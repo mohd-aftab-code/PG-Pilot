@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+import API_BASE_URL from '../../components/apiconfig/api-config';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -8,19 +9,30 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
+
+  axios.defaults.withCredentials = true;
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    const result = await login(email, password);
-    
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      setError(result.error);
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/login`,
+        { email, password }
+      );
+
+      if (response.data && response.data.success) {
+        navigate('/dashboard');
+      } else {
+        setError(response.data?.message || 'Login failed');
+      }
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 
+                          err.response?.data?.message || 
+                          'Login failed. Please try again.';
+      setError(errorMessage);
     }
     
     setIsLoading(false);

@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, useLocation } from 'react-router-dom';
 import AppRoutes from './routes/app-routes';
 import LayoutWrapper from './modules/layout/LayoutWrapper';
-import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
 const LayoutDecider = () => {
@@ -15,11 +14,9 @@ const LayoutDecider = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <LayoutDecider />
-      </Router>
-    </AuthProvider>
+    <Router>
+      <LayoutDecider />
+    </Router>
   );
 }
 

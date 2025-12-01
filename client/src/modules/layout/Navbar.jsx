@@ -1,14 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+import API_BASE_URL from '../../components/apiconfig/api-config';
 
 const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebarOpen }) => {
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+
+  axios.defaults.withCredentials = true;
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+    try {
+      await axios.post(`${API_BASE_URL}/api/auth/logout`, {});
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Clear any local storage or cookies if needed
+      navigate('/login');
+    }
   };
 
   return (
@@ -42,11 +50,6 @@ const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebar
         </div>
         
         <div className="flex items-center space-x-4">
-          {user && (
-            <span className="text-sm text-gray-600">
-              {user.name || user.email}
-            </span>
-          )}
           <button
             onClick={handleLogout}
             className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
