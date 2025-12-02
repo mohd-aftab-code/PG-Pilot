@@ -1,0 +1,196 @@
+const Razorpay = require('razorpay');
+const database = require('../config/database');
+
+// Initialize Razorpay
+const razorpay = new Razorpay({
+  key_id: 'rzp_test_Rmoh4WhxaIg16m',
+  key_secret: 'xH15K2IZJvoNp4taKXGhdUDD',
+});
+
+// Create Razorpay order for subscription
+const createSubscriptionOrder = async (req, res) => {
+  try {
+    const { plan_id } = req.body;
+    const { id: userId, pg_id: userPgId } = req.user;
+
+    if (!plan_id) {
+      return res.status(400).json({ error: 'Plan ID is required' });
+    }
+
+    // Get plan details
+    const [plans] = await database.query('SELECT * FROM plans WHERE id = ?', [plan_id]);
+    if (plans.length === 0) {
+      return res.status(404).json({ error: 'Plan not found' });
+    }
+
+    const plan = plans[0];
+
+    // Check if user has a PG - refresh from database if needed
+    let finalPgId = userPgId;
+    if (!finalPgId) {
+      // Try to get pg_id from database
+      const [users] = await database.query('SELECT pg_id FROM users WHERE id = ?', [userId]);
+      if (users.length > 0 && users[0].pg_id) {
+        finalPgId = users[0].pg_id;
+      } else {
+        return res.status(400).json({ error: 'Please create a PG first before subscribing' });
+      }
+    }
+
+    // Create Razorpay order
+    const options = {
+      amount: Math.round(plan.price * 100), // Convert to paise
+      currency: 'INR',
+      receipt: `plan_${plan_id}_pg_${finalPgId}_${Date.now()}`,
+      notes: {
+        plan_id: plan_id.toString(),
+        pg_id: finalPgId.toString(),
+        user_id: userId.toString(),
+        plan_name: plan.name,
+      },
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.json({
+      order_id: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      plan: {
+        id: plan.id,
+        name: plan.name,
+        price: plan.price,
+        duration_days: plan.duration_days,
+      },
+    });
+  } catch (error) {
+    console.error('Create subscription order error:', error);
+    res.status(500).json({ error: 'Failed to create payment order' });
+  }
+};
+
+// Verify payment and create subscription
+const verifyPayment = async (req, res) => {
+  try {
+    const { order_id, payment_id, signature, plan_id } = req.body;
+    const { id: userId, pg_id: userPgId } = req.user;
+
+    if (!order_id || !payment_id || !signature || !plan_id) {
+      return res.status(400).json({ error: 'Missing payment details' });
+    }
+
+    // Verify payment signature using Razorpay
+    const crypto = require('crypto');
+    const text = `${order_id}|${payment_id}`;
+    const generatedSignature = crypto
+      .createHmac('sha256', razorpay.key_secret)
+      .update(text)
+      .digest('hex');
+
+    if (generatedSignature !== signature) {
+      return res.status(400).json({ error: 'Invalid payment signature' });
+    }
+
+    // Get pg_id from database (in case token doesn't have it updated)
+    let finalPgId = userPgId;
+    if (!finalPgId) {
+      const [users] = await database.query('SELECT pg_id FROM users WHERE id = ?', [userId]);
+      if (users.length > 0 && users[0].pg_id) {
+        finalPgId = users[0].pg_id;
+      } else {
+        // Try to get from Razorpay order notes as fallback
+        try {
+          const order = await razorpay.orders.fetch(order_id);
+          if (order.notes && order.notes.pg_id) {
+            finalPgId = parseInt(order.notes.pg_id);
+          }
+        } catch (rzpError) {
+          console.error('Error fetching Razorpay order:', rzpError);
+        }
+      }
+    }
+
+    if (!finalPgId) {
+      return res.status(400).json({ error: 'PG ID not found. Please create a PG first.' });
+    }
+
+    // Get plan details
+    const [plans] = await database.query('SELECT * FROM plans WHERE id = ?', [plan_id]);
+    if (plans.length === 0) {
+      return res.status(404).json({ error: 'Plan not found' });
+    }
+
+    const plan = plans[0];
+
+    // Calculate dates
+    const startDate = new Date();
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + plan.duration_days);
+
+    // Create subscription
+    const [result] = await database.query(
+      'INSERT INTO pg_subscriptions (pg_id, plan_id, start_date, expiry_date, custom_price) VALUES (?, ?, ?, ?, ?)',
+      [finalPgId, plan_id, startDate.toISOString().split('T')[0], expiryDate.toISOString().split('T')[0], plan.price]
+    );
+
+    const subscriptionId = result.insertId;
+
+    // Create invoice with payment details
+    try {
+      await database.query(
+        `INSERT INTO invoices (pg_id, amount, status, invoice_date, due_date, order_id, payment_id, razorpay_order_id, razorpay_payment_id, transaction_id) 
+         VALUES (?, ?, "paid", ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          finalPgId, 
+          plan.price, 
+          startDate.toISOString().split('T')[0], 
+          expiryDate.toISOString().split('T')[0],
+          order_id,
+          payment_id,
+          order_id, // razorpay_order_id (same as order_id)
+          payment_id, // razorpay_payment_id (same as payment_id)
+          payment_id // transaction_id (using payment_id)
+        ]
+      );
+    } catch (invoiceError) {
+      // If invoice columns don't exist yet, create without payment details
+      console.log('Invoice table may not have payment columns, creating basic invoice:', invoiceError);
+      await database.query(
+        'INSERT INTO invoices (pg_id, amount, status, invoice_date, due_date) VALUES (?, ?, "paid", ?, ?)',
+        [userPgId, plan.price, startDate.toISOString().split('T')[0], expiryDate.toISOString().split('T')[0]]
+      );
+    }
+
+    // Log payment details for reference
+    console.log('Payment Details Stored:', {
+      order_id,
+      payment_id,
+      subscription_id: subscriptionId,
+      pg_id: finalPgId,
+      plan_id,
+      amount: plan.price,
+      date: startDate.toISOString().split('T')[0]
+    });
+
+    res.json({
+      message: 'Payment verified and subscription created successfully',
+      subscription_id: result.insertId,
+      expiry_date: expiryDate.toISOString().split('T')[0],
+    });
+  } catch (error) {
+    console.error('Verify payment error:', error);
+    res.status(500).json({ error: 'Failed to verify payment' });
+  }
+};
+
+// Get Razorpay key for frontend
+const getRazorpayKey = async (req, res) => {
+  res.json({ key: razorpay.key_id });
+};
+
+module.exports = {
+  createSubscriptionOrder,
+  verifyPayment,
+  getRazorpayKey,
+};
+

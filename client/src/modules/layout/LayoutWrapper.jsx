@@ -61,7 +61,7 @@ const LayoutWrapper = ({ children }) => {
   const sidebarWidth = sidebarVisible ? (sidebarOpen ? SIDEBAR_OPEN_WIDTH : SIDEBAR_COLLAPSED_WIDTH) : 0;
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-background min-h-screen">
       <Navbar 
         sidebarWidth={sidebarWidth} 
         sidebarOpen={sidebarOpen} 
@@ -77,10 +77,11 @@ const LayoutWrapper = ({ children }) => {
         />
       )}
       <main
-        className="p-2 sm:p-2 bg-gray-100 transition-all duration-200"
+        className="transition-all duration-300 bg-background"
         style={{ 
-          marginLeft: isMobile ? 0 : sidebarWidth, 
+          marginLeft: isMobile ? 0 : `${sidebarWidth}px`, 
           paddingTop: '4rem',
+          minHeight: 'calc(100vh - 4rem)',
           width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`
         }}
         onClick={handleMainClick}
