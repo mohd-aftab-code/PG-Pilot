@@ -149,7 +149,7 @@ const LandingPage = () => {
           contact: getStoredUser()?.phone || '',
         },
         theme: {
-          color: '#3b82f6',
+          color: '#004767',
         },
       };
 
@@ -218,43 +218,43 @@ const LandingPage = () => {
 
   // Icon Components
   const IconUsers = () => (
-    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-12 h-12 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
     </svg>
   );
 
   const IconDollar = () => (
-    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-12 h-12 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   );
 
   const IconAlert = () => (
-    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-12 h-12 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
     </svg>
   );
 
   const IconHome = () => (
-    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-12 h-12 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
     </svg>
   );
 
   const IconCoffee = () => (
-    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-12 h-12 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 11h14M5 11a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 01-2 2M5 11v6a2 2 0 002 2h10a2 2 0 002-2v-6m-9 4h6" />
     </svg>
   );
 
   const IconChart = () => (
-    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-12 h-12 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
     </svg>
   );
 
   const IconCheck = () => (
-    <svg className="w-5 h-5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-5 h-5 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
     </svg>
   );
@@ -320,24 +320,24 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-sm bg-card/95">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <header className="bg-primary sticky top-0 z-50 shadow-md">
+        <div className="container mx-auto px-4 md:px-8 py-4 flex justify-between items-center h-16">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">PG</span>
+            <div className="w-10 h-10 bg-white/10 rounded flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">PG</span>
             </div>
-            <span className="text-xl font-bold text-foreground">PG Pilot</span>
+            <span className="text-xl font-bold text-primary-foreground">PG Pilot</span>
           </div>
           <div className="flex gap-3">
             <button
               onClick={() => navigate('/login')}
-              className="px-5 py-2 text-foreground hover:text-primary transition-colors font-medium"
+              className="px-5 py-2 text-primary-foreground hover:text-accent transition-colors font-semibold text-sm uppercase tracking-wide"
             >
               Sign In
             </button>
             <button
               onClick={() => navigate('/signup')}
-              className="px-6 py-2 bg-primary text-primary-foreground rounded hover:bg-accent transition-colors font-medium"
+              className="px-6 py-2 bg-accent text-white rounded hover:bg-accent/90 transition-colors font-semibold text-sm uppercase tracking-wide"
             >
               Sign Up
             </button>
@@ -346,27 +346,27 @@ const LandingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
+      <section className="container mx-auto px-4 md:px-8 py-20 text-center">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-black text-primary mb-6 leading-tight">
             Manage Your PG with
-            <span className="text-primary"> Ease</span>
+            <span className="text-accent"> Ease</span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
             Complete solution for managing tenants, rooms, payments, and more. 
             Streamline your PG operations with our comprehensive management system designed for modern property managers.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <button
               onClick={() => navigate('/signup')}
-              className="flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded hover:bg-accent transition-all text-lg font-medium shadow-lg hover:shadow-xl"
+              className="flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-sm hover:bg-primary/90 transition-all text-lg font-semibold shadow-lg hover:shadow-xl uppercase tracking-wide"
             >
               Get Started Free
               <IconArrowRight />
             </button>
             <button
               onClick={() => navigate('/login')}
-              className="flex items-center gap-2 px-8 py-3.5 border-2 border-border text-foreground rounded hover:bg-secondary transition-all text-lg font-medium"
+              className="flex items-center gap-2 px-8 py-3.5 border-2 border-primary text-primary rounded-sm hover:bg-primary hover:text-primary-foreground transition-all text-lg font-semibold uppercase tracking-wide"
             >
               Learn More
             </button>
@@ -375,26 +375,27 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="bg-card py-20">
-        <div className="container mx-auto px-4">
+      <section className="bg-[#E4EDF3] py-20">
+        <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-foreground mb-4">
-              Powerful Features
+            <p className="text-sm font-bold text-accent uppercase tracking-wider mb-2">Key Features</p>
+            <h2 className="text-4xl md:text-5xl font-black text-primary mb-4">
+              Why PG Owners Prefer This System
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to manage your PG efficiently and effectively
-            </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, idx) => {
               const IconComponent = feature.icon;
               return (
-                <div key={idx} className="bg-background p-6 rounded border border-border hover:shadow-lg transition-all group">
-                  <div className="w-12 h-12 bg-primary/10 rounded flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                <div 
+                  key={idx} 
+                  className="bg-white p-6 rounded-sm shadow-[0_1px_4px_0_rgba(0,0,0,0.15)] hover:shadow-xl transition-all duration-500 border-l-4 border-accent relative overflow-hidden group"
+                >
+                  <div className="w-12 h-12 text-accent mb-4 flex items-center justify-center text-5xl">
                     <IconComponent />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <h3 className="text-xl font-bold text-primary mb-3 leading-tight">{feature.title}</h3>
+                  <p className="text-foreground text-sm leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -405,40 +406,41 @@ const LandingPage = () => {
       </section>
 
       {/* Subscription Plans Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-foreground mb-4">
+            <p className="text-sm font-bold text-accent uppercase tracking-wider mb-2">Simple Pricing</p>
+            <h2 className="text-4xl md:text-5xl font-black text-primary mb-4">
               Choose Your Plan
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-foreground max-w-2xl mx-auto">
               Flexible pricing plans to suit your needs. Start free and upgrade as you grow.
             </p>
           </div>
           {loading ? (
-            <div className="text-center text-muted-foreground">Loading plans...</div>
+            <div className="text-center text-foreground">Loading plans...</div>
           ) : (
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {plans.map((plan, idx) => (
                 <div
                   key={plan.id}
-                  className={`bg-card border rounded-lg p-8 hover:shadow-xl transition-all ${
-                    idx === 1 ? 'border-primary border-2 shadow-lg scale-105' : 'border-border'
+                  className={`bg-white border rounded-sm p-8 hover:shadow-xl transition-all duration-500 ${
+                    idx === 1 ? 'border-accent border-2 shadow-lg scale-105' : 'border-border shadow-[0_1px_4px_0_rgba(0,0,0,0.15)]'
                   }`}
                 >
                   {idx === 1 && (
-                    <div className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">
+                    <div className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-sm inline-block mb-4 uppercase tracking-wide">
                       Most Popular
                     </div>
                   )}
-                  <h3 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-2">{plan.name}</h3>
                   <div className="mb-6">
-                    <span className="text-5xl font-bold text-primary">₹{plan.price}</span>
-                    <span className="text-muted-foreground">/month</span>
+                    <span className="text-5xl font-black text-primary">₹{plan.price}</span>
+                    <span className="text-foreground">/month</span>
                   </div>
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature, fIdx) => (
-                      <li key={fIdx} className="flex items-center gap-2 text-muted-foreground">
+                      <li key={fIdx} className="flex items-center gap-2 text-foreground text-sm">
                         <IconCheck />
                         <span>{feature}</span>
                       </li>
@@ -446,10 +448,10 @@ const LandingPage = () => {
                   </ul>
                   <button
                     onClick={() => handleSubscribe(plan.id)}
-                    className={`w-full py-3 rounded font-medium transition-all ${
+                    className={`w-full py-3 rounded-sm font-semibold transition-all uppercase tracking-wide text-sm ${
                       idx === 1
-                        ? 'bg-primary text-primary-foreground hover:bg-accent shadow-lg'
-                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg'
+                        : 'bg-secondary text-foreground hover:bg-secondary/80'
                     }`}
                   >
                     Subscribe Now
@@ -462,102 +464,96 @@ const LandingPage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-primary/5 py-16">
-        <div className="container mx-auto px-4">
+      <section className="bg-white py-16 border-t border-border">
+        <div className="container mx-auto px-4 md:px-8">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">1000+</div>
-              <div className="text-muted-foreground">Active PGs</div>
+              <div className="text-5xl font-black text-primary mb-2">150+</div>
+              <div className="text-foreground font-semibold">PG Owners</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">50K+</div>
-              <div className="text-muted-foreground">Tenants Managed</div>
+              <div className="text-5xl font-black text-primary mb-2">2000+</div>
+              <div className="text-foreground font-semibold">Rooms Managed</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">99.9%</div>
-              <div className="text-muted-foreground">Uptime</div>
+              <div className="text-5xl font-black text-primary mb-2">5000+</div>
+              <div className="text-foreground font-semibold">Tenants Tracked</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-muted-foreground">Support</div>
+              <div className="text-5xl font-black text-primary mb-2">25+</div>
+              <div className="text-foreground font-semibold">Cities</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-card border-t border-border py-12">
-        <div className="container mx-auto px-4">
+      <footer className="bg-primary text-primary-foreground py-12">
+        <div className="container mx-auto px-4 md:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold">PG</span>
-                </div>
-                <span className="text-xl font-bold text-foreground">PG Pilot</span>
-              </div>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                The complete solution for managing your PG operations efficiently and effectively.
+              <h3 className="font-bold text-lg mb-4">PG Management System</h3>
+              <p className="text-primary-foreground/80 text-sm leading-relaxed">
+                A simple PG management system built for Indian PG owners. Manage rent, tenants and payments — all in one place.
               </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Updates</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Roadmap</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Contact</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <IconMail />
-                  <a href="mailto:support@pgpilot.com" className="hover:text-primary transition-colors">support@pgpilot.com</a>
-                </li>
-                <li className="flex items-center gap-2">
-                  <IconPhone />
-                  <a href="tel:+911234567890" className="hover:text-primary transition-colors">+91 123 456 7890</a>
-                </li>
-                <li className="flex items-center gap-2">
-                  <IconMapPin />
-                  <span>Mumbai, India</span>
-                </li>
-              </ul>
               <div className="flex gap-3 mt-4">
-                <a href="#" className="w-8 h-8 bg-secondary rounded flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
+                <a href="#" className="w-8 h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconFacebook />
                 </a>
-                <a href="#" className="w-8 h-8 bg-secondary rounded flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
+                <a href="#" className="w-8 h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconTwitter />
                 </a>
-                <a href="#" className="w-8 h-8 bg-secondary rounded flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
+                <a href="#" className="w-8 h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconLinkedin />
                 </a>
-                <a href="#" className="w-8 h-8 bg-secondary rounded flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
+                <a href="#" className="w-8 h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconInstagram />
                 </a>
               </div>
             </div>
+            <div>
+              <h4 className="font-bold text-foreground mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-sm text-primary-foreground/80">
+                <li><a href="#" className="hover:text-accent transition-colors">Features</a></li>
+                <li><a href="#" className="hover:text-accent transition-colors">Pricing</a></li>
+                <li><a href="#" className="hover:text-accent transition-colors">Free Trial</a></li>
+                <li><a href="#" className="hover:text-accent transition-colors">Contact Us</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-foreground mb-4">Contact</h4>
+              <ul className="space-y-3 text-sm text-primary-foreground/80">
+                <li>
+                  <b className="block text-foreground mb-1">Address</b>
+                  <hr className="border-primary-foreground/20 mb-2" />
+                  <p>Noida, Uttar Pradesh, India</p>
+                </li>
+                <li>
+                  <b className="block text-foreground mb-1">Email</b>
+                  <hr className="border-primary-foreground/20 mb-2" />
+                  <a href="mailto:support@pgpilot.com" className="hover:text-accent transition-colors">support@pgpilot.com</a>
+                </li>
+                <li>
+                  <b className="block text-foreground mb-1">Phone</b>
+                  <hr className="border-primary-foreground/20 mb-2" />
+                  <a href="tel:+911234567890" className="hover:text-accent transition-colors">+91 XXX XXX XXXX</a>
+                </li>
+                <li>
+                  <b className="block text-foreground mb-1">Support</b>
+                  <hr className="border-primary-foreground/20 mb-2" />
+                  <p>Available 24/7</p>
+                </li>
+              </ul>
+            </div>
           </div>
-          <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              &copy; 2024 PG Pilot. All rights reserved.
+          <div className="border-t border-primary-foreground/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-primary-foreground/80">
+              © 2024 PG Management System - Built for Indian PG Owners
             </p>
-            <div className="flex gap-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-primary transition-colors">Cookie Policy</a>
+            <div className="flex gap-6 text-sm text-primary-foreground/80">
+              <a href="#" className="hover:text-accent transition-colors">Contact us</a>
+              <span>|</span>
+              <a href="#" className="hover:text-accent transition-colors">Privacy policy</a>
             </div>
           </div>
         </div>

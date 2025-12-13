@@ -7,31 +7,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: 'hsl(210, 29%, 95%)',
-        foreground: 'hsl(220, 39%, 10%)',
+        background: 'hsl(0, 0%, 100%)',
+        foreground: 'hsl(215, 20%, 31%)',
         card: {
-          DEFAULT: 'hsl(210, 29%, 98%)',
-          foreground: 'hsl(220, 39%, 10%)',
+          DEFAULT: 'hsl(0, 0%, 100%)',
+          foreground: 'hsl(215, 20%, 31%)',
         },
         popover: {
-          DEFAULT: 'hsl(210, 29%, 98%)',
-          foreground: 'hsl(220, 39%, 10%)',
+          DEFAULT: 'hsl(0, 0%, 100%)',
+          foreground: 'hsl(215, 20%, 31%)',
         },
         primary: {
-          DEFAULT: 'hsl(220, 39%, 26%)',
-          foreground: 'hsl(0, 0%, 98%)',
+          DEFAULT: 'hsl(200, 100%, 20%)',
+          foreground: 'hsl(0, 0%, 100%)',
         },
         secondary: {
           DEFAULT: 'hsl(210, 25%, 90%)',
-          foreground: 'hsl(220, 39%, 10%)',
+          foreground: 'hsl(215, 20%, 31%)',
         },
         muted: {
           DEFAULT: 'hsl(210, 25%, 90%)',
-          foreground: 'hsl(220, 10%, 40%)',
+          foreground: 'hsl(215, 10%, 50%)',
         },
         accent: {
-          DEFAULT: 'hsl(216, 34%, 37%)',
-          foreground: 'hsl(0, 0%, 98%)',
+          DEFAULT: 'hsl(184, 97%, 40%)',
+          foreground: 'hsl(0, 0%, 100%)',
         },
         destructive: {
           DEFAULT: 'hsl(0, 84.2%, 60.2%)',
@@ -39,7 +39,7 @@ export default {
         },
         border: 'hsl(210, 20%, 88%)',
         input: 'hsl(210, 20%, 88%)',
-        ring: 'hsl(220, 39%, 26%)',
+        ring: 'hsl(200, 100%, 20%)',
         chart: {
           1: 'hsl(220, 70%, 50%)',
           2: 'hsl(160, 60%, 45%)',
@@ -48,14 +48,14 @@ export default {
           5: 'hsl(340, 75%, 55%)',
         },
         sidebar: {
-          background: 'hsl(220, 39%, 15%)',
-          foreground: 'hsl(210, 29%, 95%)',
-          primary: 'hsl(224.3, 76.3%, 48%)',
+          background: 'hsl(200, 100%, 20%)',
+          foreground: 'hsl(0, 0%, 100%)',
+          primary: 'hsl(184, 97%, 40%)',
           'primary-foreground': 'hsl(0, 0%, 100%)',
-          accent: 'hsl(220, 39%, 26%)',
-          'accent-foreground': 'hsl(210, 29%, 95%)',
-          border: 'hsl(220, 39%, 20%)',
-          ring: 'hsl(217.2, 91.2%, 59.8%)',
+          accent: 'hsl(200, 100%, 25%)',
+          'accent-foreground': 'hsl(0, 0%, 100%)',
+          border: 'hsl(200, 100%, 25%)',
+          ring: 'hsl(184, 97%, 40%)',
         },
       },
       borderRadius: {
