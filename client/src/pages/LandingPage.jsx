@@ -12,6 +12,8 @@ const LandingPage = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPGModal, setShowPGModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
   const [pendingPlanId, setPendingPlanId] = useState(null);
   const [pgFormData, setPgFormData] = useState({
     name: '',
@@ -216,6 +218,152 @@ const LandingPage = () => {
     }
   };
 
+  // Login form state
+  const [loginData, setLoginData] = useState({
+    phone: '',
+    password: '',
+  });
+  const [loginError, setLoginError] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setLoginError('');
+
+    try {
+      const response = await api.post('/api/auth/login', loginData);
+      
+      if (response.data && response.data.user) {
+        setStoredUser(response.data.user);
+        const user = response.data.user;
+        
+        // Close login modal
+        setShowLoginModal(false);
+        setLoginData({ phone: '', password: '' });
+        
+        // Small delay to ensure state is saved
+        setTimeout(async () => {
+          // If user came from subscription flow, handle it
+          if (pendingPlanId) {
+            if (!user.pg_id) {
+              setPendingPlanId(pendingPlanId);
+              setShowPGModal(true);
+              return;
+            }
+            await initiatePayment(pendingPlanId);
+            return;
+          }
+          
+          // Role-based redirect
+          if (user.role === 'superadmin') {
+            navigate('/pgs');
+          } else {
+            // For PG Admin, check subscription before allowing access
+            if (user.pg_id) {
+              try {
+                const subResponse = await api.get(`/api/subscriptions/pg/${user.pg_id}/active`);
+                if (subResponse.data.subscription) {
+                  navigate('/dashboard');
+                } else {
+                  // No subscription, stay on landing page
+                  alert('Please subscribe to a plan to access the dashboard.');
+                }
+              } catch (error) {
+                alert('Please subscribe to a plan to access the dashboard.');
+              }
+            } else {
+              // No PG created yet
+              alert('Please create a PG and subscribe to a plan to access the dashboard.');
+            }
+          }
+        }, 100);
+      } else {
+        setLoginError(response.data?.message || 'Login failed');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      const errorMessage = err.response?.data?.error || 
+                          err.response?.data?.message || 
+                          'Login failed. Please try again.';
+      setLoginError(errorMessage);
+    }
+    
+    setLoginLoading(false);
+  };
+
+  // Signup form state
+  const [signupData, setSignupData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    role: 'pg_admin',
+  });
+  const [signupError, setSignupError] = useState('');
+  const [signupLoading, setSignupLoading] = useState(false);
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setSignupLoading(true);
+    setSignupError('');
+
+    if (signupData.password !== signupData.confirmPassword) {
+      setSignupError('Passwords do not match');
+      setSignupLoading(false);
+      return;
+    }
+
+    if (signupData.password.length < 6) {
+      setSignupError('Password must be at least 6 characters');
+      setSignupLoading(false);
+      return;
+    }
+
+    try {
+      const { confirmPassword, ...signupPayload } = signupData;
+      const response = await api.post('/api/auth/signup', signupPayload);
+      
+      if (response.data && response.data.user) {
+        setStoredUser(response.data.user);
+        const user = response.data.user;
+        
+        // Close signup modal
+        setShowSignupModal(false);
+        setSignupData({
+          name: '',
+          email: '',
+          phone: '',
+          password: '',
+          confirmPassword: '',
+          role: 'pg_admin',
+        });
+        
+        // Small delay to ensure state is saved
+        setTimeout(() => {
+          // Role-based redirect
+          if (user.role === 'superadmin') {
+            navigate('/pgs');
+          } else {
+            // PG Admin must subscribe first - stay on landing page
+            alert('Account created successfully! Please subscribe to a plan to continue.');
+          }
+        }, 100);
+      } else {
+        setSignupError(response.data?.message || 'Signup failed');
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
+      const errorMessage = err.response?.data?.error || 
+                          err.response?.data?.message || 
+                          'Signup failed. Please try again.';
+      setSignupError(errorMessage);
+    }
+    
+    setSignupLoading(false);
+  };
+
   // Icon Components
   const IconUsers = () => (
     <svg className="w-12 h-12 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -330,13 +478,13 @@ const LandingPage = () => {
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => setShowLoginModal(true)}
               className="px-5 py-2 text-primary-foreground hover:text-accent transition-colors font-semibold text-sm uppercase tracking-wide"
             >
               Sign In
             </button>
             <button
-              onClick={() => navigate('/signup')}
+              onClick={() => setShowSignupModal(true)}
               className="px-6 py-2 bg-accent text-white rounded hover:bg-accent/90 transition-colors font-semibold text-sm uppercase tracking-wide"
             >
               Sign Up
@@ -358,14 +506,14 @@ const LandingPage = () => {
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <button
-              onClick={() => navigate('/signup')}
+              onClick={() => setShowSignupModal(true)}
               className="flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-sm hover:bg-primary/90 transition-all text-lg font-semibold shadow-lg hover:shadow-xl uppercase tracking-wide"
             >
               Get Started Free
               <IconArrowRight />
             </button>
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => setShowLoginModal(true)}
               className="flex items-center gap-2 px-8 py-3.5 border-2 border-primary text-primary rounded-sm hover:bg-primary hover:text-primary-foreground transition-all text-lg font-semibold uppercase tracking-wide"
             >
               Learn More
@@ -558,6 +706,215 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+
+      {/* Login Modal */}
+      <Modal
+        isOpen={showLoginModal}
+        onClose={() => {
+          setShowLoginModal(false);
+          setLoginData({ phone: '', password: '' });
+          setLoginError('');
+        }}
+        title="Sign In"
+        size="sm"
+      >
+        <form onSubmit={handleLogin}>
+          {loginError && (
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive text-destructive rounded text-sm">
+              {loginError}
+            </div>
+          )}
+          
+          <div className="mb-4">
+            <label className="block text-foreground text-sm font-bold mb-2">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              value={loginData.phone}
+              onChange={(e) => setLoginData({ ...loginData, phone: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              placeholder="Enter your phone number"
+              required
+            />
+          </div>
+          
+          <div className="mb-6">
+            <label className="block text-foreground text-sm font-bold mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              value={loginData.password}
+              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+          
+          <button
+            type="submit"
+            disabled={loginLoading}
+            className="w-full bg-primary text-primary-foreground py-2.5 px-4 rounded hover:bg-accent disabled:opacity-50 transition-all font-medium shadow-sm hover:shadow"
+          >
+            {loginLoading ? 'Signing in...' : 'Sign In'}
+          </button>
+
+          <div className="mt-4 text-center">
+            <span className="text-muted-foreground text-sm">Don't have an account? </span>
+            <button
+              type="button"
+              onClick={() => {
+                setShowLoginModal(false);
+                setShowSignupModal(true);
+                setLoginData({ phone: '', password: '' });
+                setLoginError('');
+              }}
+              className="text-primary hover:text-accent font-medium"
+            >
+              Sign Up
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Signup Modal */}
+      <Modal
+        isOpen={showSignupModal}
+        onClose={() => {
+          setShowSignupModal(false);
+          setSignupData({
+            name: '',
+            email: '',
+            phone: '',
+            password: '',
+            confirmPassword: '',
+            role: 'pg_admin',
+          });
+          setSignupError('');
+        }}
+        title="Create Account"
+        size="md"
+      >
+        <form onSubmit={handleSignup}>
+          {signupError && (
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive text-destructive rounded text-sm">
+              {signupError}
+            </div>
+          )}
+          
+          <div className="mb-4">
+            <label className="block text-foreground text-sm font-bold mb-2">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              value={signupData.name}
+              onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-foreground text-sm font-bold mb-2">
+              Phone Number *
+            </label>
+            <input
+              type="tel"
+              value={signupData.phone}
+              onChange={(e) => setSignupData({ ...signupData, phone: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-foreground text-sm font-bold mb-2">
+              Email (Optional)
+            </label>
+            <input
+              type="email"
+              value={signupData.email}
+              onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-foreground text-sm font-bold mb-2">
+              Role *
+            </label>
+            <select
+              value={signupData.role}
+              onChange={(e) => setSignupData({ ...signupData, role: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              required
+            >
+              <option value="pg_admin">PG Admin</option>
+              <option value="superadmin">Super Admin</option>
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block text-foreground text-sm font-bold mb-2">
+              Password *
+            </label>
+            <input
+              type="password"
+              value={signupData.password}
+              onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              required
+            />
+          </div>
+          
+          <div className="mb-6">
+            <label className="block text-foreground text-sm font-bold mb-2">
+              Confirm Password *
+            </label>
+            <input
+              type="password"
+              value={signupData.confirmPassword}
+              onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              required
+            />
+          </div>
+          
+          <button
+            type="submit"
+            disabled={signupLoading}
+            className="w-full bg-primary text-primary-foreground py-2.5 px-4 rounded hover:bg-accent disabled:opacity-50 transition-all font-medium shadow-sm hover:shadow"
+          >
+            {signupLoading ? 'Creating account...' : 'Sign Up'}
+          </button>
+
+          <div className="mt-4 text-center">
+            <span className="text-muted-foreground text-sm">Already have an account? </span>
+            <button
+              type="button"
+              onClick={() => {
+                setShowSignupModal(false);
+                setShowLoginModal(true);
+                setSignupData({
+                  name: '',
+                  email: '',
+                  phone: '',
+                  password: '',
+                  confirmPassword: '',
+                  role: 'pg_admin',
+                });
+                setSignupError('');
+              }}
+              className="text-primary hover:text-accent font-medium"
+            >
+              Sign In
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* PG Creation Modal */}
       <Modal
