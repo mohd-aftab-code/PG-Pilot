@@ -7,9 +7,12 @@ const signup = async (req, res) => {
   try {
     const { name, email, phone, password, role, pg_id } = req.body;
 
-    if (!name || !phone || !password || !role) {
+    if (!name || !phone || !password) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
+
+    // Default role to 'pg_admin' if not provided
+    const userRole = role || 'pg_admin';
 
     // Check if phone already exists
     const [existingUser] = await database.query(
@@ -27,14 +30,14 @@ const signup = async (req, res) => {
     // Insert user
     const [result] = await database.query(
       'INSERT INTO users (name, email, phone, password_hash, role, pg_id) VALUES (?, ?, ?, ?, ?, ?)',
-      [name, email || null, phone, password_hash, role, pg_id || null]
+      [name, email || null, phone, password_hash, userRole, pg_id || null]
     );
 
     const userId = result.insertId;
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: userId, phone, role, pg_id: pg_id || null },
+      { id: userId, phone, role: userRole, pg_id: pg_id || null },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '7d' }
     );
@@ -54,7 +57,7 @@ const signup = async (req, res) => {
         name,
         email,
         phone,
-        role,
+        role: userRole,
         pg_id: pg_id || null,
       },
     });

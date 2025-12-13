@@ -844,21 +844,6 @@ const LandingPage = () => {
 
           <div className="mb-4">
             <label className="block text-foreground text-sm font-bold mb-2">
-              Role *
-            </label>
-            <select
-              value={signupData.role}
-              onChange={(e) => setSignupData({ ...signupData, role: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-              required
-            >
-              <option value="pg_admin">PG Admin</option>
-              <option value="superadmin">Super Admin</option>
-            </select>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block text-foreground text-sm font-bold mb-2">
               Password *
             </label>
             <input

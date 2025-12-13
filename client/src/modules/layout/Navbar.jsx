@@ -14,7 +14,7 @@ const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebar
       console.error('Logout error:', error);
     } finally {
       clearAuth();
-      navigate('/login');
+      navigate('/');
     }
   };
 
