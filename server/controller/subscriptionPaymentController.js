@@ -161,6 +161,76 @@ const verifyPayment = async (req, res) => {
       );
     }
 
+    // Get user and PG details for email
+    const [users] = await database.query(
+      'SELECT name, email, phone FROM users WHERE id = ?',
+      [userId]
+    );
+    const [pgs] = await database.query(
+      'SELECT name, address FROM pgs WHERE id = ?',
+      [finalPgId]
+    );
+
+    const user = users[0] || {};
+    const pg = pgs[0] || {};
+
+    // Send email notification (if email exists)
+    if (user.email) {
+      try {
+        // Simple email sending using console for now (can be replaced with nodemailer)
+        const emailSubject = `Subscription Successful - ${plan.name}`;
+        const emailBody = `
+Dear ${user.name},
+
+Congratulations! Your subscription to ${plan.name} has been successfully activated.
+
+Subscription Details:
+- Plan: ${plan.name}
+- Amount: ₹${plan.price}
+- Start Date: ${startDate.toISOString().split('T')[0]}
+- Expiry Date: ${expiryDate.toISOString().split('T')[0]}
+- Duration: ${plan.duration_days} days
+
+PG Details:
+- PG Name: ${pg.name || 'N/A'}
+- Location: ${pg.address || 'N/A'}
+
+Payment Details:
+- Order ID: ${order_id}
+- Payment ID: ${payment_id}
+- Transaction Date: ${new Date().toLocaleString('en-IN')}
+
+You can now access your dashboard and start managing your PG efficiently.
+
+Thank you for choosing PG Pilot!
+
+Best Regards,
+PG Pilot Team
+        `;
+
+        // Log email (in production, send actual email using nodemailer)
+        console.log('=== EMAIL NOTIFICATION ===');
+        console.log('To:', user.email);
+        console.log('Subject:', emailSubject);
+        console.log('Body:', emailBody);
+        console.log('========================');
+
+        // TODO: Implement actual email sending using nodemailer
+        // const nodemailer = require('nodemailer');
+        // const transporter = nodemailer.createTransport({...});
+        // await transporter.sendMail({
+        //   from: 'support@pgpilot.com',
+        //   to: user.email,
+        //   subject: emailSubject,
+        //   text: emailBody,
+        //   html: emailBody.replace(/\n/g, '<br>')
+        // });
+      } catch (emailError) {
+        console.error('Error sending email notification:', emailError);
+        // Don't fail the payment if email fails
+      }
+    }
+
     // Log payment details for reference
     console.log('Payment Details Stored:', {
       order_id,
@@ -176,6 +246,11 @@ const verifyPayment = async (req, res) => {
       message: 'Payment verified and subscription created successfully',
       subscription_id: result.insertId,
       expiry_date: expiryDate.toISOString().split('T')[0],
+      plan: {
+        id: plan.id,
+        name: plan.name,
+        price: plan.price,
+      },
     });
   } catch (error) {
     console.error('Verify payment error:', error);

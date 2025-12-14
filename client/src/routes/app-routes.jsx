@@ -25,8 +25,8 @@ const AppRoutes = () => {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<LandingPage />} />
+      <Route path="/signup" element={<LandingPage />} />
 
       {/* Protected Routes */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

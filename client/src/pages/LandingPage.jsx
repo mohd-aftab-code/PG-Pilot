@@ -15,6 +15,8 @@ const LandingPage = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [pendingPlanId, setPendingPlanId] = useState(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [razorpayKey, setRazorpayKey] = useState(null);
   const [pgFormData, setPgFormData] = useState({
     name: '',
     address: '',
@@ -25,13 +27,43 @@ const LandingPage = () => {
   useEffect(() => {
     fetchPlans();
     
+    // Preload Razorpay script and key
+    if (!window.Razorpay) {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+    
+    // Preload Razorpay key
+    api.get('/api/subscription-payment/razorpay-key')
+      .then(response => {
+        setRazorpayKey(response.data.key);
+      })
+      .catch(err => console.error('Error loading Razorpay key:', err));
+    
+    // Check if modal should be opened from route pathname or state
+    if (location.pathname === '/login' || location.state?.modal === 'login') {
+      setShowLoginModal(true);
+      // Replace URL to remove /login from path
+      if (location.pathname === '/login') {
+        navigate('/', { replace: true });
+      }
+    } else if (location.pathname === '/signup' || location.state?.modal === 'signup') {
+      setShowSignupModal(true);
+      // Replace URL to remove /signup from path
+      if (location.pathname === '/signup') {
+        navigate('/', { replace: true });
+      }
+    }
+    
     // Show message if redirected from login/signup
     if (location.state?.message) {
       setTimeout(() => {
         alert(location.state.message);
       }, 500);
     }
-  }, [location]);
+  }, [location, navigate]);
 
   const fetchPlans = async () => {
     try {
@@ -69,21 +101,26 @@ const LandingPage = () => {
         // If API call fails, try localStorage
         user = getStoredUser();
         if (!user) {
-          navigate('/login', { state: { planId, redirectTo: 'subscription' } });
+          // User not logged in - show signup modal first with planId
+          setPendingPlanId(planId);
+          setShowSignupModal(true);
           return;
         }
       }
 
       // Check if user is logged in
       if (!user) {
-        navigate('/login', { state: { planId, redirectTo: 'subscription' } });
+        // User not logged in - show signup modal first with planId
+        setPendingPlanId(planId);
+        setShowSignupModal(true);
         return;
       }
 
       // Check if user is PG Admin
       if (user.role !== 'pg_admin') {
         alert(`Only PG Admins can subscribe to plans. Your current role is: ${user.role || 'not set'}. Please register as a PG Admin.`);
-        navigate('/signup');
+        setPendingPlanId(planId);
+        setShowSignupModal(true);
         return;
       }
 
@@ -95,12 +132,26 @@ const LandingPage = () => {
       }
 
       // Proceed with payment
-      // Load Razorpay script
+      setPaymentLoading(true);
+      
+      // Wait for Razorpay script if not loaded
       if (!window.Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = () => initiatePayment(planId);
-        document.body.appendChild(script);
+        const checkRazorpay = setInterval(() => {
+          if (window.Razorpay) {
+            clearInterval(checkRazorpay);
+            initiatePayment(planId);
+          }
+        }, 100);
+        
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          clearInterval(checkRazorpay);
+          if (!window.Razorpay) {
+            setPaymentLoading(false);
+            alert('Razorpay is taking too long to load. Please refresh the page and try again.');
+            return;
+          }
+        }, 5000);
       } else {
         initiatePayment(planId);
       }
@@ -112,9 +163,13 @@ const LandingPage = () => {
 
   const initiatePayment = async (planId) => {
     try {
-      // Get Razorpay key
-      const keyResponse = await api.get('/api/subscription-payment/razorpay-key');
-      const razorpayKey = keyResponse.data.key;
+      // Use cached key or fetch it
+      let finalRazorpayKey = razorpayKey;
+      if (!finalRazorpayKey) {
+        const keyResponse = await api.get('/api/subscription-payment/razorpay-key');
+        finalRazorpayKey = keyResponse.data.key;
+        setRazorpayKey(finalRazorpayKey);
+      }
 
       // Create order
       const orderResponse = await api.post('/api/subscription-payment/create-order', { plan_id: planId });
@@ -122,7 +177,7 @@ const LandingPage = () => {
 
       // Initialize Razorpay
       const options = {
-        key: razorpayKey,
+        key: finalRazorpayKey,
         amount: amount,
         currency: 'INR',
         name: 'PG Pilot',
@@ -138,7 +193,16 @@ const LandingPage = () => {
               plan_id: planId,
             });
 
-            alert('Payment successful! Subscription activated.');
+            // Get plan details for success message
+            const planDetails = verifyResponse.data?.plan || plan;
+            
+            // Show success message with plan details
+            alert(`🎉 Payment Successful!\n\nYour subscription to "${planDetails.name}" has been activated.\n\nAmount: ₹${planDetails.price}\nExpiry Date: ${verifyResponse.data?.expiry_date || 'N/A'}\n\nA confirmation email has been sent to your registered email address.\n\nYou can now access your dashboard!`);
+            
+            // Clear pending plan
+            setPendingPlanId(null);
+            
+            // Redirect to dashboard
             navigate('/dashboard');
           } catch (error) {
             console.error('Payment verification error:', error);
@@ -156,9 +220,11 @@ const LandingPage = () => {
       };
 
       const razorpay = new window.Razorpay(options);
+      setPaymentLoading(false);
       razorpay.open();
     } catch (error) {
       console.error('Payment initiation error:', error);
+      setPaymentLoading(false);
       alert(error.response?.data?.error || 'Failed to initiate payment. Please try again.');
     }
   };
@@ -251,6 +317,7 @@ const LandingPage = () => {
               setShowPGModal(true);
               return;
             }
+            // Proceed with payment
             await initiatePayment(pendingPlanId);
             return;
           }
@@ -300,6 +367,8 @@ const LandingPage = () => {
     password: '',
     confirmPassword: '',
     role: 'pg_admin',
+    pg_name: '',
+    pg_location: '',
   });
   const [signupError, setSignupError] = useState('');
   const [signupLoading, setSignupLoading] = useState(false);
@@ -321,13 +390,45 @@ const LandingPage = () => {
       return;
     }
 
+    if (!signupData.pg_name || !signupData.pg_location) {
+      setSignupError('PG Name and Location are required');
+      setSignupLoading(false);
+      return;
+    }
+
     try {
-      const { confirmPassword, ...signupPayload } = signupData;
+      const { confirmPassword, pg_name, pg_location, ...signupPayload } = signupData;
+      
+      // First create user account
       const response = await api.post('/api/auth/signup', signupPayload);
       
       if (response.data && response.data.user) {
-        setStoredUser(response.data.user);
         const user = response.data.user;
+        setStoredUser(user);
+        
+        // If user is pg_admin, create PG with provided details
+        if (user.role === 'pg_admin') {
+          try {
+            const pgResponse = await api.post('/api/pgs', {
+              name: pg_name,
+              address: pg_location,
+              food_enabled: false,
+              default_due_day: 5,
+            });
+            
+            // Update user with pg_id
+            const updatedUser = { ...user, pg_id: pgResponse.data.pg.id };
+            setStoredUser(updatedUser);
+            
+            // Wait a bit for backend to update
+            await new Promise(resolve => setTimeout(resolve, 500));
+          } catch (pgError) {
+            console.error('Error creating PG:', pgError);
+            setSignupError('Account created but failed to create PG. Please try again.');
+            setSignupLoading(false);
+            return;
+          }
+        }
         
         // Close signup modal
         setShowSignupModal(false);
@@ -338,18 +439,25 @@ const LandingPage = () => {
           password: '',
           confirmPassword: '',
           role: 'pg_admin',
+          pg_name: '',
+          pg_location: '',
         });
         
-        // Small delay to ensure state is saved
-        setTimeout(() => {
+        // If there's a pending plan, show login modal, otherwise show success
+        if (pendingPlanId) {
+          // Show login modal to proceed with subscription
+          setTimeout(() => {
+            setShowLoginModal(true);
+          }, 300);
+        } else {
           // Role-based redirect
           if (user.role === 'superadmin') {
             navigate('/pgs');
           } else {
-            // PG Admin must subscribe first - stay on landing page
-            alert('Account created successfully! Please subscribe to a plan to continue.');
+            alert('Account created successfully! Please login and subscribe to a plan to continue.');
+            setShowLoginModal(true);
           }
-        }, 100);
+        }
       } else {
         setSignupError(response.data?.message || 'Signup failed');
       }
@@ -596,13 +704,24 @@ const LandingPage = () => {
                   </ul>
                   <button
                     onClick={() => handleSubscribe(plan.id)}
-                    className={`w-full py-3 rounded-sm font-semibold transition-all uppercase tracking-wide text-sm ${
+                    disabled={paymentLoading}
+                    className={`w-full py-3 rounded-sm font-semibold transition-all uppercase tracking-wide text-sm flex items-center justify-center gap-2 ${
                       idx === 1
-                        ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg'
-                        : 'bg-secondary text-foreground hover:bg-secondary/80'
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
+                        : 'bg-secondary text-foreground hover:bg-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed'
                     }`}
                   >
-                    Subscribe Now
+                    {paymentLoading ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Opening Payment...</span>
+                      </>
+                    ) : (
+                      'Subscribe Now'
+                    )}
                   </button>
                 </div>
               ))}
@@ -669,27 +788,27 @@ const LandingPage = () => {
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-foreground mb-4">Contact</h4>
+              <h4 className="font-bold text-primary-foreground mb-4">Contact</h4>
               <ul className="space-y-3 text-sm text-primary-foreground/80">
                 <li>
-                  <b className="block text-foreground mb-1">Address</b>
+                  <b className="block text-primary-foreground mb-1">Address</b>
                   <hr className="border-primary-foreground/20 mb-2" />
-                  <p>Noida, Uttar Pradesh, India</p>
+                  <p className="text-primary-foreground/80">Noida, Uttar Pradesh, India</p>
                 </li>
                 <li>
-                  <b className="block text-foreground mb-1">Email</b>
+                  <b className="block text-primary-foreground mb-1">Email</b>
                   <hr className="border-primary-foreground/20 mb-2" />
-                  <a href="mailto:support@pgpilot.com" className="hover:text-accent transition-colors">support@pgpilot.com</a>
+                  <a href="mailto:support@pgpilot.com" className="text-primary-foreground/80 hover:text-accent transition-colors">support@pgpilot.com</a>
                 </li>
                 <li>
-                  <b className="block text-foreground mb-1">Phone</b>
+                  <b className="block text-primary-foreground mb-1">Phone</b>
                   <hr className="border-primary-foreground/20 mb-2" />
-                  <a href="tel:+911234567890" className="hover:text-accent transition-colors">+91 XXX XXX XXXX</a>
+                  <a href="tel:+911234567890" className="text-primary-foreground/80 hover:text-accent transition-colors">+91 XXX XXX XXXX</a>
                 </li>
                 <li>
-                  <b className="block text-foreground mb-1">Support</b>
+                  <b className="block text-primary-foreground mb-1">Support</b>
                   <hr className="border-primary-foreground/20 mb-2" />
-                  <p>Available 24/7</p>
+                  <p className="text-primary-foreground/80">Available 24/7</p>
                 </li>
               </ul>
             </div>
@@ -717,6 +836,7 @@ const LandingPage = () => {
         }}
         title="Sign In"
         size="sm"
+        closeOnOutsideClick={false}
       >
         <form onSubmit={handleLogin}>
           {loginError && (
@@ -791,11 +911,15 @@ const LandingPage = () => {
             password: '',
             confirmPassword: '',
             role: 'pg_admin',
+            pg_name: '',
+            pg_location: '',
           });
           setSignupError('');
+          setPendingPlanId(null);
         }}
         title="Create Account"
         size="md"
+        closeOnOutsideClick={false}
       >
         <form onSubmit={handleSignup}>
           {signupError && (
@@ -839,6 +963,34 @@ const LandingPage = () => {
               value={signupData.email}
               onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
               className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-foreground text-sm font-bold mb-2">
+              PG Name *
+            </label>
+            <input
+              type="text"
+              value={signupData.pg_name}
+              onChange={(e) => setSignupData({ ...signupData, pg_name: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              placeholder="Enter your PG name"
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-foreground text-sm font-bold mb-2">
+              PG Location/Address *
+            </label>
+            <textarea
+              value={signupData.pg_location}
+              onChange={(e) => setSignupData({ ...signupData, pg_location: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              placeholder="Enter your PG location/address"
+              rows="3"
+              required
             />
           </div>
 
@@ -890,6 +1042,8 @@ const LandingPage = () => {
                   password: '',
                   confirmPassword: '',
                   role: 'pg_admin',
+                  pg_name: '',
+                  pg_location: '',
                 });
                 setSignupError('');
               }}

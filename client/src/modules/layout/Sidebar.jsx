@@ -160,9 +160,9 @@ const Sidebar = ({ open, onClose, isMobile }) => {
         <div className="fixed top-0 left-0 h-16 bg-sidebar-background border-b border-sidebar-border flex items-center justify-start z-40 transition-all duration-300"
           style={{ width: open ? '256px' : '80px' }}
         >
-          <div className="flex items-center gap-3 px-3 w-full">
+          <div className="flex items-center  w-full">
             <div className="w-10 h-10 bg-primary rounded flex items-center justify-center flex-shrink-0">
-              <span className="text-primary-foreground font-bold text-base">PG</span>
+
             </div>
             {open && (
               <h1 className="text-lg font-bold text-sidebar-foreground whitespace-nowrap">PG Pilot</h1>

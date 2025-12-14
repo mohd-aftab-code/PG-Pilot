@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
+const Modal = ({ isOpen, onClose, title, children, size = 'md', closeOnOutsideClick = true }) => {
   if (!isOpen) return null;
 
   const sizeClasses = {
@@ -10,8 +10,14 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
     xl: 'max-w-4xl',
   };
 
+  const handleBackdropClick = (e) => {
+    if (closeOnOutsideClick && e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={handleBackdropClick}>
       <div
         className={`bg-card rounded shadow-xl border border-border ${sizeClasses[size]} w-full m-4 max-h-[90vh] overflow-y-auto`}
         onClick={(e) => e.stopPropagation()}

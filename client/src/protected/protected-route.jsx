@@ -108,7 +108,7 @@ const ProtectedRoute = ({ children, requireRole }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace state={{ modal: 'login' }} />;
   }
 
   // Check role requirement if specified
