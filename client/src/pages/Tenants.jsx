@@ -14,6 +14,13 @@ const Tenants = () => {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTenant, setEditingTenant] = useState(null);
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    search: '',
+    status: 'all',
+  });
+  
   const [formData, setFormData] = useState({
     pg_id: getStoredPgId(),
     bed_id: '',
@@ -131,6 +138,39 @@ const Tenants = () => {
     }
   };
 
+  // Status Badge Component
+  const StatusBadge = ({ isActive }) => {
+    if (isActive === 1 || isActive === true) {
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+          Active
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">
+        Inactive
+      </span>
+    );
+  };
+
+  // Filter tenants
+  const filteredTenants = tenants.filter((tenant) => {
+    // Search filter
+    const searchTerm = filters.search.toLowerCase();
+    const matchesSearch = !filters.search || 
+      tenant.name?.toLowerCase().includes(searchTerm) ||
+      tenant.phone?.toLowerCase().includes(searchTerm) ||
+      tenant.email?.toLowerCase().includes(searchTerm);
+
+    // Status filter
+    const matchesStatus = filters.status === 'all' || 
+      (filters.status === 'active' && tenant.is_active === 1) ||
+      (filters.status === 'inactive' && tenant.is_active !== 1);
+
+    return matchesSearch && matchesStatus;
+  });
+
   const columns = [
     { header: 'Name', accessor: 'name' },
     { header: 'Phone', accessor: 'phone' },
@@ -139,7 +179,7 @@ const Tenants = () => {
     { header: 'Bed', accessor: 'bed_number', render: (val) => val || '-' },
     { header: 'Rent', accessor: 'rent_amount', render: (val) => val ? `₹${val}` : '-' },
     { header: 'Join Date', accessor: 'join_date', render: (val) => formatDateDDMMYY(val) },
-    { header: 'Status', accessor: 'is_active', render: (val) => val === 1 ? 'Active' : 'Inactive' },
+    { header: 'Status', accessor: 'is_active', render: (val) => <StatusBadge isActive={val} /> },
   ];
 
   return (
@@ -149,9 +189,37 @@ const Tenants = () => {
         <Button onClick={() => setIsModalOpen(true)}>Add New Tenant</Button>
       </div>
 
+      {/* Simple Filters */}
+      <div className="mb-4 flex flex-wrap gap-3">
+        <input
+          type="text"
+          placeholder="Search by name, phone, email..."
+          value={filters.search}
+          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          className="flex-1 min-w-[200px] px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+        />
+        <select
+          value={filters.status}
+          onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+          className="px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+        >
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        {(filters.search || filters.status !== 'all') && (
+          <button
+            onClick={() => setFilters({ search: '', status: 'all' })}
+            className="px-4 py-2 text-sm text-primary hover:text-accent font-medium"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
       <DataTable
         columns={columns}
-        data={tenants}
+        data={filteredTenants}
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}

@@ -13,6 +13,14 @@ const Payments = () => {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState(null);
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    search: '',
+    status: 'all',
+    mode: 'all',
+  });
+  
   const [formData, setFormData] = useState({
     tenant_id: '',
     pg_id: getStoredPgId(),
@@ -80,12 +88,62 @@ const Payments = () => {
     });
   };
 
+  // Status Badge Component
+  const StatusBadge = ({ status }) => {
+    const statusConfig = {
+      received: {
+        label: 'Received',
+        bgColor: 'bg-green-100',
+        textColor: 'text-green-800',
+      },
+      pending: {
+        label: 'Pending',
+        bgColor: 'bg-yellow-100',
+        textColor: 'text-yellow-800',
+      },
+      failed: {
+        label: 'Failed',
+        bgColor: 'bg-red-100',
+        textColor: 'text-red-800',
+      },
+    };
+
+    const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
+
+    return (
+      <span
+        className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${config.bgColor} ${config.textColor}`}
+      >
+        {config.label}
+      </span>
+    );
+  };
+
+  // Filter payments
+  const filteredPayments = payments.filter((payment) => {
+    // Search filter
+    const searchTerm = filters.search.toLowerCase();
+    const matchesSearch = !filters.search || 
+      payment.tenant_name?.toLowerCase().includes(searchTerm) ||
+      payment.amount?.toString().includes(searchTerm);
+
+    // Status filter
+    const matchesStatus = filters.status === 'all' || 
+      payment.status?.toLowerCase() === filters.status.toLowerCase();
+
+    // Mode filter
+    const matchesMode = filters.mode === 'all' || 
+      payment.mode?.toLowerCase() === filters.mode.toLowerCase();
+
+    return matchesSearch && matchesStatus && matchesMode;
+  });
+
   const columns = [
     { header: 'Tenant', accessor: 'tenant_name' },
     { header: 'Amount', accessor: 'amount', render: (val) => `₹${val}` },
     { header: 'Month For', accessor: 'month_for', render: (val) => formatDateDDMMYY(val) },
     { header: 'Mode', accessor: 'mode', render: (val) => val.toUpperCase() },
-    { header: 'Status', accessor: 'status', render: (val) => val.charAt(0).toUpperCase() + val.slice(1) },
+    { header: 'Status', accessor: 'status', render: (val) => <StatusBadge status={val} /> },
     { header: 'Date', accessor: 'created_at', render: (val) => formatDateDDMMYY(val) },
   ];
 
@@ -96,9 +154,48 @@ const Payments = () => {
         <Button onClick={() => setIsModalOpen(true)}>Add Payment</Button>
       </div>
 
+      {/* Simple Filters */}
+      <div className="mb-4 flex flex-wrap gap-3">
+        <input
+          type="text"
+          placeholder="Search by tenant name, amount..."
+          value={filters.search}
+          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          className="flex-1 min-w-[200px] px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+        />
+        <select
+          value={filters.status}
+          onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+          className="px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+        >
+          <option value="all">All Status</option>
+          <option value="received">Received</option>
+          <option value="pending">Pending</option>
+          <option value="failed">Failed</option>
+        </select>
+        <select
+          value={filters.mode}
+          onChange={(e) => setFilters({ ...filters, mode: e.target.value })}
+          className="px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+        >
+          <option value="all">All Modes</option>
+          <option value="cash">Cash</option>
+          <option value="qr">QR</option>
+          <option value="manual">Manual</option>
+        </select>
+        {(filters.search || filters.status !== 'all' || filters.mode !== 'all') && (
+          <button
+            onClick={() => setFilters({ search: '', status: 'all', mode: 'all' })}
+            className="px-4 py-2 text-sm text-primary hover:text-accent font-medium"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
       <DataTable
         columns={columns}
-        data={payments}
+        data={filteredPayments}
         loading={loading}
         onEdit={(payment) => {
           setEditingPayment(payment);
