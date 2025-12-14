@@ -12,11 +12,35 @@ const getRooms = async (req, res) => {
     }
 
     const [rooms] = await database.query(
-      'SELECT * FROM rooms WHERE pg_id = ? ORDER BY room_name',
+      `SELECT r.*, COUNT(b.id) as actual_bed_count 
+       FROM rooms r 
+       LEFT JOIN beds b ON r.id = b.room_id 
+       WHERE r.pg_id = ? 
+       GROUP BY r.id 
+       ORDER BY r.room_name`,
       [pg_id]
     );
 
-    res.json({ rooms });
+    // Sync total_beds with actual bed count if there's a mismatch
+    for (const room of rooms) {
+      const actualCount = parseInt(room.actual_bed_count) || 0;
+      const totalBeds = parseInt(room.total_beds) || 0;
+      
+      if (actualCount !== totalBeds) {
+        // Update total_beds to match actual count
+        await database.query(
+          'UPDATE rooms SET total_beds = ? WHERE id = ?',
+          [actualCount, room.id]
+        );
+        room.total_beds = actualCount;
+        console.log(`Synced room ${room.id}: total_beds updated from ${totalBeds} to ${actualCount}`);
+      }
+    }
+
+    // Remove actual_bed_count from response (it was just for syncing)
+    const cleanedRooms = rooms.map(({ actual_bed_count, ...room }) => room);
+
+    res.json({ rooms: cleanedRooms });
   } catch (error) {
     console.error('Get rooms error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -145,12 +169,43 @@ const updateRoom = async (req, res) => {
     const currentCount = currentBedCount[0][0].count;
 
     if (total_beds > currentCount) {
-      // Add new beds
-      const bedInserts = [];
-      for (let i = currentCount + 1; i <= total_beds; i++) {
-        bedInserts.push([id, i]);
+      // Check bed limits before adding new beds
+      const bedCheck = await canCreateBed(rooms[0].pg_id, id);
+      
+      if (!bedCheck.allowed) {
+        // If limit reached, don't add beds and update total_beds to current count
+        await database.query(
+          'UPDATE rooms SET total_beds = ? WHERE id = ?',
+          [currentCount, id]
+        );
+        const [updatedRooms] = await database.query('SELECT * FROM rooms WHERE id = ?', [id]);
+        return res.status(403).json({ 
+          error: bedCheck.message,
+          room: updatedRooms[0]
+        });
       }
-      await database.query('INSERT INTO beds (room_id, bed_number) VALUES ?', [bedInserts]);
+
+      // Calculate how many beds we can actually create
+      const bedsToAdd = total_beds - currentCount;
+      const bedsCanCreate = Math.min(bedsToAdd, bedCheck.remaining);
+      
+      // Add new beds (up to limit)
+      if (bedsCanCreate > 0) {
+        const bedInserts = [];
+        for (let i = currentCount + 1; i <= currentCount + bedsCanCreate; i++) {
+          bedInserts.push([id, i]);
+        }
+        await database.query('INSERT INTO beds (room_id, bed_number) VALUES ?', [bedInserts]);
+      }
+
+      // If we couldn't create all requested beds, update total_beds
+      const actualTotalBeds = currentCount + bedsCanCreate;
+      if (actualTotalBeds < total_beds) {
+        await database.query(
+          'UPDATE rooms SET total_beds = ? WHERE id = ?',
+          [actualTotalBeds, id]
+        );
+      }
     } else if (total_beds < currentCount) {
       // Remove extra beds (only if vacant)
       await database.query(
