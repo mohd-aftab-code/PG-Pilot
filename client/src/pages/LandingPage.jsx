@@ -577,23 +577,23 @@ const LandingPage = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-primary sticky top-0 z-50 shadow-md">
-        <div className="container mx-auto px-4 md:px-8 py-4 flex justify-between items-center h-16">
+        <div className="container mx-auto px-4 md:px-8 py-3 md:py-4 flex justify-between items-center min-h-[60px] md:h-16">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-white/10 rounded flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">PG</span>
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-white/10 rounded flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-xs md:text-sm">PG</span>
             </div>
-            <span className="text-xl font-bold text-primary-foreground">PG Pilot</span>
+            <span className="text-lg md:text-xl font-bold text-primary-foreground">PG Pilot</span>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 md:gap-3">
             <button
               onClick={() => setShowLoginModal(true)}
-              className="px-5 py-2 text-primary-foreground hover:text-accent transition-colors font-semibold text-sm uppercase tracking-wide"
+              className="px-3 md:px-5 py-1.5 md:py-2 text-primary-foreground hover:text-accent transition-colors font-semibold text-xs md:text-sm uppercase tracking-wide"
             >
               Sign In
             </button>
             <button
               onClick={() => setShowSignupModal(true)}
-              className="px-6 py-2 bg-accent text-white rounded hover:bg-accent/90 transition-colors font-semibold text-sm uppercase tracking-wide"
+              className="px-4 md:px-6 py-1.5 md:py-2 bg-accent text-white rounded hover:bg-accent/90 transition-colors font-semibold text-xs md:text-sm uppercase tracking-wide"
             >
               Sign Up
             </button>
@@ -602,27 +602,27 @@ const LandingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 md:px-8 py-20 text-center">
+      <section className="container mx-auto px-4 md:px-8 py-12 md:py-20 text-center">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-black text-primary mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-primary mb-4 md:mb-6 leading-tight px-2">
             Manage Your PG with
             <span className="text-accent"> Ease</span>
           </h1>
-          <p className="text-xl text-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-foreground mb-6 md:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
             Complete solution for managing tenants, rooms, payments, and more. 
             Streamline your PG operations with our comprehensive management system designed for modern property managers.
           </p>
-          <div className="flex gap-4 justify-center flex-wrap">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center flex-wrap px-2">
             <button
               onClick={() => setShowSignupModal(true)}
-              className="flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-sm hover:bg-primary/90 transition-all text-lg font-semibold shadow-lg hover:shadow-xl uppercase tracking-wide"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-3.5 bg-primary text-primary-foreground rounded-sm hover:bg-primary/90 transition-all text-sm md:text-lg font-semibold shadow-lg hover:shadow-xl uppercase tracking-wide"
             >
               Get Started Free
               <IconArrowRight />
             </button>
             <button
               onClick={() => setShowLoginModal(true)}
-              className="flex items-center gap-2 px-8 py-3.5 border-2 border-primary text-primary rounded-sm hover:bg-primary hover:text-primary-foreground transition-all text-lg font-semibold uppercase tracking-wide"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-3.5 border-2 border-primary text-primary rounded-sm hover:bg-primary hover:text-primary-foreground transition-all text-sm md:text-lg font-semibold uppercase tracking-wide"
             >
               Learn More
             </button>
@@ -631,27 +631,27 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="bg-[#E4EDF3] py-20">
+      <section className="bg-[#E4EDF3] py-12 md:py-20">
         <div className="container mx-auto px-4 md:px-8">
-          <div className="text-center mb-16">
-            <p className="text-sm font-bold text-accent uppercase tracking-wider mb-2">Key Features</p>
-            <h2 className="text-4xl md:text-5xl font-black text-primary mb-4">
+          <div className="text-center mb-8 md:mb-16">
+            <p className="text-xs md:text-sm font-bold text-accent uppercase tracking-wider mb-2">Key Features</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-4 px-2">
               Why PG Owners Prefer This System
             </h2>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {features.map((feature, idx) => {
               const IconComponent = feature.icon;
               return (
                 <div 
                   key={idx} 
-                  className="bg-white p-6 rounded-sm shadow-[0_1px_4px_0_rgba(0,0,0,0.15)] hover:shadow-xl transition-all duration-500 border-l-4 border-accent relative overflow-hidden group"
+                  className="bg-white p-4 md:p-6 rounded-sm shadow-[0_1px_4px_0_rgba(0,0,0,0.15)] hover:shadow-xl transition-all duration-500 border-l-4 border-accent relative overflow-hidden group"
                 >
-                  <div className="w-12 h-12 text-accent mb-4 flex items-center justify-center text-5xl">
+                  <div className="w-10 h-10 md:w-12 md:h-12 text-accent mb-3 md:mb-4 flex items-center justify-center">
                     <IconComponent />
                   </div>
-                  <h3 className="text-xl font-bold text-primary mb-3 leading-tight">{feature.title}</h3>
-                  <p className="text-foreground text-sm leading-relaxed">
+                  <h3 className="text-lg md:text-xl font-bold text-primary mb-2 md:mb-3 leading-tight">{feature.title}</h3>
+                  <p className="text-foreground text-xs md:text-sm leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -662,50 +662,50 @@ const LandingPage = () => {
       </section>
 
       {/* Subscription Plans Section */}
-      <section className="py-20 bg-white">
+      <section className="py-12 md:py-20 bg-white">
         <div className="container mx-auto px-4 md:px-8">
-          <div className="text-center mb-16">
-            <p className="text-sm font-bold text-accent uppercase tracking-wider mb-2">Simple Pricing</p>
-            <h2 className="text-4xl md:text-5xl font-black text-primary mb-4">
+          <div className="text-center mb-8 md:mb-16">
+            <p className="text-xs md:text-sm font-bold text-accent uppercase tracking-wider mb-2">Simple Pricing</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-4 px-2">
               Choose Your Plan
             </h2>
-            <p className="text-lg text-foreground max-w-2xl mx-auto">
+            <p className="text-sm md:text-lg text-foreground max-w-2xl mx-auto px-2">
               Flexible pricing plans to suit your needs. Start free and upgrade as you grow.
             </p>
           </div>
           {loading ? (
-            <div className="text-center text-foreground">Loading plans...</div>
+            <div className="text-center text-foreground text-sm md:text-base">Loading plans...</div>
           ) : (
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 max-w-6xl mx-auto">
               {plans.map((plan, idx) => (
                 <div
                   key={plan.id}
-                  className={`bg-white border rounded-sm p-8 hover:shadow-xl transition-all duration-500 ${
-                    idx === 1 ? 'border-accent border-2 shadow-lg scale-105' : 'border-border shadow-[0_1px_4px_0_rgba(0,0,0,0.15)]'
+                  className={`bg-white border rounded-sm p-5 md:p-8 hover:shadow-xl transition-all duration-500 ${
+                    idx === 1 ? 'border-accent border-2 shadow-lg md:scale-105' : 'border-border shadow-[0_1px_4px_0_rgba(0,0,0,0.15)]'
                   }`}
                 >
                   {idx === 1 && (
-                    <div className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-sm inline-block mb-4 uppercase tracking-wide">
+                    <div className="bg-primary text-primary-foreground text-xs font-bold px-2 md:px-3 py-1 rounded-sm inline-block mb-3 md:mb-4 uppercase tracking-wide">
                       Most Popular
                     </div>
                   )}
-                  <h3 className="text-2xl font-bold text-primary mb-2">{plan.name}</h3>
-                  <div className="mb-6">
-                    <span className="text-5xl font-black text-primary">₹{plan.price}</span>
-                    <span className="text-foreground">/month</span>
+                  <h3 className="text-xl md:text-2xl font-bold text-primary mb-2">{plan.name}</h3>
+                  <div className="mb-4 md:mb-6">
+                    <span className="text-3xl md:text-5xl font-black text-primary">₹{plan.price}</span>
+                    <span className="text-foreground text-sm md:text-base">/month</span>
                   </div>
-                  <ul className="space-y-3 mb-8">
+                  <ul className="space-y-2 md:space-y-3 mb-6 md:mb-8">
                     {plan.features.map((feature, fIdx) => (
-                      <li key={fIdx} className="flex items-center gap-2 text-foreground text-sm">
+                      <li key={fIdx} className="flex items-start gap-2 text-foreground text-xs md:text-sm">
                         <IconCheck />
-                        <span>{feature}</span>
+                        <span className="flex-1">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   <button
                     onClick={() => handleSubscribe(plan.id)}
                     disabled={paymentLoading}
-                    className={`w-full py-3 rounded-sm font-semibold transition-all uppercase tracking-wide text-sm flex items-center justify-center gap-2 ${
+                    className={`w-full py-2.5 md:py-3 rounded-sm font-semibold transition-all uppercase tracking-wide text-xs md:text-sm flex items-center justify-center gap-2 ${
                       idx === 1
                         ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
                         : 'bg-secondary text-foreground hover:bg-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed'
@@ -731,93 +731,93 @@ const LandingPage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-white py-16 border-t border-border">
+      <section className="bg-white py-10 md:py-16 border-t border-border">
         <div className="container mx-auto px-4 md:px-8">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
             <div>
-              <div className="text-5xl font-black text-primary mb-2">150+</div>
-              <div className="text-foreground font-semibold">PG Owners</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">150+</div>
+              <div className="text-foreground font-semibold text-xs md:text-base">PG Owners</div>
             </div>
             <div>
-              <div className="text-5xl font-black text-primary mb-2">2000+</div>
-              <div className="text-foreground font-semibold">Rooms Managed</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">2000+</div>
+              <div className="text-foreground font-semibold text-xs md:text-base">Rooms Managed</div>
             </div>
             <div>
-              <div className="text-5xl font-black text-primary mb-2">5000+</div>
-              <div className="text-foreground font-semibold">Tenants Tracked</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">5000+</div>
+              <div className="text-foreground font-semibold text-xs md:text-base">Tenants Tracked</div>
             </div>
             <div>
-              <div className="text-5xl font-black text-primary mb-2">25+</div>
-              <div className="text-foreground font-semibold">Cities</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">25+</div>
+              <div className="text-foreground font-semibold text-xs md:text-base">Cities</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-primary text-primary-foreground py-12">
+      <footer className="bg-primary text-primary-foreground py-8 md:py-12">
         <div className="container mx-auto px-4 md:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="font-bold text-lg mb-4">PG Management System</h3>
-              <p className="text-primary-foreground/80 text-sm leading-relaxed">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
+            <div className="sm:col-span-2 md:col-span-1">
+              <h3 className="font-bold text-base md:text-lg mb-3 md:mb-4">PG Management System</h3>
+              <p className="text-primary-foreground/80 text-xs md:text-sm leading-relaxed mb-3 md:mb-0">
                 A simple PG management system built for Indian PG owners. Manage rent, tenants and payments — all in one place.
               </p>
-              <div className="flex gap-3 mt-4">
-                <a href="#" className="w-8 h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
+              <div className="flex gap-2 md:gap-3 mt-3 md:mt-4">
+                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconFacebook />
                 </a>
-                <a href="#" className="w-8 h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
+                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconTwitter />
                 </a>
-                <a href="#" className="w-8 h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
+                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconLinkedin />
                 </a>
-                <a href="#" className="w-8 h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
+                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconInstagram />
                 </a>
               </div>
             </div>
             <div>
-              <h4 className="font-bold text-foreground mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-sm text-primary-foreground/80">
+              <h4 className="font-bold text-foreground mb-3 md:mb-4 text-sm md:text-base">Quick Links</h4>
+              <ul className="space-y-2 text-xs md:text-sm text-primary-foreground/80">
                 <li><a href="#" className="hover:text-accent transition-colors">Features</a></li>
                 <li><a href="#" className="hover:text-accent transition-colors">Pricing</a></li>
                 <li><a href="#" className="hover:text-accent transition-colors">Free Trial</a></li>
                 <li><a href="#" className="hover:text-accent transition-colors">Contact Us</a></li>
               </ul>
             </div>
-            <div>
-              <h4 className="font-bold text-primary-foreground mb-4">Contact</h4>
-              <ul className="space-y-3 text-sm text-primary-foreground/80">
+            <div className="sm:col-span-2 md:col-span-1">
+              <h4 className="font-bold text-primary-foreground mb-3 md:mb-4 text-sm md:text-base">Contact</h4>
+              <ul className="space-y-2 md:space-y-3 text-xs md:text-sm text-primary-foreground/80">
                 <li>
                   <b className="block text-primary-foreground mb-1">Address</b>
-                  <hr className="border-primary-foreground/20 mb-2" />
+                  <hr className="border-primary-foreground/20 mb-1 md:mb-2" />
                   <p className="text-primary-foreground/80">Noida, Uttar Pradesh, India</p>
                 </li>
                 <li>
                   <b className="block text-primary-foreground mb-1">Email</b>
-                  <hr className="border-primary-foreground/20 mb-2" />
-                  <a href="mailto:support@pgpilot.com" className="text-primary-foreground/80 hover:text-accent transition-colors">support@pgpilot.com</a>
+                  <hr className="border-primary-foreground/20 mb-1 md:mb-2" />
+                  <a href="mailto:support@pgpilot.com" className="text-primary-foreground/80 hover:text-accent transition-colors break-all">support@pgpilot.com</a>
                 </li>
                 <li>
                   <b className="block text-primary-foreground mb-1">Phone</b>
-                  <hr className="border-primary-foreground/20 mb-2" />
+                  <hr className="border-primary-foreground/20 mb-1 md:mb-2" />
                   <a href="tel:+911234567890" className="text-primary-foreground/80 hover:text-accent transition-colors">+91 XXX XXX XXXX</a>
                 </li>
                 <li>
                   <b className="block text-primary-foreground mb-1">Support</b>
-                  <hr className="border-primary-foreground/20 mb-2" />
+                  <hr className="border-primary-foreground/20 mb-1 md:mb-2" />
                   <p className="text-primary-foreground/80">Available 24/7</p>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-primary-foreground/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-primary-foreground/80">
+          <div className="border-t border-primary-foreground/20 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
+            <p className="text-xs md:text-sm text-primary-foreground/80 text-center md:text-left">
               © 2024 PG Management System - Built for Indian PG Owners
             </p>
-            <div className="flex gap-6 text-sm text-primary-foreground/80">
+            <div className="flex gap-4 md:gap-6 text-xs md:text-sm text-primary-foreground/80">
               <a href="#" className="hover:text-accent transition-colors">Contact us</a>
               <span>|</span>
               <a href="#" className="hover:text-accent transition-colors">Privacy policy</a>
