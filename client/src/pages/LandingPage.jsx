@@ -565,12 +565,12 @@ const LandingPage = () => {
   );
 
   const features = [
-    { icon: IconUsers, title: 'Tenant Management', description: 'Comprehensive tenant database with detailed profiles, documents, and history tracking.' },
-    { icon: IconDollar, title: 'Payment Tracking', description: 'Automated payment reminders, multiple payment modes, and detailed financial reports.' },
-    { icon: IconAlert, title: 'Complaint Management', description: 'Streamlined complaint system with status tracking and resolution management.' },
-    { icon: IconHome, title: 'Room & Bed Management', description: 'Real-time occupancy tracking, room allocation, and bed status management.' },
-    { icon: IconCoffee, title: 'Mess Management', description: 'Create mess plans, assign to tenants, and generate automated mess bills.' },
-    { icon: IconChart, title: 'Analytics & Reports', description: 'Comprehensive analytics dashboard with insights into your PG operations.' },
+    { icon: IconUsers, title: 'Tenant Management', description: 'Excel sheets aur WhatsApp lists ki jhanjhat khatam. Saare tenants ek hi jagah with documents and complete history tracking.' },
+    { icon: IconDollar, title: 'Payment Tracking', description: 'Rent miss hone ka tension khatam. Automated reminders, multiple payment modes, aur detailed financial reports — sab kuch seedha aapke dashboard pe.' },
+    { icon: IconAlert, title: 'Complaint Management', description: 'Complaints ko track karna abhi easy hai. Status tracking aur resolution management se sab kuch organized rahega.' },
+    { icon: IconHome, title: 'Room & Bed Management', description: 'Real-time mein dekho kaunsi room khali hai aur kaunsi occupied. Room allocation aur bed status — sab kuch ek click pe.' },
+    { icon: IconCoffee, title: 'Mess Management', description: 'Mess plans create karo, tenants ko assign karo, aur automated bills generate karo. Mess ki tension abhi zero.' },
+    { icon: IconChart, title: 'Analytics & Reports', description: 'Apne PG ki complete analytics dekho. Revenue, occupancy, payments — sab kuch detailed reports mein, seedha dashboard pe.' },
   ];
 
   return (
@@ -582,7 +582,7 @@ const LandingPage = () => {
             <div className="w-8 h-8 md:w-10 md:h-10 bg-white/10 rounded flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-xs md:text-sm">PG</span>
             </div>
-            <span className="text-lg md:text-xl font-bold text-primary-foreground">PG Pilot</span>
+            <span className="text-lg md:text-xl font-bold text-primary-foreground">Pilot</span>
           </div>
           <div className="flex gap-2 md:gap-3">
             <button
@@ -605,14 +605,14 @@ const LandingPage = () => {
       <section className="container mx-auto px-4 md:px-8 py-12 md:py-20 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-primary mb-4 md:mb-6 leading-tight px-2">
-            Manage Your PG with
-            <span className="text-accent"> Ease</span>
+            Run Your Entire PG on
+            <span className="text-accent"> Autopilot</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-foreground mb-6 md:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
-            Complete solution for managing tenants, rooms, payments, and more. 
-            Streamline your PG operations with our comprehensive management system designed for modern property managers.
+            Reduce manual work, never miss rent, track every bed in real time. 
+            Simplify rent, tenants & mess in one place — built specifically for Indian PG owners.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center flex-wrap px-2">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center flex-wrap px-2 mb-4">
             <button
               onClick={() => setShowSignupModal(true)}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-3.5 bg-primary text-primary-foreground rounded-sm hover:bg-primary/90 transition-all text-sm md:text-lg font-semibold shadow-lg hover:shadow-xl uppercase tracking-wide"
@@ -627,6 +627,37 @@ const LandingPage = () => {
               Learn More
             </button>
           </div>
+          <p className="text-xs md:text-sm text-foreground/70 px-2">
+            No credit card required · Setup in 10 minutes
+          </p>
+        </div>
+      </section>
+
+      {/* Social Proof Stats Strip */}
+      <section className="bg-white py-8 md:py-12 border-b border-border">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 text-center">
+            <div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">150+</div>
+              <div className="text-foreground font-semibold text-xs md:text-sm mb-1">PG Owners</div>
+              <div className="text-foreground/70 text-xs">trust PG Pilot to run their properties.</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">2000+</div>
+              <div className="text-foreground font-semibold text-xs md:text-sm mb-1">Rooms Managed</div>
+              <div className="text-foreground/70 text-xs">across India with real-time tracking.</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">5000+</div>
+              <div className="text-foreground font-semibold text-xs md:text-sm mb-1">Tenants Tracked</div>
+              <div className="text-foreground/70 text-xs">with complete profiles and history.</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">25+</div>
+              <div className="text-foreground font-semibold text-xs md:text-sm mb-1">Cities</div>
+              <div className="text-foreground/70 text-xs">where PG owners rely on PG Pilot.</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -636,7 +667,7 @@ const LandingPage = () => {
           <div className="text-center mb-8 md:mb-16">
             <p className="text-xs md:text-sm font-bold text-accent uppercase tracking-wider mb-2">Key Features</p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-4 px-2">
-              Why PG Owners Prefer This System
+              Everything You Need to Run Your PG Smoothly
             </h2>
           </div>
           <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -670,7 +701,7 @@ const LandingPage = () => {
               Choose Your Plan
             </h2>
             <p className="text-sm md:text-lg text-foreground max-w-2xl mx-auto px-2">
-              Flexible pricing plans to suit your needs. Start free and upgrade as you grow.
+              Plans designed for Indian PG owners. Start with free trial, upgrade as your business grows.
             </p>
           </div>
           {loading ? (
@@ -730,38 +761,15 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="bg-white py-10 md:py-16 border-t border-border">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
-            <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">150+</div>
-              <div className="text-foreground font-semibold text-xs md:text-base">PG Owners</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">2000+</div>
-              <div className="text-foreground font-semibold text-xs md:text-base">Rooms Managed</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">5000+</div>
-              <div className="text-foreground font-semibold text-xs md:text-base">Tenants Tracked</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">25+</div>
-              <div className="text-foreground font-semibold text-xs md:text-base">Cities</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="bg-primary text-primary-foreground py-8 md:py-12">
         <div className="container mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
             <div className="sm:col-span-2 md:col-span-1">
-              <h3 className="font-bold text-base md:text-lg mb-3 md:mb-4">PG Management System</h3>
+              <h3 className="font-bold text-base md:text-lg mb-3 md:mb-4">PG Pilot – PG Management System</h3>
               <p className="text-primary-foreground/80 text-xs md:text-sm leading-relaxed mb-3 md:mb-0">
-                A simple PG management system built for Indian PG owners. Manage rent, tenants and payments — all in one place.
+                Built specially for Indian PG and hostel owners. Manage rent, tenants and payments — all in one place.
               </p>
               <div className="flex gap-2 md:gap-3 mt-3 md:mt-4">
                 <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
@@ -803,19 +811,20 @@ const LandingPage = () => {
                 <li>
                   <b className="block text-primary-foreground mb-1">Phone</b>
                   <hr className="border-primary-foreground/20 mb-1 md:mb-2" />
-                  <a href="tel:+911234567890" className="text-primary-foreground/80 hover:text-accent transition-colors">+91 XXX XXX XXXX</a>
+                  <p className="text-primary-foreground/80">Phone support available between 10 AM – 7 PM IST</p>
                 </li>
                 <li>
                   <b className="block text-primary-foreground mb-1">Support</b>
                   <hr className="border-primary-foreground/20 mb-1 md:mb-2" />
-                  <p className="text-primary-foreground/80">Available 24/7</p>
+                  <p className="text-primary-foreground/80 mb-1">Available 24/7</p>
+                  <p className="text-primary-foreground/80">WhatsApp onboarding and training available</p>
                 </li>
               </ul>
             </div>
           </div>
           <div className="border-t border-primary-foreground/20 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
             <p className="text-xs md:text-sm text-primary-foreground/80 text-center md:text-left">
-              © 2024 PG Management System - Built for Indian PG Owners
+              © 2024 PG Pilot – Built for Indian PG Owners
             </p>
             <div className="flex gap-4 md:gap-6 text-xs md:text-sm text-primary-foreground/80">
               <a href="#" className="hover:text-accent transition-colors">Contact us</a>
