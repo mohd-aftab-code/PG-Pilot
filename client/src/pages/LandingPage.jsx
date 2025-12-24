@@ -24,6 +24,335 @@ const LandingPage = () => {
     default_due_day: 5,
   });
 
+  // Handle Google Authentication (for both login and signup)
+  const handleGoogleAuth = async (response) => {
+    const isLoginFlow = showLoginModal;
+    if (isLoginFlow) {
+      setGoogleLoginLoading(true);
+    } else {
+      setGoogleSignupLoading(true);
+    }
+    setLoginError('');
+    setSignupError('');
+
+    try {
+      const result = await api.post('/api/auth/google', {
+        credential: response.credential,
+      });
+
+      if (result.data && result.data.user) {
+        setStoredUser(result.data.user);
+        const user = result.data.user;
+
+        // Close modals
+        setShowLoginModal(false);
+        setShowSignupModal(false);
+        setLoginData({ phone: '', password: '' });
+        setSignupData({
+          name: '',
+          email: '',
+          phone: '',
+          password: '',
+          confirmPassword: '',
+          role: 'pg_admin',
+          pg_name: '',
+          pg_location: '',
+        });
+
+        setTimeout(async () => {
+          // If user came from subscription flow, handle it
+          if (pendingPlanId) {
+            if (!user.pg_id) {
+              setPendingPlanId(pendingPlanId);
+              setShowPGModal(true);
+              return;
+            }
+            // Proceed with payment
+            await initiatePayment(pendingPlanId);
+            return;
+          }
+
+          // Role-based redirect
+          if (user.role === 'superadmin') {
+            navigate('/pgs');
+          } else {
+            // For PG Admin, check subscription before allowing access
+            if (user.pg_id) {
+              try {
+                const subResponse = await api.get(`/api/subscriptions/pg/${user.pg_id}/active`);
+                if (subResponse.data.subscription) {
+                  navigate('/dashboard');
+                } else {
+                  // No subscription, stay on landing page
+                  alert('Please subscribe to a plan to access the dashboard.');
+                }
+              } catch (error) {
+                alert('Please subscribe to a plan to access the dashboard.');
+              }
+            } else {
+              // No PG created yet
+              alert('Please create a PG and subscribe to a plan to access the dashboard.');
+            }
+          }
+        }, 100);
+      }
+    } catch (err) {
+      console.error('Google auth error:', err);
+      const errorMessage = err.response?.data?.error ||
+                          err.response?.data?.message ||
+                          'Google authentication failed. Please try again.';
+      if (isLoginFlow) {
+        setLoginError(errorMessage);
+      } else {
+        setSignupError(errorMessage);
+      }
+    } finally {
+      if (isLoginFlow) {
+        setGoogleLoginLoading(false);
+      } else {
+        setGoogleSignupLoading(false);
+      }
+    }
+  };
+
+  const triggerGoogleSignIn = () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const currentOrigin = window.location.origin;
+    console.log('LandingPage: Triggering Google Sign-In, Client ID:', clientId ? 'Set' : 'Not Set');
+    console.log('LandingPage: Current Origin:', currentOrigin);
+    
+    if (!clientId) {
+      setLoginError('Google Client ID is not configured. Please contact support.');
+      console.error('VITE_GOOGLE_CLIENT_ID is not set in environment variables');
+      return;
+    }
+
+    if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+      setLoginError('Google sign-in is not available. Please refresh the page.');
+      console.error('Google OAuth not loaded. window.google:', !!window.google, 'window.google.accounts:', !!(window.google && window.google.accounts));
+      return;
+    }
+
+    setGoogleLoginLoading(true);
+    setLoginError('');
+
+    try {
+      // Re-initialize to ensure proper setup
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleAuth,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+      });
+
+      // Create or get container for Google button (visible but off-screen)
+      let googleButtonContainer = document.getElementById('google-signin-hidden-container');
+      if (!googleButtonContainer) {
+        googleButtonContainer = document.createElement('div');
+        googleButtonContainer.id = 'google-signin-hidden-container';
+        googleButtonContainer.style.position = 'fixed';
+        googleButtonContainer.style.top = '-1000px';
+        googleButtonContainer.style.left = '-1000px';
+        googleButtonContainer.style.width = '250px';
+        googleButtonContainer.style.height = '50px';
+        googleButtonContainer.style.zIndex = '9999';
+        document.body.appendChild(googleButtonContainer);
+      }
+
+      // Clear previous button if exists
+      googleButtonContainer.innerHTML = '';
+
+      // Render Google button
+      try {
+        window.google.accounts.id.renderButton(googleButtonContainer, {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: 'signin_with',
+          width: 250,
+        });
+
+        // Wait for button to render, then click it
+        let attempts = 0;
+        const tryClickButton = setInterval(() => {
+          attempts++;
+          const googleButton = googleButtonContainer.querySelector('div[role="button"]') || 
+                              googleButtonContainer.querySelector('iframe');
+          
+          if (googleButton) {
+            clearInterval(tryClickButton);
+            try {
+              // Try clicking the button element
+              if (googleButton.click) {
+                googleButton.click();
+              } else {
+                // If it's an iframe, try to access its content
+                const buttonElement = googleButtonContainer.querySelector('div[role="button"]');
+                if (buttonElement && buttonElement.click) {
+                  buttonElement.click();
+                } else {
+                  // Fallback to prompt
+                  window.google.accounts.id.prompt();
+                }
+              }
+              console.log('LandingPage: Google sign-in button clicked');
+            } catch (clickError) {
+              console.error('Error clicking button:', clickError);
+              // Fallback to prompt
+              window.google.accounts.id.prompt();
+            }
+          } else if (attempts > 20) {
+            clearInterval(tryClickButton);
+            // Fallback: use prompt method
+            console.log('LandingPage: Button not found after 2 seconds, trying prompt method');
+            window.google.accounts.id.prompt((notification) => {
+              if (notification.isNotDisplayed() || notification.isSkippedMoment() || notification.isDismissedMoment()) {
+                const errorMsg = `Google sign-in is not available. This usually means:\n\n1. Your origin (${currentOrigin}) is not registered in Google Cloud Console\n2. Go to: https://console.cloud.google.com/apis/credentials\n3. Select your OAuth 2.0 Client ID\n4. Add "${currentOrigin}" to "Authorized JavaScript origins"\n5. Save and wait 5-10 minutes for changes to propagate`;
+                setLoginError(errorMsg);
+                setGoogleLoginLoading(false);
+                console.error('Google One Tap not available:', notification);
+              }
+            });
+          }
+        }, 100);
+      } catch (renderError) {
+        console.error('Error rendering Google button:', renderError);
+        // Fallback to prompt
+        window.google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            const errorMsg = `Google sign-in failed. Please ensure:\n\n1. Origin "${currentOrigin}" is registered in Google Cloud Console\n2. OAuth consent screen is properly configured\n3. Client ID matches in both frontend and backend`;
+            setLoginError(errorMsg);
+            setGoogleLoginLoading(false);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error triggering Google sign-in:', error);
+      const errorMsg = `Failed to open Google sign-in: ${error.message}\n\nPlease ensure:\n1. Origin "${currentOrigin}" is registered in Google Cloud Console\n2. Go to: https://console.cloud.google.com/apis/credentials\n3. Add "${currentOrigin}" to Authorized JavaScript origins`;
+      setLoginError(errorMsg);
+      setGoogleLoginLoading(false);
+    }
+  };
+
+  const triggerGoogleSignUp = () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const currentOrigin = window.location.origin;
+    console.log('LandingPage: Triggering Google Sign-Up, Client ID:', clientId ? 'Set' : 'Not Set');
+    console.log('LandingPage: Current Origin:', currentOrigin);
+    
+    if (!clientId) {
+      setSignupError('Google Client ID is not configured. Please contact support.');
+      console.error('VITE_GOOGLE_CLIENT_ID is not set in environment variables');
+      return;
+    }
+
+    if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+      setSignupError('Google sign-up is not available. Please refresh the page.');
+      console.error('Google OAuth not loaded. window.google:', !!window.google, 'window.google.accounts:', !!(window.google && window.google.accounts));
+      return;
+    }
+
+    setGoogleSignupLoading(true);
+    setSignupError('');
+
+    try {
+      // Re-initialize to ensure proper setup
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleAuth,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+      });
+
+      // Create or get container for Google button (visible but off-screen)
+      let googleButtonContainer = document.getElementById('google-signup-hidden-container');
+      if (!googleButtonContainer) {
+        googleButtonContainer = document.createElement('div');
+        googleButtonContainer.id = 'google-signup-hidden-container';
+        googleButtonContainer.style.position = 'fixed';
+        googleButtonContainer.style.top = '-1000px';
+        googleButtonContainer.style.left = '-1000px';
+        googleButtonContainer.style.width = '250px';
+        googleButtonContainer.style.height = '50px';
+        googleButtonContainer.style.zIndex = '9999';
+        document.body.appendChild(googleButtonContainer);
+      }
+
+      // Clear previous button if exists
+      googleButtonContainer.innerHTML = '';
+
+      // Render Google button
+      try {
+        window.google.accounts.id.renderButton(googleButtonContainer, {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: 'signup_with',
+          width: 250,
+        });
+
+        // Wait for button to render, then click it
+        let attempts = 0;
+        const tryClickButton = setInterval(() => {
+          attempts++;
+          const googleButton = googleButtonContainer.querySelector('div[role="button"]') || 
+                              googleButtonContainer.querySelector('iframe');
+          
+          if (googleButton) {
+            clearInterval(tryClickButton);
+            try {
+              // Try clicking the button element
+              if (googleButton.click) {
+                googleButton.click();
+              } else {
+                // If it's an iframe, try to access its content
+                const buttonElement = googleButtonContainer.querySelector('div[role="button"]');
+                if (buttonElement && buttonElement.click) {
+                  buttonElement.click();
+                } else {
+                  // Fallback to prompt
+                  window.google.accounts.id.prompt();
+                }
+              }
+              console.log('LandingPage: Google sign-up button clicked');
+            } catch (clickError) {
+              console.error('Error clicking button:', clickError);
+              // Fallback to prompt
+              window.google.accounts.id.prompt();
+            }
+          } else if (attempts > 20) {
+            clearInterval(tryClickButton);
+            // Fallback: use prompt method
+            console.log('LandingPage: Button not found after 2 seconds, trying prompt method');
+            window.google.accounts.id.prompt((notification) => {
+              if (notification.isNotDisplayed() || notification.isSkippedMoment() || notification.isDismissedMoment()) {
+                const errorMsg = `Google sign-up is not available. This usually means:\n\n1. Your origin (${currentOrigin}) is not registered in Google Cloud Console\n2. Go to: https://console.cloud.google.com/apis/credentials\n3. Select your OAuth 2.0 Client ID\n4. Add "${currentOrigin}" to "Authorized JavaScript origins"\n5. Save and wait 5-10 minutes for changes to propagate`;
+                setSignupError(errorMsg);
+                setGoogleSignupLoading(false);
+                console.error('Google One Tap not available:', notification);
+              }
+            });
+          }
+        }, 100);
+      } catch (renderError) {
+        console.error('Error rendering Google button:', renderError);
+        // Fallback to prompt
+        window.google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            const errorMsg = `Google sign-up failed. Please ensure:\n\n1. Origin "${currentOrigin}" is registered in Google Cloud Console\n2. OAuth consent screen is properly configured\n3. Client ID matches in both frontend and backend`;
+            setSignupError(errorMsg);
+            setGoogleSignupLoading(false);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error triggering Google sign-up:', error);
+      const errorMsg = `Failed to open Google sign-up: ${error.message}\n\nPlease ensure:\n1. Origin "${currentOrigin}" is registered in Google Cloud Console\n2. Go to: https://console.cloud.google.com/apis/credentials\n3. Add "${currentOrigin}" to Authorized JavaScript origins`;
+      setSignupError(errorMsg);
+      setGoogleSignupLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchPlans();
     
@@ -41,6 +370,77 @@ const LandingPage = () => {
         setRazorpayKey(response.data.key);
       })
       .catch(err => console.error('Error loading Razorpay key:', err));
+    
+    // Load Google OAuth script
+    const loadGoogleScript = () => {
+      // Check if already loaded
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+        if (clientId) {
+          try {
+            window.google.accounts.id.initialize({
+              client_id: clientId,
+              callback: handleGoogleAuth,
+            });
+            console.log('LandingPage: Google OAuth initialized with Client ID:', clientId.substring(0, 20) + '...');
+          } catch (error) {
+            console.error('Error initializing Google OAuth:', error);
+          }
+        } else {
+          console.warn('LandingPage: VITE_GOOGLE_CLIENT_ID is not set');
+        }
+        return;
+      }
+      
+      // Check if script already exists
+      if (document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
+        // Script exists but not loaded yet, wait for it
+        const checkInterval = setInterval(() => {
+          if (window.google && window.google.accounts && window.google.accounts.id) {
+            clearInterval(checkInterval);
+            const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+            if (clientId) {
+              window.google.accounts.id.initialize({
+                client_id: clientId,
+                callback: handleGoogleAuth,
+              });
+              console.log('LandingPage: Google OAuth initialized after script load with Client ID:', clientId.substring(0, 20) + '...');
+            }
+          }
+        }, 100);
+        
+        // Timeout after 5 seconds
+        setTimeout(() => clearInterval(checkInterval), 5000);
+        return;
+      }
+      
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+      
+      script.onload = () => {
+        if (window.google && window.google.accounts && window.google.accounts.id) {
+          const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+          if (clientId) {
+            window.google.accounts.id.initialize({
+              client_id: clientId,
+              callback: handleGoogleAuth,
+            });
+            console.log('LandingPage: Google OAuth initialized with Client ID:', clientId.substring(0, 20) + '...');
+          } else {
+            console.warn('LandingPage: VITE_GOOGLE_CLIENT_ID is not set');
+          }
+        }
+      };
+
+      script.onerror = () => {
+        console.error('LandingPage: Failed to load Google OAuth script');
+      };
+    };
+
+    loadGoogleScript();
     
     // Check if modal should be opened from route pathname or state
     if (location.pathname === '/login' || location.state?.modal === 'login') {
@@ -291,6 +691,8 @@ const LandingPage = () => {
   });
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [googleLoginLoading, setGoogleLoginLoading] = useState(false);
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -372,6 +774,7 @@ const LandingPage = () => {
   });
   const [signupError, setSignupError] = useState('');
   const [signupLoading, setSignupLoading] = useState(false);
+  const [googleSignupLoading, setGoogleSignupLoading] = useState(false);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -884,10 +1287,46 @@ const LandingPage = () => {
           
           <button
             type="submit"
-            disabled={loginLoading}
+            disabled={loginLoading || googleLoginLoading}
             className="w-full bg-primary text-primary-foreground py-2.5 px-4 rounded hover:bg-accent disabled:opacity-50 transition-all font-medium shadow-sm hover:shadow"
           >
             {loginLoading ? 'Signing in...' : 'Sign In'}
+          </button>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-background text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={triggerGoogleSignIn}
+            disabled={loginLoading || googleLoginLoading}
+            className="w-full flex items-center justify-center gap-3 border border-input bg-background text-foreground py-2.5 px-4 rounded hover:bg-accent/10 disabled:opacity-50 transition-all font-medium shadow-sm hover:shadow"
+          >
+            {googleLoginLoading ? (
+              <>
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Signing in...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span>Sign in with Google</span>
+              </>
+            )}
           </button>
 
           <div className="mt-4 text-center">
@@ -1031,10 +1470,46 @@ const LandingPage = () => {
           
           <button
             type="submit"
-            disabled={signupLoading}
+            disabled={signupLoading || googleSignupLoading}
             className="w-full bg-primary text-primary-foreground py-2.5 px-4 rounded hover:bg-accent disabled:opacity-50 transition-all font-medium shadow-sm hover:shadow"
           >
             {signupLoading ? 'Creating account...' : 'Sign Up'}
+          </button>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-background text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={triggerGoogleSignUp}
+            disabled={signupLoading || googleSignupLoading}
+            className="w-full flex items-center justify-center gap-3 border border-input bg-background text-foreground py-2.5 px-4 rounded hover:bg-accent/10 disabled:opacity-50 transition-all font-medium shadow-sm hover:shadow"
+          >
+            {googleSignupLoading ? (
+              <>
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Creating account...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span>Sign up with Google</span>
+              </>
+            )}
           </button>
 
           <div className="mt-4 text-center">
