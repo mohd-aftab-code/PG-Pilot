@@ -54,7 +54,10 @@ const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebar
         
         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
           {user && (
-            <div className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-secondary rounded">
+            <button
+              onClick={() => navigate('/profile')}
+              className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-secondary rounded hover:bg-secondary/80 transition-colors cursor-pointer"
+            >
               <svg className="w-4 h-4 text-muted-foreground flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -64,7 +67,7 @@ const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebar
                   ({user.role === 'superadmin' ? 'Super Admin' : 'PG Admin'})
                 </span>
               </div>
-            </div>
+            </button>
           )}
           <button
             className="p-2 hover:bg-secondary rounded transition-colors text-foreground relative flex-shrink-0"

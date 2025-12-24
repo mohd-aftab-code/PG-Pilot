@@ -19,6 +19,7 @@ import Invoices from '../pages/Invoices';
 import Coupons from '../pages/Coupons';
 import Referrals from '../pages/Referrals';
 import AuditLogs from '../pages/AuditLogs';
+import Profile from '../pages/Profile';
 
 const AppRoutes = () => {
   return (
@@ -44,6 +45,7 @@ const AppRoutes = () => {
       <Route path="/coupons" element={<ProtectedRoute requireRole="superadmin"><Coupons /></ProtectedRoute>} />
       <Route path="/referrals" element={<ProtectedRoute><Referrals /></ProtectedRoute>} />
       <Route path="/audit-logs" element={<ProtectedRoute><AuditLogs /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
       {/* Default Route - Redirect to landing */}
       <Route path="*" element={<Navigate to="/" replace />} />
