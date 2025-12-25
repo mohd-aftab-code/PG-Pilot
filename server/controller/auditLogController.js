@@ -13,6 +13,7 @@ const getAuditLogs = async (req, res) => {
       LEFT JOIN pgs p ON al.pg_id = p.id
     `;
 
+    
     const params = [];
 
     if (role === 'pg_admin') {
