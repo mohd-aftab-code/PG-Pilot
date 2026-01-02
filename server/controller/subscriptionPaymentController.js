@@ -114,6 +114,18 @@ const verifyPayment = async (req, res) => {
       return res.status(400).json({ error: 'PG ID not found. Please create a PG first.' });
     }
 
+    // Validate that PG exists in database
+    const [pgCheck] = await database.query('SELECT id, name FROM pgs WHERE id = ?', [finalPgId]);
+    if (pgCheck.length === 0) {
+      console.error(`PG ID ${finalPgId} does not exist in database`);
+      return res.status(404).json({ 
+        error: 'PG not found. Please create a PG first before subscribing.',
+        details: `PG ID ${finalPgId} does not exist in the database.`
+      });
+    }
+
+    console.log(`Creating subscription for PG ID ${finalPgId} (${pgCheck[0].name})`);
+
     // Get plan details
     const [plans] = await database.query('SELECT * FROM plans WHERE id = ?', [plan_id]);
     if (plans.length === 0) {
@@ -128,12 +140,24 @@ const verifyPayment = async (req, res) => {
     expiryDate.setDate(expiryDate.getDate() + plan.duration_days);
 
     // Create subscription
-    const [result] = await database.query(
-      'INSERT INTO pg_subscriptions (pg_id, plan_id, start_date, expiry_date, custom_price) VALUES (?, ?, ?, ?, ?)',
-      [finalPgId, plan_id, startDate.toISOString().split('T')[0], expiryDate.toISOString().split('T')[0], plan.price]
-    );
-
-    const subscriptionId = result.insertId;
+    let subscriptionId;
+    try {
+      const [result] = await database.query(
+        'INSERT INTO pg_subscriptions (pg_id, plan_id, start_date, expiry_date, custom_price) VALUES (?, ?, ?, ?, ?)',
+        [finalPgId, plan_id, startDate.toISOString().split('T')[0], expiryDate.toISOString().split('T')[0], plan.price]
+      );
+      subscriptionId = result.insertId;
+    } catch (subscriptionError) {
+      // Handle foreign key constraint error specifically
+      if (subscriptionError.code === 'ER_NO_REFERENCED_ROW_2' || subscriptionError.errno === 1452) {
+        return res.status(400).json({ 
+          error: 'PG not found in database',
+          details: `The PG ID ${finalPgId} does not exist. Please create a PG first before subscribing.`,
+          message: 'Please go to PG Management and create your PG, then try subscribing again.'
+        });
+      }
+      throw subscriptionError; // Re-throw if it's a different error
+    }
 
     // Create invoice with payment details
     try {
@@ -252,10 +276,23 @@ PG Pilot Team
         price: plan.price,
       },
     });
-  } catch (error) {
-    console.error('Verify payment error:', error);
-    res.status(500).json({ error: 'Failed to verify payment' });
-  }
+    } catch (error) {
+      console.error('Verify payment error:', error);
+      
+      // Handle foreign key constraint error specifically
+      if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) {
+        return res.status(400).json({ 
+          error: 'PG not found in database',
+          details: `The PG ID ${finalPgId} does not exist. Please create a PG first before subscribing.`,
+          message: 'Please go to PG Management and create your PG, then try subscribing again.'
+        });
+      }
+      
+      res.status(500).json({ 
+        error: 'Failed to verify payment',
+        details: error.message 
+      });
+    }
 };
 
 // Get Razorpay key for frontend

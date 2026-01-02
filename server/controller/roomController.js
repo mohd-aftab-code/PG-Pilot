@@ -76,7 +76,15 @@ const getRoomById = async (req, res) => {
 // Create room
 const createRoom = async (req, res) => {
   try {
-    const { pg_id, room_name, total_beds, rent_per_bed } = req.body;
+    const { 
+      pg_id, 
+      room_name, 
+      total_beds, 
+      rent_per_bed,
+      gender_type = 'unisex',
+      show_in_marketplace = true,
+      room_description = null
+    } = req.body;
     const { role, pg_id: userPgId } = req.user;
 
     if (role === 'pg_admin' && userPgId != pg_id) {
@@ -93,9 +101,19 @@ const createRoom = async (req, res) => {
       return res.status(403).json({ error: roomCheck.message });
     }
 
+    // Handle uploaded images
+    const imagePaths = [];
+    if (req.files && req.files.length > 0) {
+      req.files.forEach(file => {
+        imagePaths.push(`/uploads/room-images/${file.filename}`);
+      });
+    }
+    const roomImagesJson = imagePaths.length > 0 ? JSON.stringify(imagePaths) : null;
+
     const [result] = await database.query(
-      'INSERT INTO rooms (pg_id, room_name, total_beds, rent_per_bed) VALUES (?, ?, ?, ?)',
-      [pg_id, room_name, total_beds, rent_per_bed]
+      `INSERT INTO rooms (pg_id, room_name, total_beds, rent_per_bed, gender_type, show_in_marketplace, room_description, room_images) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [pg_id, room_name, total_beds, rent_per_bed, gender_type, show_in_marketplace ? 1 : 0, room_description, roomImagesJson]
     );
 
     const roomId = result.insertId;
@@ -143,7 +161,14 @@ const createRoom = async (req, res) => {
 const updateRoom = async (req, res) => {
   try {
     const { id } = req.params;
-    const { room_name, total_beds, rent_per_bed } = req.body;
+    const { 
+      room_name, 
+      total_beds, 
+      rent_per_bed,
+      gender_type,
+      show_in_marketplace,
+      room_description
+    } = req.body;
     const { role, pg_id } = req.user;
 
     // Get current room
@@ -156,10 +181,57 @@ const updateRoom = async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    await database.query(
-      'UPDATE rooms SET room_name = ?, total_beds = ?, rent_per_bed = ? WHERE id = ?',
-      [room_name, total_beds, rent_per_bed, id]
-    );
+    // Handle uploaded images
+    let roomImagesJson = null;
+    if (req.files && req.files.length > 0) {
+      const imagePaths = [];
+      req.files.forEach(file => {
+        imagePaths.push(`/uploads/room-images/${file.filename}`);
+      });
+      roomImagesJson = JSON.stringify(imagePaths);
+    }
+
+    // Build update query dynamically
+    const updateFields = [];
+    const updateValues = [];
+
+    if (room_name !== undefined) {
+      updateFields.push('room_name = ?');
+      updateValues.push(room_name);
+    }
+    if (total_beds !== undefined) {
+      updateFields.push('total_beds = ?');
+      updateValues.push(total_beds);
+    }
+    if (rent_per_bed !== undefined) {
+      updateFields.push('rent_per_bed = ?');
+      updateValues.push(rent_per_bed);
+    }
+    if (gender_type !== undefined) {
+      updateFields.push('gender_type = ?');
+      updateValues.push(gender_type);
+    }
+    if (show_in_marketplace !== undefined) {
+      updateFields.push('show_in_marketplace = ?');
+      updateValues.push(show_in_marketplace ? 1 : 0);
+    }
+    if (room_description !== undefined) {
+      updateFields.push('room_description = ?');
+      updateValues.push(room_description);
+    }
+    if (roomImagesJson !== null) {
+      updateFields.push('room_images = ?');
+      updateValues.push(roomImagesJson);
+    }
+
+    updateValues.push(id);
+
+    if (updateFields.length > 0) {
+      await database.query(
+        `UPDATE rooms SET ${updateFields.join(', ')} WHERE id = ?`,
+        updateValues
+      );
+    }
 
     // Handle bed count changes
     const currentBedCount = await database.query(

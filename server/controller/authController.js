@@ -172,7 +172,40 @@ const getCurrentUser = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ user: formatUserResponse(users[0]) });
+    const user = formatUserResponse(users[0]);
+    
+    // If user has pg_id, fetch PG details
+    if (user.pg_id) {
+      try {
+        const [pgs] = await database.query(
+          `SELECT id, pg_uid, name, address, city, area, pincode, food_enabled, default_due_day, images, created_at 
+           FROM pgs WHERE id = ?`,
+          [user.pg_id]
+        );
+        
+        if (pgs.length > 0) {
+          const pg = pgs[0];
+          user.pg_details = {
+            id: pg.id,
+            pg_uid: pg.pg_uid,
+            name: pg.name,
+            address: pg.address,
+            city: pg.city,
+            area: pg.area,
+            pincode: pg.pincode,
+            food_enabled: pg.food_enabled === 1,
+            default_due_day: pg.default_due_day,
+            images: pg.images ? (typeof pg.images === 'string' ? JSON.parse(pg.images) : pg.images) : null,
+            created_at: pg.created_at
+          };
+        }
+      } catch (pgError) {
+        console.error('Error fetching PG details:', pgError);
+        // Don't fail the request if PG fetch fails
+      }
+    }
+
+    res.json({ user });
   } catch (error) {
     console.error('Get current user error:', error);
     res.status(500).json({ error: 'Internal server error' });

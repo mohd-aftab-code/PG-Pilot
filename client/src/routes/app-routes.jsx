@@ -20,11 +20,16 @@ import Coupons from '../pages/Coupons';
 import Referrals from '../pages/Referrals';
 import AuditLogs from '../pages/AuditLogs';
 import Profile from '../pages/Profile';
+import MarketplaceSearch from '../pages/MarketplaceSearch';
+import PGDetail from '../pages/PGDetail';
+import InquiryList from '../pages/InquiryList';
 
 const AppRoutes = () => {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/marketplace/pg/:pg_id" element={<PGDetail />} />
+      <Route path="/marketplace/search" element={<MarketplaceSearch />} />
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LandingPage />} />
       <Route path="/signup" element={<LandingPage />} />
@@ -46,6 +51,7 @@ const AppRoutes = () => {
       <Route path="/referrals" element={<ProtectedRoute><Referrals /></ProtectedRoute>} />
       <Route path="/audit-logs" element={<ProtectedRoute><AuditLogs /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/inquiries" element={<ProtectedRoute><InquiryList /></ProtectedRoute>} />
 
       {/* Default Route - Redirect to landing */}
       <Route path="*" element={<Navigate to="/" replace />} />

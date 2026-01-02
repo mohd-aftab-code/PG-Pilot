@@ -98,6 +98,18 @@ const RoomCard = ({ room, isSelected, onSelect, onEdit }) => {
           <p className="text-lg font-semibold text-foreground">₹{room.rent_per_bed}</p>
         </div>
       </div>
+      {room.gender_type && (
+        <div className="mt-2">
+          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
+            {room.gender_type}
+          </span>
+          {room.show_in_marketplace && (
+            <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded ml-2">
+              Marketplace
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -127,27 +139,26 @@ const BedCard = ({ bed, onStatusChange }) => {
   };
 
   return (
-    <div className="p-4 rounded-lg border border-border bg-card hover:shadow-sm transition-all">
+    <div className="p-3 rounded-lg border border-border bg-card hover:shadow-sm transition-all">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
             <IconBed />
           </div>
           <div>
-            <h3 className="font-semibold text-foreground">Bed #{bed.bed_number}</h3>
-            <p className="text-xs text-muted-foreground">ID: {bed.id}</p>
+            <h3 className="font-semibold text-sm text-foreground">Bed #{bed.bed_number}</h3>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(bed.status)}`}>
+          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(bed.status)}`}>
             {bed.status?.charAt(0).toUpperCase() + bed.status?.slice(1) || 'Vacant'}
           </span>
           <button
             onClick={() => onStatusChange(bed, getNextStatus(bed.status))}
-            className="p-2 hover:bg-secondary rounded transition-colors text-muted-foreground hover:text-foreground"
+            className="p-1.5 hover:bg-secondary rounded transition-colors text-muted-foreground hover:text-foreground"
             title={`Change to ${getNextStatus(bed.status)}`}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>
@@ -159,12 +170,13 @@ const BedCard = ({ bed, onStatusChange }) => {
 
 const RoomsBeds = () => {
   const [rooms, setRooms] = useState([]);
-  const [beds, setBeds] = useState([]);
-  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [beds, setBeds] = useState({});
+  const [expandedRooms, setExpandedRooms] = useState(new Set());
   const [loading, setLoading] = useState(false);
-  const [bedsLoading, setBedsLoading] = useState(false);
+  const [bedsLoading, setBedsLoading] = useState({});
   const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
+  const [viewingImages, setViewingImages] = useState(null);
   
   // Filter states
   const [roomFilter, setRoomFilter] = useState({
@@ -179,6 +191,10 @@ const RoomsBeds = () => {
     room_name: '',
     total_beds: 1,
     rent_per_bed: 0,
+    gender_type: 'unisex',
+    show_in_marketplace: true,
+    room_description: '',
+    images: [],
   });
 
   useEffect(() => {
@@ -187,14 +203,19 @@ const RoomsBeds = () => {
     }
   }, [formData.pg_id]);
 
-  useEffect(() => {
-    if (selectedRoom) {
-      fetchBeds(selectedRoom.id);
+  const toggleRoom = async (roomId) => {
+    const newExpanded = new Set(expandedRooms);
+    if (newExpanded.has(roomId)) {
+      newExpanded.delete(roomId);
     } else {
-      // Clear beds when no room is selected
-      setBeds([]);
+      newExpanded.add(roomId);
+      // Fetch beds if not already loaded
+      if (!beds[roomId]) {
+        await fetchBeds(roomId);
+      }
     }
-  }, [selectedRoom]);
+    setExpandedRooms(newExpanded);
+  };
 
   const fetchRooms = async () => {
     setLoading(true);
@@ -209,36 +230,58 @@ const RoomsBeds = () => {
   };
 
   const fetchBeds = async (roomId) => {
-    if (!roomId) {
-      setBeds([]);
-      return;
-    }
-    setBedsLoading(true);
+    if (!roomId) return;
+    setBedsLoading(prev => ({ ...prev, [roomId]: true }));
     try {
-      setBeds([]); // Clear previous beds
       const response = await api.get(`/api/beds/room/${roomId}`);
       const fetchedBeds = response.data.beds || [];
-      console.log(`Fetched ${fetchedBeds.length} beds for room ${roomId}:`, fetchedBeds);
-      setBeds(fetchedBeds);
+      setBeds(prev => ({ ...prev, [roomId]: fetchedBeds }));
     } catch (error) {
       console.error('Error fetching beds:', error);
-      setBeds([]);
+      setBeds(prev => ({ ...prev, [roomId]: [] }));
     } finally {
-      setBedsLoading(false);
+      setBedsLoading(prev => ({ ...prev, [roomId]: false }));
     }
   };
 
   const handleRoomSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('pg_id', formData.pg_id);
+      formDataToSend.append('room_name', formData.room_name);
+      formDataToSend.append('total_beds', formData.total_beds.toString());
+      formDataToSend.append('rent_per_bed', formData.rent_per_bed.toString());
+      formDataToSend.append('gender_type', formData.gender_type);
+      formDataToSend.append('show_in_marketplace', formData.show_in_marketplace ? '1' : '0');
+      formDataToSend.append('room_description', formData.room_description || '');
+      
+      // Append images
+      formData.images.forEach((image) => {
+        formDataToSend.append('images', image);
+      });
+
       if (editingRoom) {
-        await api.put(`/api/rooms/${editingRoom.id}`, formData);
+        await api.put(`/api/rooms/${editingRoom.id}`, formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       } else {
-        await api.post('/api/rooms', formData);
+        await api.post('/api/rooms', formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       }
       setIsRoomModalOpen(false);
       setEditingRoom(null);
-      setFormData({ ...formData, room_name: '', total_beds: 1, rent_per_bed: 0 });
+      setFormData({ 
+        ...formData, 
+        room_name: '', 
+        total_beds: 1, 
+        rent_per_bed: 0,
+        gender_type: 'unisex',
+        show_in_marketplace: true,
+        room_description: '',
+        images: [],
+      });
       fetchRooms();
     } catch (error) {
       console.error('Error saving room:', error);
@@ -246,10 +289,10 @@ const RoomsBeds = () => {
     }
   };
 
-  const handleBedStatusUpdate = async (bed, newStatus) => {
+  const handleBedStatusUpdate = async (bed, newStatus, roomId) => {
     try {
       await api.put(`/api/beds/${bed.id}/status`, { status: newStatus });
-      fetchBeds(selectedRoom.id);
+      fetchBeds(roomId);
     } catch (error) {
       console.error('Error updating bed status:', error);
       alert(error.response?.data?.error || 'Error updating bed status');
@@ -293,17 +336,20 @@ const RoomsBeds = () => {
     return matchesSearch;
   });
 
-  // Filter beds
-  const filteredBeds = beds.filter((bed) => {
-    if (!bed) return false; // Filter out any null/undefined beds
-    if (bedFilter.status === 'all') return true;
-    return bed.status?.toLowerCase() === bedFilter.status.toLowerCase();
-  });
-
   const roomColumns = [
     { header: 'Room Name', accessor: 'room_name' },
     { header: 'Total Beds', accessor: 'total_beds' },
     { header: 'Rent per Bed', accessor: 'rent_per_bed', render: (val) => `₹${val}` },
+    { 
+      header: 'Gender', 
+      accessor: 'gender_type', 
+      render: (val) => val ? val.charAt(0).toUpperCase() + val.slice(1) : 'N/A' 
+    },
+    { 
+      header: 'Marketplace', 
+      accessor: 'show_in_marketplace', 
+      render: (val) => val ? 'Yes' : 'No' 
+    },
   ];
 
   const bedColumns = [
@@ -330,7 +376,7 @@ const RoomsBeds = () => {
 
       {/* Stats Summary */}
       {!loading && rooms.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div className="bg-card p-4 rounded-lg border border-border">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
@@ -355,158 +401,217 @@ const RoomsBeds = () => {
               </div>
             </div>
           </div>
-          {selectedRoom && (
-            <div className="bg-card p-4 rounded-lg border border-border">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
-                  <IconBed />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Selected Room Beds</p>
-                  <p className="text-xl font-bold text-foreground">{beds.length}</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Rooms Section */}
-        <div className="bg-card rounded-lg border border-border p-5">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-            <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <IconHome />
-              Rooms
-            </h2>
-            <div className="relative w-full sm:w-64">
-              <input
-                type="text"
-                placeholder="Search rooms..."
-                value={roomFilter.search}
-                onChange={(e) => setRoomFilter({ ...roomFilter, search: e.target.value })}
-                className="w-full pl-10 pr-4 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-              />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                <IconSearch />
-              </div>
-            </div>
-          </div>
-          
-          <div className="space-y-3 max-h-[calc(100vh-20rem)] overflow-y-auto custom-scrollbar">
-            {loading ? (
-              <SkeletonLoader rows={4} />
-            ) : filteredRooms.length > 0 ? (
-              filteredRooms.map((room) => (
-                <RoomCard
-                  key={room.id}
-                  room={room}
-                  isSelected={selectedRoom?.id === room.id}
-                  onSelect={setSelectedRoom}
-                  onEdit={(room) => {
-                    setEditingRoom(room);
-                    setFormData({
-                      ...formData,
-                      room_name: room.room_name,
-                      total_beds: room.total_beds,
-                      rent_per_bed: room.rent_per_bed,
-                    });
-                    setIsRoomModalOpen(true);
-                  }}
-                />
-              ))
-            ) : (
-              <div className="text-center py-12 border border-dashed border-border rounded-lg">
-                <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <IconHome />
-                </div>
-                <p className="text-muted-foreground mt-3">
-                  {roomFilter.search ? 'No rooms found matching your search' : 'No rooms added yet'}
-                </p>
-                <Button
-                  onClick={() => setIsRoomModalOpen(true)}
-                  variant="outline"
-                  className="mt-4 flex items-center gap-2 mx-auto"
-                >
-                  <IconPlus />
-                  <span>Add First Room</span>
-                </Button>
-              </div>
-            )}
+      {/* Search Bar */}
+      <div className="mb-4">
+        <div className="relative w-full sm:w-64">
+          <input
+            type="text"
+            placeholder="Search rooms..."
+            value={roomFilter.search}
+            onChange={(e) => setRoomFilter({ ...roomFilter, search: e.target.value })}
+            className="w-full pl-10 pr-4 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+          />
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+            <IconSearch />
           </div>
         </div>
+      </div>
 
-        {/* Beds Section */}
-        <div className="bg-card rounded-lg border border-border p-5">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-            <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <IconBed />
-              Beds
-              {selectedRoom && (
-                <span className="text-base font-normal text-muted-foreground">
-                  - {selectedRoom.room_name}
-                </span>
-              )}
-            </h2>
-            {selectedRoom && (
-              <select
-                value={bedFilter.status}
-                onChange={(e) => setBedFilter({ ...bedFilter, status: e.target.value })}
-                className="w-full sm:w-auto px-3 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-              >
-                <option value="all">All Status</option>
-                <option value="vacant">Vacant</option>
-                <option value="occupied">Occupied</option>
-                <option value="blocked">Blocked</option>
-              </select>
-            )}
-          </div>
-          
-          <div className="space-y-3 max-h-[calc(100vh-20rem)] overflow-y-auto custom-scrollbar">
-            {selectedRoom ? (
-              <>
-                {bedsLoading ? (
-                  <SkeletonLoader rows={5} />
-                ) : filteredBeds.length > 0 ? (
-                  <>
-                    {filteredBeds.map((bed) => (
-                      <BedCard
-                        key={bed.id}
-                        bed={bed}
-                        onStatusChange={handleBedStatusUpdate}
-                      />
-                    ))}
-                    {beds.length > filteredBeds.length && (
-                      <div className="p-3 text-xs text-muted-foreground border-t border-border bg-secondary/30 rounded-b-lg text-center">
-                        Showing {filteredBeds.length} of {beds.length} beds
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-12 border border-dashed border-border rounded-lg">
-                    <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
-                      <IconBed />
+      {/* Rooms Table */}
+      <div className="bg-card rounded-lg border border-border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-muted/50 border-b border-border">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-12"></th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Room Name</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Beds</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rent/Bed</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Gender</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Marketplace</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Images</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {loading ? (
+                <tr>
+                  <td colSpan="8" className="px-4 py-8">
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
-                    <p className="text-muted-foreground mt-3">
-                      {beds.length === 0 
-                        ? 'No beds found for this room' 
-                        : `No beds found with status: ${bedFilter.status}`}
-                    </p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-[300px] border border-dashed border-border rounded-lg">
-                <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
-                  <IconBed />
-                </div>
-                <p className="text-muted-foreground text-center px-4">
-                  Select a room from the left to view and manage beds
-                </p>
-              </div>
-            )}
-          </div>
+                  </td>
+                </tr>
+              ) : filteredRooms.length > 0 ? (
+                filteredRooms.map((room) => {
+                  const isExpanded = expandedRooms.has(room.id);
+                  const roomBeds = Array.isArray(beds[room.id]) ? beds[room.id] : [];
+                  const filteredRoomBeds = bedFilter.status === 'all' 
+                    ? roomBeds 
+                    : (Array.isArray(roomBeds) ? roomBeds.filter(bed => bed.status === bedFilter.status) : []);
+                  
+                  return (
+                    <React.Fragment key={room.id}>
+                      <tr 
+                        className="hover:bg-muted/30 cursor-pointer transition-colors"
+                        onClick={() => toggleRoom(room.id)}
+                      >
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleRoom(room.id);
+                            }}
+                            className="p-1 hover:bg-secondary rounded transition-colors"
+                          >
+                            <svg 
+                              className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-foreground">{room.room_name}</div>
+                          {room.room_description && (
+                            <div className="text-xs text-muted-foreground mt-1 truncate max-w-xs">
+                              {room.room_description}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-foreground">{room.total_beds}</td>
+                        <td className="px-4 py-3 text-foreground">₹{room.rent_per_bed}</td>
+                        <td className="px-4 py-3">
+                          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded capitalize">
+                            {room.gender_type || 'unisex'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          {room.show_in_marketplace ? (
+                            <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">Yes</span>
+                          ) : (
+                            <span className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded">No</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          {room.room_images && (typeof room.room_images === 'string' ? JSON.parse(room.room_images) : room.room_images).length > 0 ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setViewingImages(room);
+                              }}
+                              className="text-sm text-primary hover:underline font-medium"
+                            >
+                              View ({typeof room.room_images === 'string' ? JSON.parse(room.room_images).length : room.room_images.length})
+                            </button>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">-</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingRoom(room);
+                              setFormData({
+                                ...formData,
+                                room_name: room.room_name,
+                                total_beds: room.total_beds,
+                                rent_per_bed: room.rent_per_bed,
+                                gender_type: room.gender_type || 'unisex',
+                                show_in_marketplace: room.show_in_marketplace === 1 || room.show_in_marketplace === true,
+                                room_description: room.room_description || '',
+                                images: [],
+                              });
+                              setIsRoomModalOpen(true);
+                            }}
+                            className="p-2 hover:bg-secondary rounded transition-colors text-muted-foreground hover:text-foreground"
+                            title="Edit room"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan="8" className="px-4 py-4 bg-muted/20">
+                            <div className="space-y-2">
+                              {bedsLoading[room.id] ? (
+                                <div className="text-center py-4">
+                                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                                </div>
+                              ) : filteredRoomBeds.length > 0 ? (
+                                <>
+                                  <div className="flex items-center justify-between mb-3">
+                                    <h4 className="font-semibold text-foreground">Beds in {room.room_name}</h4>
+                                    <select
+                                      value={bedFilter.status}
+                                      onChange={(e) => setBedFilter({ ...bedFilter, status: e.target.value })}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="px-3 py-1.5 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+                                    >
+                                      <option value="all">All Status</option>
+                                      <option value="vacant">Vacant</option>
+                                      <option value="occupied">Occupied</option>
+                                      <option value="blocked">Blocked</option>
+                                    </select>
+                                  </div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {filteredRoomBeds.map((bed) => (
+                                      <BedCard
+                                        key={bed.id}
+                                        bed={bed}
+                                        onStatusChange={(bed, newStatus) => handleBedStatusUpdate(bed, newStatus, room.id)}
+                                      />
+                                    ))}
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="text-center py-4 text-muted-foreground">
+                                  {roomBeds.length === 0 
+                                    ? 'No beds found for this room' 
+                                    : `No beds found with status: ${bedFilter.status}`}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="8" className="px-4 py-12 text-center">
+                    <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
+                        <IconHome />
+                      </div>
+                      <p className="text-muted-foreground mb-4">
+                        {roomFilter.search ? 'No rooms found matching your search' : 'No rooms added yet'}
+                      </p>
+                      <Button
+                        onClick={() => setIsRoomModalOpen(true)}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <IconPlus />
+                        <span>Add First Room</span>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -515,7 +620,16 @@ const RoomsBeds = () => {
         onClose={() => {
           setIsRoomModalOpen(false);
           setEditingRoom(null);
-          setFormData({ ...formData, room_name: '', total_beds: 1, rent_per_bed: 0 });
+          setFormData({ 
+            ...formData, 
+            room_name: '', 
+            total_beds: 1, 
+            rent_per_bed: 0,
+            gender_type: 'unisex',
+            show_in_marketplace: true,
+            room_description: '',
+            images: [],
+          });
         }}
         title={editingRoom ? 'Edit Room' : 'Add New Room'}
       >
@@ -540,6 +654,91 @@ const RoomsBeds = () => {
             onChange={(e) => setFormData({ ...formData, rent_per_bed: parseFloat(e.target.value) })}
             required
           />
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Gender Type</label>
+            <select
+              value={formData.gender_type}
+              onChange={(e) => setFormData({ ...formData, gender_type: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+            >
+              <option value="unisex">Unisex</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={formData.show_in_marketplace}
+                onChange={(e) => setFormData({ ...formData, show_in_marketplace: e.target.checked })}
+                className="mr-2"
+              />
+              <span className="text-sm text-foreground">Show in Marketplace</span>
+            </label>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Room Description</label>
+            <textarea
+              value={formData.room_description}
+              onChange={(e) => setFormData({ ...formData, room_description: e.target.value })}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              rows="3"
+              placeholder="Describe the room (optional)"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Room Images</label>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => {
+                const files = Array.from(e.target.files);
+                setFormData({ ...formData, images: files });
+              }}
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+            />
+            {formData.images.length > 0 && (
+              <div className="mt-2">
+                <p className="text-sm text-muted-foreground mb-2">
+                  {formData.images.length} image(s) selected
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {formData.images.map((image, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-20 object-cover rounded border border-border"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {editingRoom && editingRoom.room_images && (
+              <div className="mt-2">
+                <p className="text-sm text-muted-foreground mb-2">Existing Images:</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {(typeof editingRoom.room_images === 'string' ? JSON.parse(editingRoom.room_images) : editingRoom.room_images).map((img, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                        alt={`Existing ${index + 1}`}
+                        className="w-full h-20 object-cover rounded border border-border"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex gap-2 justify-end">
             <Button type="button" variant="outline" onClick={() => setIsRoomModalOpen(false)}>
               Cancel
@@ -547,6 +746,38 @@ const RoomsBeds = () => {
             <Button type="submit">Save</Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Image View Modal */}
+      <Modal
+        isOpen={viewingImages !== null}
+        onClose={() => setViewingImages(null)}
+        title={`Room Images - ${viewingImages?.room_name || ''}`}
+        size="lg"
+      >
+        {viewingImages && viewingImages.room_images && (
+          <div className="grid grid-cols-2 gap-4">
+            {(typeof viewingImages.room_images === 'string' 
+              ? JSON.parse(viewingImages.room_images) 
+              : viewingImages.room_images).map((img, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                  alt={`Room image ${index + 1}`}
+                  className="w-full h-48 object-cover rounded-lg border border-border"
+                />
+                <a
+                  href={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-2 right-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90 transition-colors"
+                >
+                  View Full
+                </a>
+              </div>
+            ))}
+          </div>
+        )}
       </Modal>
     </div>
   );

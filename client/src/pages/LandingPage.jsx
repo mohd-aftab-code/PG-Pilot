@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import api from '../utils/api';
 import { getStoredUser, setStoredUser } from '../utils/auth';
 import Modal from '../components/common/Modal';
@@ -83,15 +83,26 @@ const LandingPage = () => {
                 if (subResponse.data.subscription) {
                   navigate('/dashboard');
                 } else {
-                  // No subscription, stay on landing page
-                  alert('Please subscribe to a plan to access the dashboard.');
+                  // No subscription - stay on landing page, scroll to plans
+                  setTimeout(() => {
+                    const plansSection = document.getElementById('pricing-plans');
+                    if (plansSection) {
+                      plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }, 300);
                 }
               } catch (error) {
-                alert('Please subscribe to a plan to access the dashboard.');
+                // No subscription - stay on landing page, scroll to plans
+                setTimeout(() => {
+                  const plansSection = document.getElementById('pricing-plans');
+                  if (plansSection) {
+                    plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 300);
               }
             } else {
-              // No PG created yet
-              alert('Please create a PG and subscribe to a plan to access the dashboard.');
+              // No PG created yet - should not happen in normal flow
+              alert('Please create a PG first, then subscribe to a plan.');
             }
           }
         }, 100);
@@ -723,7 +734,7 @@ const LandingPage = () => {
             await initiatePayment(pendingPlanId);
             return;
           }
-          
+
           // Role-based redirect
           if (user.role === 'superadmin') {
             navigate('/pgs');
@@ -733,17 +744,22 @@ const LandingPage = () => {
               try {
                 const subResponse = await api.get(`/api/subscriptions/pg/${user.pg_id}/active`);
                 if (subResponse.data.subscription) {
+                  // Has active subscription - go to dashboard
                   navigate('/dashboard');
                 } else {
-                  // No subscription, stay on landing page
-                  alert('Please subscribe to a plan to access the dashboard.');
+                  // No subscription - stay on landing page to subscribe
+                  alert('Welcome back! Please subscribe to a plan to access your dashboard.');
+                  // User stays on landing page - can select a plan
                 }
               } catch (error) {
-                alert('Please subscribe to a plan to access the dashboard.');
+                // No subscription found
+                alert('Welcome back! Please subscribe to a plan to access your dashboard.');
+                // User stays on landing page - can select a plan
               }
             } else {
-              // No PG created yet
-              alert('Please create a PG and subscribe to a plan to access the dashboard.');
+              // No PG created yet - should not happen if flow is correct
+              alert('Please create a PG first, then subscribe to a plan.');
+              // Could redirect to PG creation page or show PG creation modal
             }
           }
         }, 100);
@@ -775,6 +791,171 @@ const LandingPage = () => {
   const [signupError, setSignupError] = useState('');
   const [signupLoading, setSignupLoading] = useState(false);
   const [googleSignupLoading, setGoogleSignupLoading] = useState(false);
+
+  // Marketplace search state
+  const [searchParams, setSearchParams] = useState({
+    city: '',
+    area: '',
+    budget_min: '',
+    budget_max: '',
+    gender: '',
+    has_food: false,
+    has_wifi: false,
+    has_ac: false,
+  });
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchTotal, setSearchTotal] = useState(0);
+  const [hasSearched, setHasSearched] = useState(false);
+  const searchLimit = 10;
+
+  // Autocomplete suggestions state
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [areaSuggestions, setAreaSuggestions] = useState([]);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [showAreaSuggestions, setShowAreaSuggestions] = useState(false);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+
+  // Fetch search suggestions
+  const fetchSuggestions = async (query, type = 'both') => {
+    if (!query || query.trim().length < 2) {
+      if (type === 'city' || type === 'both') setCitySuggestions([]);
+      if (type === 'area' || type === 'both') setAreaSuggestions([]);
+      return;
+    }
+
+    setSuggestionsLoading(true);
+    try {
+      const response = await api.get(`/api/search/suggestions?q=${encodeURIComponent(query)}`);
+      if (response.data.success) {
+        if (type === 'city' || type === 'both') {
+          setCitySuggestions(response.data.suggestions.cities || []);
+        }
+        if (type === 'area' || type === 'both') {
+          setAreaSuggestions(response.data.suggestions.areas || []);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  };
+
+  // Handle city input change with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchParams.city && searchParams.city.length >= 2) {
+        fetchSuggestions(searchParams.city, 'city');
+        setShowCitySuggestions(true);
+      } else {
+        setCitySuggestions([]);
+        setShowCitySuggestions(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchParams.city]);
+
+  // Handle area input change with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchParams.area && searchParams.area.length >= 2) {
+        fetchSuggestions(searchParams.area, 'area');
+        setShowAreaSuggestions(true);
+      } else {
+        setAreaSuggestions([]);
+        setShowAreaSuggestions(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchParams.area]);
+
+  // Marketplace search function
+  const handleMarketplaceSearch = async (pageNum = 1) => {
+    if (!searchParams.city) {
+      alert('Please enter a city');
+      return;
+    }
+
+    setSearchLoading(true);
+    setShowCitySuggestions(false);
+    setShowAreaSuggestions(false);
+    try {
+      const params = new URLSearchParams({
+        city: searchParams.city,
+        page: pageNum.toString(),
+        limit: searchLimit.toString(),
+      });
+
+      if (searchParams.area) params.append('area', searchParams.area);
+      if (searchParams.budget_min) params.append('budget_min', searchParams.budget_min);
+      if (searchParams.budget_max) params.append('budget_max', searchParams.budget_max);
+      if (searchParams.gender) params.append('gender', searchParams.gender);
+      if (searchParams.has_food) params.append('has_food', 'true');
+      if (searchParams.has_wifi) params.append('has_wifi', 'true');
+      if (searchParams.has_ac) params.append('has_ac', 'true');
+
+      console.log('Searching with params:', params.toString());
+      const response = await api.get(`/api/search/pgs?${params.toString()}`);
+      
+      console.log('=== SEARCH RESPONSE ===');
+      console.log('Full response:', response);
+      console.log('Response data:', response.data);
+      console.log('Success:', response.data?.success);
+      console.log('Data array:', response.data?.data);
+      console.log('Data length:', response.data?.data?.length);
+      console.log('Total:', response.data?.total);
+      
+      if (response.data && response.data.success) {
+        const results = response.data.data || [];
+        const total = response.data.total || 0;
+        
+        console.log('Setting search results:', results);
+        console.log('Results count:', results.length);
+        console.log('Setting total:', total);
+        console.log('First result sample:', results[0]);
+        
+        setSearchResults(results);
+        setSearchTotal(total);
+        setSearchPage(pageNum);
+        setHasSearched(true);
+        
+        // Additional debug
+        console.log('State updated - searchResults length:', results.length);
+        console.log('State updated - hasSearched:', true);
+        
+        // Scroll to results
+        setTimeout(() => {
+          const resultsElement = document.getElementById('search-results');
+          if (resultsElement) {
+            resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      } else {
+        console.error('Search failed:', response.data);
+        setSearchResults([]);
+        setSearchTotal(0);
+        setHasSearched(true);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+      setSearchTotal(0);
+      setHasSearched(true);
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Failed to search PGs. Please try again.';
+      alert(errorMessage);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    handleMarketplaceSearch(1);
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -846,21 +1027,62 @@ const LandingPage = () => {
           pg_location: '',
         });
         
-        // If there's a pending plan, show login modal, otherwise show success
-        if (pendingPlanId) {
-          // Show login modal to proceed with subscription
-          setTimeout(() => {
-            setShowLoginModal(true);
-          }, 300);
-        } else {
-          // Role-based redirect
-          if (user.role === 'superadmin') {
-            navigate('/pgs');
-          } else {
-            alert('Account created successfully! Please login and subscribe to a plan to continue.');
+        // After successful registration and PG creation:
+        // Step 1: User is now logged in (token set)
+        // Step 2: If PG created, check subscription
+        // Step 3: If no subscription, prompt for subscription
+        
+        setTimeout(async () => {
+          // Refresh user data to get updated pg_id
+          try {
+            const currentUserResponse = await api.get('/api/auth/me');
+            const currentUser = currentUserResponse.data.user;
+            setStoredUser(currentUser);
+            
+            if (currentUser.role === 'superadmin') {
+              navigate('/pgs');
+              return;
+            }
+            
+            // For PG Admin: Check if they have subscription
+            if (currentUser.pg_id) {
+              try {
+                const subResponse = await api.get(`/api/subscriptions/pg/${currentUser.pg_id}/active`);
+                if (subResponse.data.subscription) {
+                  // Has subscription - go to dashboard
+                  navigate('/dashboard');
+                } else {
+                  // No subscription - show success message and scroll to plans
+                  alert('✅ Registration Successful!\n\nYour account and PG have been created.\n\nPlease subscribe to a plan below to access your dashboard.');
+                  // Scroll to plans section
+                  setTimeout(() => {
+                    const plansSection = document.getElementById('pricing-plans');
+                    if (plansSection) {
+                      plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }, 500);
+                }
+              } catch (subError) {
+                // No subscription found - show success and scroll to plans
+                alert('✅ Registration Successful!\n\nYour account and PG have been created.\n\nPlease subscribe to a plan below to access your dashboard.');
+                // Scroll to plans section
+                setTimeout(() => {
+                  const plansSection = document.getElementById('pricing-plans');
+                  if (plansSection) {
+                    plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 500);
+              }
+            } else {
+              // PG creation failed or pending
+              alert('✅ Account created successfully!\n\nPlease create your PG first, then subscribe to a plan.');
+            }
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+            alert('✅ Registration Successful!\n\nPlease login and subscribe to a plan to continue.');
             setShowLoginModal(true);
           }
-        }
+        }, 500);
       } else {
         setSignupError(response.data?.message || 'Signup failed');
       }
@@ -1064,8 +1286,421 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Marketplace Section - For Tenants */}
+      <section className="bg-gradient-to-br from-blue-50 to-indigo-50 py-12 md:py-20">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-8 md:mb-12">
+              <p className="text-xs md:text-sm font-bold text-accent uppercase tracking-wider mb-2">For Tenants</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-4 px-2">
+                Find Your Perfect PG
+              </h2>
+              <p className="text-sm md:text-lg text-foreground max-w-2xl mx-auto px-2">
+                Search from verified PGs with real-time availability. Filter by location, budget, facilities, and more.
+              </p>
+            </div>
+
+            {/* Compact Search Form */}
+            <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 mb-8">
+              <form onSubmit={handleSearchSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                  <div className="relative">
+                    <label className="block text-xs font-semibold mb-1 text-gray-700">City *</label>
+                    <input
+                      type="text"
+                      value={searchParams.city}
+                      onChange={(e) => {
+                        setSearchParams({ ...searchParams, city: e.target.value });
+                        setShowCitySuggestions(true);
+                      }}
+                      onFocus={() => {
+                        if (citySuggestions.length > 0) setShowCitySuggestions(true);
+                      }}
+                      onBlur={() => {
+                        setTimeout(() => setShowCitySuggestions(false), 200);
+                      }}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                      placeholder="e.g., Noida"
+                      required
+                    />
+                    {showCitySuggestions && citySuggestions.length > 0 && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                        {citySuggestions.map((city, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setSearchParams({ ...searchParams, city });
+                              setShowCitySuggestions(false);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="flex items-center gap-2">
+                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                              <span>{city}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {suggestionsLoading && showCitySuggestions && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-2">
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent"></div>
+                          <span className="ml-2 text-xs text-gray-500">Loading...</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <label className="block text-xs font-semibold mb-1 text-gray-700">Area</label>
+                    <input
+                      type="text"
+                      value={searchParams.area}
+                      onChange={(e) => {
+                        setSearchParams({ ...searchParams, area: e.target.value });
+                        setShowAreaSuggestions(true);
+                      }}
+                      onFocus={() => {
+                        if (areaSuggestions.length > 0) setShowAreaSuggestions(true);
+                      }}
+                      onBlur={() => {
+                        setTimeout(() => setShowAreaSuggestions(false), 200);
+                      }}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                      placeholder="e.g., Sector 44"
+                    />
+                    {showAreaSuggestions && areaSuggestions.length > 0 && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                        {areaSuggestions.map((area, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setSearchParams({ ...searchParams, area });
+                              setShowAreaSuggestions(false);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="flex items-center gap-2">
+                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                              </svg>
+                              <span>{area}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {suggestionsLoading && showAreaSuggestions && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-2">
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent"></div>
+                          <span className="ml-2 text-xs text-gray-500">Loading...</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-gray-700">Budget (₹)</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="number"
+                        value={searchParams.budget_min}
+                        onChange={(e) => setSearchParams({ ...searchParams, budget_min: e.target.value })}
+                        className="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                        placeholder="Min"
+                      />
+                      <input
+                        type="number"
+                        value={searchParams.budget_max}
+                        onChange={(e) => setSearchParams({ ...searchParams, budget_max: e.target.value })}
+                        className="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                        placeholder="Max"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-gray-700">Gender</label>
+                    <select
+                      value={searchParams.gender}
+                      onChange={(e) => setSearchParams({ ...searchParams, gender: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                    >
+                      <option value="">Any</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="unisex">Unisex</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4 pt-2">
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center text-sm text-gray-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={searchParams.has_food}
+                        onChange={(e) => setSearchParams({ ...searchParams, has_food: e.target.checked })}
+                        className="mr-2 w-4 h-4 text-accent focus:ring-accent"
+                      />
+                      <span>Food</span>
+                    </label>
+                    <label className="flex items-center text-sm text-gray-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={searchParams.has_wifi}
+                        onChange={(e) => setSearchParams({ ...searchParams, has_wifi: e.target.checked })}
+                        className="mr-2 w-4 h-4 text-accent focus:ring-accent"
+                      />
+                      <span>WiFi</span>
+                    </label>
+                    <label className="flex items-center text-sm text-gray-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={searchParams.has_ac}
+                        onChange={(e) => setSearchParams({ ...searchParams, has_ac: e.target.checked })}
+                        className="mr-2 w-4 h-4 text-accent focus:ring-accent"
+                      />
+                      <span>AC</span>
+                    </label>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={searchLoading}
+                    className="ml-auto px-6 py-2.5 bg-accent text-white rounded-md hover:bg-accent/90 disabled:opacity-50 font-semibold text-sm transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+                  >
+                    {searchLoading ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Searching...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Search PGs
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Search Results */}
+            <div id="search-results">
+              {searchLoading && (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-accent"></div>
+                  <p className="mt-4 text-gray-600">Searching for PGs...</p>
+                </div>
+              )}
+
+              {!searchLoading && searchResults.length === 0 && !hasSearched && (
+                <div className="bg-white rounded-lg shadow-md p-8 md:p-12 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Start Your Search</h3>
+                  <p className="text-gray-600">Enter a city above and click "Search PGs" to find available PGs.</p>
+                </div>
+              )}
+
+              {!searchLoading && searchResults.length === 0 && hasSearched && (
+                <div className="bg-white rounded-lg shadow-md p-8 md:p-12 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">No PGs Found</h3>
+                  <p className="text-gray-600 mb-4">Try adjusting your search filters or search in a different city/area.</p>
+                  <button
+                    onClick={() => {
+                      setSearchParams({
+                        city: '',
+                        area: '',
+                        budget_min: '',
+                        budget_max: '',
+                        gender: '',
+                        has_food: false,
+                        has_wifi: false,
+                        has_ac: false,
+                      });
+                      setSearchResults([]);
+                      setHasSearched(false);
+                      setSearchTotal(0);
+                    }}
+                    className="text-accent hover:text-accent/80 font-medium text-sm"
+                  >
+                    Clear Filters & Search Again
+                  </button>
+                </div>
+              )}
+
+              {!searchLoading && searchResults.length > 0 && (
+                <>
+                  <div className="mb-4 flex items-center justify-between">
+                    <p className="text-sm md:text-base text-gray-700">
+                      Found <span className="font-bold text-primary">{searchTotal}</span> PG{searchTotal !== 1 ? 's' : ''} matching your search
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    {searchResults.map((pg) => (
+                      <div
+                        key={pg.pg_id}
+                        className="bg-white rounded-lg shadow-md p-5 md:p-6 hover:shadow-xl transition-all duration-300 border border-gray-100"
+                      >
+                        {/* PG Images */}
+                        {pg.images && Array.isArray(pg.images) && pg.images.length > 0 && (
+                          <div className="mb-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                              {pg.images.slice(0, 4).map((img, idx) => (
+                                <div key={idx} className="relative aspect-video rounded-lg overflow-hidden border border-gray-200">
+                                  <img
+                                    src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                                    alt={`${pg.pg_name} - Image ${idx + 1}`}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found';
+                                    }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-primary mb-1">{pg.pg_name || 'PG Name'}</h3>
+                            <p className="text-sm text-gray-600 flex items-center gap-1">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                              {pg.area && `${pg.area}, `}{pg.city || 'City not specified'}
+                            </p>
+                          </div>
+                          {pg.address && (
+                            <button
+                              onClick={() => {
+                                const address = encodeURIComponent(`${pg.address}, ${pg.area || ''}, ${pg.city || ''}`);
+                                window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+                              }}
+                              className="text-accent hover:text-accent/80 text-sm font-medium flex items-center gap-1"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                              View on Map
+                            </button>
+                          )}
+                        </div>
+
+                        {pg.address && (
+                          <p className="text-gray-700 mb-3 text-sm">{pg.address}</p>
+                        )}
+
+                        {pg.facilities && Array.isArray(pg.facilities) && pg.facilities.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {pg.facilities.map((facility, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
+                              >
+                                {facility}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {pg.rooms && Array.isArray(pg.rooms) && pg.rooms.length > 0 ? (
+                          <div className="mt-4 mb-4">
+                            <h4 className="text-sm font-semibold mb-2 text-gray-800">Available Rooms:</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              {pg.rooms.map((room) => (
+                                <div
+                                  key={room.room_id || Math.random()}
+                                  className="flex justify-between items-center p-2.5 bg-gray-50 rounded border border-gray-200"
+                                >
+                                  <div>
+                                    <span className="font-medium text-sm">{room.room_name || 'Room'}</span>
+                                    {room.gender_type && (
+                                      <span className="text-xs text-gray-600 ml-2">
+                                        ({room.gender_type})
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="font-bold text-primary">₹{room.rent_per_bed || 0}/bed</div>
+                                    <div className="text-xs text-gray-600">
+                                      {room.available_beds || 0} bed{(room.available_beds || 0) !== 1 ? 's' : ''} available
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="mt-4 mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                            No rooms available at the moment. Please contact the PG owner for availability.
+                          </div>
+                        )}
+
+                        <button
+                          onClick={() => navigate(`/marketplace/pg/${pg.pg_id}`)}
+                          className="w-full bg-accent text-white py-2.5 rounded-md hover:bg-accent/90 font-semibold transition-all shadow-md hover:shadow-lg text-sm"
+                        >
+                          View Details & Send Inquiry
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {searchTotal > searchLimit && (
+                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                      <button
+                        onClick={() => handleMarketplaceSearch(searchPage - 1)}
+                        disabled={searchPage === 1}
+                        className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-medium text-sm"
+                      >
+                        ← Previous
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-600">
+                          Page <span className="font-semibold">{searchPage}</span> of <span className="font-semibold">{Math.ceil(searchTotal / searchLimit)}</span>
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleMarketplaceSearch(searchPage + 1)}
+                        disabled={searchPage >= Math.ceil(searchTotal / searchLimit)}
+                        className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-medium text-sm"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section className="bg-[#E4EDF3] py-12 md:py-20">
+      <section id="features" className="bg-[#E4EDF3] py-12 md:py-20">
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-8 md:mb-16">
             <p className="text-xs md:text-sm font-bold text-accent uppercase tracking-wider mb-2">Key Features</p>
@@ -1096,7 +1731,7 @@ const LandingPage = () => {
       </section>
 
       {/* Subscription Plans Section */}
-      <section className="py-12 md:py-20 bg-white">
+      <section id="pricing-plans" className="py-12 md:py-20 bg-white">
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-8 md:mb-16">
             <p className="text-xs md:text-sm font-bold text-accent uppercase tracking-wider mb-2">Simple Pricing</p>
@@ -1192,8 +1827,9 @@ const LandingPage = () => {
             <div>
               <h4 className="font-bold text-foreground mb-3 md:mb-4 text-sm md:text-base">Quick Links</h4>
               <ul className="space-y-2 text-xs md:text-sm text-primary-foreground/80">
-                <li><a href="#" className="hover:text-accent transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors">Pricing</a></li>
+                <li><Link to="/marketplace/search" className="hover:text-accent transition-colors">Find PG</Link></li>
+                <li><a href="#features" className="hover:text-accent transition-colors">Features</a></li>
+                <li><a href="#pricing" className="hover:text-accent transition-colors">Pricing</a></li>
                 <li><a href="#" className="hover:text-accent transition-colors">Free Trial</a></li>
                 <li><a href="#" className="hover:text-accent transition-colors">Contact Us</a></li>
               </ul>

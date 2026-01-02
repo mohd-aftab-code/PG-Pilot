@@ -220,6 +220,130 @@ const Profile = () => {
               </div>
             </div>
 
+            {/* PG Details Section */}
+            {user.pg_details && (
+              <div className="mt-8 pt-6 border-t border-border">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  PG Details
+                </h3>
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* PG Name */}
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="text-sm font-medium text-muted-foreground">PG Name</label>
+                      <p className="text-foreground text-lg font-semibold">{user.pg_details.name || 'N/A'}</p>
+                    </div>
+
+                    {/* PG UID */}
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-muted-foreground">PG UID</label>
+                      <p className="text-foreground font-mono text-sm bg-secondary px-3 py-2 rounded border border-border">
+                        {user.pg_details.pg_uid || 'N/A'}
+                      </p>
+                    </div>
+
+                    {/* PG ID */}
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-muted-foreground">PG ID</label>
+                      <p className="text-foreground font-mono text-sm bg-secondary px-3 py-2 rounded border border-border">
+                        {user.pg_details.id || 'N/A'}
+                      </p>
+                    </div>
+
+                    {/* Address */}
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="text-sm font-medium text-muted-foreground">Full Address</label>
+                      <p className="text-foreground bg-secondary px-3 py-2 rounded border border-border">
+                        {user.pg_details.address || 'N/A'}
+                      </p>
+                    </div>
+
+                    {/* City */}
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-muted-foreground">City</label>
+                      <p className="text-foreground flex items-center gap-2">
+                        <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {user.pg_details.city || 'N/A'}
+                      </p>
+                    </div>
+
+                    {/* Area */}
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-muted-foreground">Area</label>
+                      <p className="text-foreground flex items-center gap-2">
+                        <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {user.pg_details.area || 'N/A'}
+                      </p>
+                    </div>
+
+                    {/* Pincode */}
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-muted-foreground">Pincode</label>
+                      <p className="text-foreground font-mono">{user.pg_details.pincode || 'N/A'}</p>
+                    </div>
+
+                    {/* Food Enabled */}
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-muted-foreground">Food Service</label>
+                      <p className="text-foreground">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                          user.pg_details.food_enabled
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                        }`}>
+                          {user.pg_details.food_enabled ? 'Enabled' : 'Disabled'}
+                        </span>
+                      </p>
+                    </div>
+
+                    {/* Default Due Day */}
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-muted-foreground">Default Due Day</label>
+                      <p className="text-foreground">
+                        Day {user.pg_details.default_due_day || 'N/A'} of month
+                      </p>
+                    </div>
+
+                    {/* PG Created At */}
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-muted-foreground">PG Created</label>
+                      <p className="text-foreground">{formatDate(user.pg_details.created_at)}</p>
+                    </div>
+
+                    {/* PG Images */}
+                    {user.pg_details.images && user.pg_details.images.length > 0 && (
+                      <div className="space-y-1 md:col-span-2">
+                        <label className="text-sm font-medium text-muted-foreground">PG Images</label>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+                          {user.pg_details.images.map((img, idx) => (
+                            <div key={idx} className="relative aspect-video rounded-lg overflow-hidden border border-border">
+                              <img
+                                src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                                alt={`PG Image ${idx + 1}`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found';
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Additional Info Section */}
             <div className="mt-8 pt-6 border-t border-border">
               <h3 className="text-lg font-semibold text-foreground mb-4">Account Information</h3>

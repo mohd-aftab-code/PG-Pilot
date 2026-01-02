@@ -7,8 +7,8 @@ import './App.css';
 
 const LayoutDecider = () => {
   const location = useLocation();
-  const noLayoutRoutes = ['/', '/login', '/signup'];
-  const isNoLayout = noLayoutRoutes.includes(location.pathname);
+  const noLayoutRoutes = ['/', '/login', '/signup', '/marketplace/search', '/marketplace/pg'];
+  const isNoLayout = noLayoutRoutes.some(route => location.pathname === route || location.pathname.startsWith(route + '/'));
   
   try {
     return isNoLayout ? <AppRoutes /> : <LayoutWrapper><AppRoutes /></LayoutWrapper>;

@@ -21,6 +21,9 @@ const couponRoutes = require('./couponRoutes');
 const referralRoutes = require('./referralRoutes');
 const auditLogRoutes = require('./auditLogRoutes');
 const subscriptionPaymentRoutes = require('./subscriptionPaymentRoutes');
+const searchRoutes = require('./search.routes');
+const inquiryRoutes = require('./inquiry.routes');
+const pgMarketplaceRoutes = require('./pg.routes');
 
 // Mount all routes
 router.use('/auth', authRoutes);
@@ -41,6 +44,9 @@ router.use('/coupons', couponRoutes);
 router.use('/referrals', referralRoutes);
 router.use('/audit-logs', auditLogRoutes);
 router.use('/subscription-payment', subscriptionPaymentRoutes);
+router.use('/search', searchRoutes);
+router.use('/inquiry', inquiryRoutes);
+router.use('/pg', pgMarketplaceRoutes);
 
 // Basic test route
 router.get('/test', (req, res) => {

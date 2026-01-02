@@ -60,7 +60,7 @@ const getTenantById = async (req, res) => {
 // Create tenant
 const createTenant = async (req, res) => {
   try {
-    const { pg_id, bed_id, name, phone, email, aadhaar_url, join_date, rent_amount, deposit_amount } = req.body;
+    const { pg_id, bed_id, name, phone, email, join_date, rent_amount, deposit_amount } = req.body;
     const { role, pg_id: userPgId } = req.user;
 
     if (role === 'pg_admin' && userPgId != pg_id) {
@@ -70,6 +70,9 @@ const createTenant = async (req, res) => {
     if (!pg_id || !name) {
       return res.status(400).json({ error: 'PG ID and name are required' });
     }
+
+    // Handle Aadhaar document upload
+    const aadhaar_url = req.file ? `/uploads/tenant-docs/${req.file.filename}` : null;
 
     // If bed_id provided, check and update bed status
     if (bed_id) {
@@ -95,7 +98,7 @@ const createTenant = async (req, res) => {
 
     const [result] = await database.query(
       'INSERT INTO tenants (pg_id, bed_id, name, phone, email, aadhaar_url, join_date, rent_amount, deposit_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [pg_id, bed_id || null, name, phone || null, email || null, aadhaar_url || null, join_date || null, rent_amount || null, deposit_amount || null]
+      [pg_id, bed_id || null, name, phone || null, email || null, aadhaar_url, join_date || null, rent_amount || null, deposit_amount || null]
     );
 
     const [tenants] = await database.query(
@@ -118,7 +121,7 @@ const createTenant = async (req, res) => {
 const updateTenant = async (req, res) => {
   try {
     const { id } = req.params;
-    const { bed_id, name, phone, email, aadhaar_url, join_date, rent_amount, deposit_amount, is_active } = req.body;
+    const { bed_id, name, phone, email, join_date, rent_amount, deposit_amount, is_active } = req.body;
     const { role, pg_id } = req.user;
 
     const [tenants] = await database.query('SELECT * FROM tenants WHERE id = ?', [id]);
@@ -128,6 +131,12 @@ const updateTenant = async (req, res) => {
 
     if (role === 'pg_admin' && pg_id != tenants[0].pg_id) {
       return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Handle Aadhaar document upload - only update if new file is uploaded
+    let aadhaar_url = tenants[0].aadhaar_url; // Keep existing if no new file
+    if (req.file) {
+      aadhaar_url = `/uploads/tenant-docs/${req.file.filename}`;
     }
 
     // Handle bed change
