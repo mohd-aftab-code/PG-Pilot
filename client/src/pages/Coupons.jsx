@@ -60,12 +60,19 @@ const Coupons = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#E5E7EB]">Coupons</h1>
-        <Button onClick={() => setIsModalOpen(true)}>Add Coupon</Button>
+    <div className="p-3 sm:p-4 md:p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB]">Coupons</h1>
+          <p className="text-sm text-[#9CA3AF] mt-1">Manage discount coupons</p>
+        </div>
+        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">Add Coupon</Button>
       </div>
-      <DataTable columns={columns} data={coupons} loading={loading} onEdit={(c) => { setEditingCoupon(c); setFormData({ code: c.code, discount_percent: c.discount_percent, max_uses: c.max_uses || '', expires_on: formatDateForInput(c.expires_on) }); setIsModalOpen(true); }} onDelete={async (c) => { if (window.confirm('Delete coupon?')) { try { await api.delete(`/api/coupons/${c.id}`); fetchCoupons(); } catch (error) { alert(error.response?.data?.error || 'Error'); } } }} />
+      {/* Table */}
+      <div className="bg-[#0F1720] border border-primary/10 rounded-lg overflow-hidden">
+        <DataTable columns={columns} data={coupons} loading={loading} onEdit={(c) => { setEditingCoupon(c); setFormData({ code: c.code, discount_percent: c.discount_percent, max_uses: c.max_uses || '', expires_on: formatDateForInput(c.expires_on) }); setIsModalOpen(true); }} onDelete={async (c) => { if (window.confirm('Delete coupon?')) { try { await api.delete(`/api/coupons/${c.id}`); fetchCoupons(); } catch (error) { alert(error.response?.data?.error || 'Error'); } } }} />
+      </div>
       <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingCoupon(null); }} title={editingCoupon ? 'Edit Coupon' : 'Add Coupon'}>
         <form onSubmit={handleSubmit}>
           <Input label="Code" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} required />

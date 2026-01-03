@@ -76,12 +76,18 @@ const Plans = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#E5E7EB]">Plans</h1>
-        <Button onClick={() => setIsModalOpen(true)}>Add Plan</Button>
+    <div className="p-3 sm:p-4 md:p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB]">Plans</h1>
+          <p className="text-sm text-[#9CA3AF] mt-1">Manage subscription plans</p>
+        </div>
+        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">Add Plan</Button>
       </div>
-      <DataTable
+      {/* Table */}
+      <div className="bg-[#0F1720] border border-primary/10 rounded-lg overflow-hidden">
+        <DataTable
         columns={columns}
         data={plans}
         loading={loading}
@@ -109,6 +115,7 @@ const Plans = () => {
           }
         }}
       />
+      </div>
       <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingPlan(null); setFormData({ name: '', price: '', duration_days: '', max_pgs: 1, max_rooms: 10, max_beds: 50, description: '' }); }} title={editingPlan ? 'Edit Plan' : 'Add Plan'}>
         <form onSubmit={handleSubmit}>
           <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
@@ -122,7 +129,7 @@ const Plans = () => {
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm resize-none"
               rows="3"
             />
           </div>

@@ -5,6 +5,7 @@ import { getStoredUser, setStoredUser } from '../utils/auth';
 import Modal from '../components/common/Modal';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import { SkeletonCard } from '../components/common/Skeleton';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -1743,7 +1744,17 @@ const LandingPage = () => {
             </p>
           </div>
           {loading ? (
-            <div className="text-center text-[#E5E7EB] text-sm sm:text-base">Loading plans...</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-8 max-w-6xl mx-auto">
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <SkeletonCard 
+                  key={idx} 
+                  showHeader={true} 
+                  lines={6} 
+                  showButton={true}
+                  className="p-5 sm:p-6 md:p-8"
+                />
+              ))}
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-8 max-w-6xl mx-auto">
               {plans.map((plan, idx) => (

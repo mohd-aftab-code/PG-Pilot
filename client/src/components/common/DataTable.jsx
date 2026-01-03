@@ -1,12 +1,14 @@
 import React from 'react';
+import { SkeletonTable } from './Skeleton';
 
 const DataTable = ({ columns, data, onEdit, onDelete, onView, loading = false }) => {
   if (loading) {
     return (
-      <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#22D3EE] mb-3"></div>
-        <p className="text-[#9CA3AF]">Loading...</p>
-      </div>
+      <SkeletonTable 
+        columns={columns.length} 
+        rows={5}
+        showActions={!!(onEdit || onDelete || onView)}
+      />
     );
   }
 

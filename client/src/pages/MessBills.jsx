@@ -61,36 +61,56 @@ const MessBills = () => {
     }
   };
 
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      paid: { bg: 'bg-green-500/20', text: 'text-green-300', border: 'border-green-500/30', label: 'Paid' },
+      pending: { bg: 'bg-yellow-500/20', text: 'text-yellow-300', border: 'border-yellow-500/30', label: 'Pending' },
+    };
+    const config = statusConfig[status] || statusConfig.pending;
+    return (
+      <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${config.bg} ${config.text} ${config.border}`}>
+        {config.label}
+      </span>
+    );
+  };
+
   const columns = [
     { header: 'Tenant', accessor: 'tenant_name' },
     { header: 'Month', accessor: 'month_for', render: (val) => formatDateDDMMYY(val) },
     { header: 'Amount', accessor: 'amount', render: (val) => `₹${val}` },
-    { header: 'Status', accessor: 'status', render: (val) => val.charAt(0).toUpperCase() + val.slice(1) },
+    { header: 'Status', accessor: 'status', render: (val) => getStatusBadge(val) },
   ];
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#E5E7EB]">Mess Bills</h1>
-        <Button onClick={() => setIsModalOpen(true)}>Add Mess Bill</Button>
+    <div className="p-3 sm:p-4 md:p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB]">Mess Bills</h1>
+          <p className="text-sm text-[#9CA3AF] mt-1">Manage mess meal bills</p>
+        </div>
+        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">Add Mess Bill</Button>
       </div>
-      <DataTable columns={columns} data={bills} loading={loading} onEdit={(bill) => { setEditingBill(bill); setFormData({ tenant_id: bill.tenant_id, pg_id: bill.pg_id, month_for: formatDateForInput(bill.month_for), amount: bill.amount, status: bill.status }); setIsModalOpen(true); }} />
+      {/* Table */}
+      <div className="bg-[#0F1720] border border-primary/10 rounded-lg overflow-hidden">
+        <DataTable columns={columns} data={bills} loading={loading} onEdit={(bill) => { setEditingBill(bill); setFormData({ tenant_id: bill.tenant_id, pg_id: bill.pg_id, month_for: formatDateForInput(bill.month_for), amount: bill.amount, status: bill.status }); setIsModalOpen(true); }} />
+      </div>
       <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingBill(null); }} title={editingBill ? 'Edit Mess Bill' : 'Add Mess Bill'}>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Tenant *</label>
-            <select value={formData.tenant_id} onChange={(e) => setFormData({ ...formData, tenant_id: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]" required>
-              <option value="">Select Tenant</option>
-              {tenants.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+            <select value={formData.tenant_id} onChange={(e) => setFormData({ ...formData, tenant_id: e.target.value })} className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm" required>
+              <option value="" className="bg-[#0B0F14] text-[#E5E7EB]">Select Tenant</option>
+              {tenants.map((t) => <option key={t.id} value={t.id} className="bg-[#0B0F14] text-[#E5E7EB]">{t.name}</option>)}
             </select>
           </div>
           <Input label="Month For" type="date" value={formData.month_for} onChange={(e) => setFormData({ ...formData, month_for: e.target.value })} required />
           <Input label="Amount" type="number" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required />
           <div className="mb-4">
             <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Status *</label>
-            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]" required>
-              <option value="pending">Pending</option>
-              <option value="paid">Paid</option>
+            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm" required>
+              <option value="pending" className="bg-[#0B0F14] text-[#E5E7EB]">Pending</option>
+              <option value="paid" className="bg-[#0B0F14] text-[#E5E7EB]">Paid</option>
             </select>
           </div>
           <div className="flex gap-2 justify-end mt-4">

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import { getStoredUser, getStoredPgId } from '../../utils/auth';
 import Button from '../../components/common/Button';
+import { Skeleton, SkeletonStatsCard, SkeletonActivityItem, SkeletonCard } from '../../components/common/Skeleton';
 
 // Icon Components
 const IconUsers = () => (
@@ -295,12 +296,34 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="p-6 bg-gradient-to-br from-[#0B0F14] via-[#0F1720] to-[#0B0F14] min-h-screen">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#22D3EE] mx-auto mb-4"></div>
-            <p className="text-[#9CA3AF]">Loading dashboard...</p>
+      <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-br from-[#0B0F14] via-[#0F1720] to-[#0B0F14] min-h-screen">
+        {/* Header Skeleton */}
+        <div className="mb-4 sm:mb-6">
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        
+        {/* Stats Cards Skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
+          {Array.from({ length: 5 }).map((_, idx) => (
+            <SkeletonStatsCard key={idx} />
+          ))}
+        </div>
+
+        {/* Recent Activity & Quick Stats Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
+          {/* Recent Activity Skeleton */}
+          <div className="lg:col-span-2">
+            <SkeletonCard showHeader={true} lines={5} />
           </div>
+          {/* Quick Stats Skeleton */}
+          <SkeletonCard showHeader={true} lines={4} />
+        </div>
+
+        {/* Quick Actions Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <SkeletonCard showHeader={true} lines={2} showButton={true} />
+          <SkeletonCard showHeader={true} lines={3} />
         </div>
       </div>
     );

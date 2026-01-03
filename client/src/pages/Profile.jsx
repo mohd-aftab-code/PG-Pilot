@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { getStoredUser, setStoredUser } from '../utils/auth';
+import { Skeleton, SkeletonCard } from '../components/common/Skeleton';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -58,10 +59,15 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#22D3EE] mx-auto mb-4"></div>
-          <p className="text-[#9CA3AF]">Loading profile...</p>
+      <div className="p-3 sm:p-4 md:p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header Skeleton */}
+          <div className="mb-4 sm:mb-6">
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          {/* Profile Card Skeleton */}
+          <SkeletonCard showHeader={true} lines={6} className="mb-4" />
         </div>
       </div>
     );
@@ -94,13 +100,9 @@ const Profile = () => {
   }
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB] mb-1 sm:mb-2">User Profile</h1>
-          <p className="text-xs sm:text-sm text-[#9CA3AF]">View and manage your account information</p>
-        </div>
+    <div className="p-3 sm:p-4 md:p-5 lg:p-6">
+      <div className="max-w-8xl mx-auto">
+       
 
         {/* Profile Card */}
         <div className="bg-[#0F1720] border border-primary/10 rounded-lg shadow-sm overflow-hidden">

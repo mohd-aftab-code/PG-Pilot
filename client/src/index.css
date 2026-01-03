@@ -124,3 +124,25 @@ select {
   background-size: 1em 1em;
   padding-right: 2.5rem;
 }
+
+/* Skeleton Shimmer Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #0B0F14 0%,
+    #0F1720 20%,
+    #0B0F14 40%,
+    #0B0F14 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}

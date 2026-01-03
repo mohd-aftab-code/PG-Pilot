@@ -5,6 +5,7 @@ import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import { Skeleton } from '../components/common/Skeleton';
 
 // Icon Components
 const IconHome = () => (
@@ -438,13 +439,18 @@ const RoomsBeds = () => {
             </thead>
             <tbody className="divide-y divide-border">
               {loading ? (
-                <tr>
-                  <td colSpan="8" className="px-4 py-8">
-                    <div className="flex justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    </div>
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <tr key={idx} className="border-b border-primary/10">
+                    <td className="px-4 py-3"><Skeleton className="h-4 w-4" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-4 w-32" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-6 w-16 rounded-full" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-6 w-12 rounded-full" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-8 w-8 rounded" /></td>
+                  </tr>
+                ))
               ) : filteredRooms.length > 0 ? (
                 filteredRooms.map((room) => {
                   const isExpanded = expandedRooms.has(room.id);

@@ -180,21 +180,28 @@ const PGManagement = () => {
   ];
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#E5E7EB]">PG Management</h1>
+    <div className="p-3 sm:p-4 md:p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB]">PG Management</h1>
+          <p className="text-sm text-[#9CA3AF] mt-1">Manage your PG properties</p>
+        </div>
         {user?.role === 'superadmin' && (
-          <Button onClick={() => setIsModalOpen(true)}>Add New PG</Button>
+          <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">Add New PG</Button>
         )}
       </div>
 
-      <DataTable
-        columns={columns}
-        data={pgs}
-        loading={loading}
-        onEdit={user?.role === 'superadmin' ? handleEdit : null}
-        onDelete={user?.role === 'superadmin' ? handleDelete : null}
-      />
+      {/* Table */}
+      <div className="bg-[#0F1720] border border-primary/10 rounded-lg overflow-hidden">
+        <DataTable
+          columns={columns}
+          data={pgs}
+          loading={loading}
+          onEdit={user?.role === 'superadmin' ? handleEdit : null}
+          onDelete={user?.role === 'superadmin' ? handleDelete : null}
+        />
+      </div>
 
       <Modal
         isOpen={isModalOpen}
@@ -227,7 +234,7 @@ const PGManagement = () => {
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             type="textarea"
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="City *"
               value={formData.city}
@@ -262,14 +269,14 @@ const PGManagement = () => {
                 const files = Array.from(e.target.files);
                 setFormData({ ...formData, images: files });
               }}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
             />
             {formData.images.length > 0 && (
               <div className="mt-2">
                 <p className="text-sm text-[#9CA3AF] mb-2">
                   {formData.images.length} image(s) selected
                 </p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {formData.images.map((image, index) => (
                     <div key={index} className="relative">
                       <img
@@ -285,7 +292,7 @@ const PGManagement = () => {
             {editingPG && editingPG.images && (
               <div className="mt-2">
                 <p className="text-sm text-[#9CA3AF] mb-2">Existing Images:</p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {(typeof editingPG.images === 'string' ? JSON.parse(editingPG.images) : editingPG.images).map((img, index) => (
                     <div key={index} className="relative">
                       <img
@@ -323,9 +330,9 @@ const PGManagement = () => {
             <label className="block text-[#E5E7EB] text-sm font-semibold mb-3">
               Facilities *
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {Object.keys(formData.facilities).map((facility) => (
-                <label key={facility} className="flex items-center cursor-pointer">
+                <label key={facility} className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-primary/5 transition-colors">
                   <input
                     type="checkbox"
                     checked={formData.facilities[facility]}
@@ -338,7 +345,7 @@ const PGManagement = () => {
                         },
                       });
                     }}
-                    className="mr-2 w-4 h-4"
+                    className="mr-2 w-4 h-4 accent-[#22D3EE]"
                   />
                   <span className="text-sm text-[#E5E7EB]">{facility.replace('_', ' ')}</span>
                 </label>

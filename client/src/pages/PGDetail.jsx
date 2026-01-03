@@ -4,6 +4,7 @@ import api from '../utils/api';
 import Modal from '../components/common/Modal';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import { Skeleton, SkeletonCard } from '../components/common/Skeleton';
 
 const PGDetail = () => {
   const { pg_id } = useParams();
@@ -94,10 +95,27 @@ const PGDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Loading PG details...</p>
+      <div className="min-h-screen bg-gradient-to-br from-[#0B0F14] via-[#0F1720] to-[#0B0F14]">
+        {/* Header Skeleton */}
+        <header className="bg-[#0F1720]/95 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-primary/10">
+          <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+            <Skeleton className="h-6 w-32 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+        </header>
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* Main Content Skeleton */}
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+              <SkeletonCard showHeader={true} lines={3} />
+              <SkeletonCard showHeader={true} lines={2} />
+              <SkeletonCard showHeader={true} lines={4} showButton={true} />
+            </div>
+            {/* Sidebar Skeleton */}
+            <div className="lg:col-span-1">
+              <SkeletonCard showHeader={true} lines={3} />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -105,12 +123,12 @@ const PGDetail = () => {
 
   if (!pgData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#0B0F14] via-[#0F1720] to-[#0B0F14] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">PG not found</p>
+          <p className="text-[#E5E7EB]">PG not found</p>
           <button
             onClick={() => navigate('/marketplace/search')}
-            className="mt-4 text-blue-600 hover:text-blue-800"
+            className="mt-4 px-4 py-2 bg-[#22D3EE] text-[#0B0F14] rounded-lg hover:bg-[#1FB6C1] transition-colors font-semibold"
           >
             Back to Search
           </button>
@@ -120,41 +138,41 @@ const PGDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#0B0F14] via-[#0F1720] to-[#0B0F14]">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4 mb-2">
+      <header className="bg-[#0F1720]/95 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-primary/10">
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-2">
             <button
               onClick={() => navigate('/marketplace/search')}
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+              className="flex items-center gap-2 text-[#22D3EE] hover:text-[#1FB6C1] font-medium transition-colors text-sm sm:text-base"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               Back to Search
             </button>
             <Link
               to="/"
-              className="text-gray-600 hover:text-gray-800 text-sm"
+              className="text-[#9CA3AF] hover:text-[#E5E7EB] text-sm transition-colors"
             >
               Home
             </Link>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{pgData.pg_name}</h1>
-          <p className="text-sm text-gray-600 mt-1">{pgData.area}, {pgData.city}</p>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#E5E7EB]">{pgData.pg_name}</h1>
+          <p className="text-xs sm:text-sm text-[#9CA3AF] mt-1">{pgData.area}, {pgData.city}</p>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Location */}
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4">Location</h2>
-              <p className="text-gray-700 mb-2">{pgData.address}</p>
-              <p className="text-gray-600">
+            <div className="bg-[#0F1720] border border-primary/10 rounded-lg p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-[#E5E7EB]">Location</h2>
+              <p className="text-[#E5E7EB] mb-2 text-sm sm:text-base">{pgData.address}</p>
+              <p className="text-[#9CA3AF] text-sm sm:text-base">
                 {pgData.area}, {pgData.city}
                 {pgData.pincode && ` - ${pgData.pincode}`}
               </p>
@@ -163,7 +181,7 @@ const PGDetail = () => {
                   href={`https://www.google.com/maps?q=${pgData.latitude},${pgData.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-3 inline-block text-blue-600 hover:text-blue-800"
+                  className="mt-3 inline-block text-[#22D3EE] hover:text-[#1FB6C1] transition-colors text-sm sm:text-base"
                 >
                   View on Google Maps →
                 </a>
@@ -172,13 +190,13 @@ const PGDetail = () => {
 
             {/* Facilities */}
             {pgData.facilities && pgData.facilities.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <h2 className="text-xl font-semibold mb-4">Facilities</h2>
+              <div className="bg-[#0F1720] border border-primary/10 rounded-lg p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-[#E5E7EB]">Facilities</h2>
                 <div className="flex flex-wrap gap-2">
                   {pgData.facilities.map((facility, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                      className="px-3 py-1 bg-[#22D3EE]/20 text-[#22D3EE] border border-[#22D3EE]/30 rounded-full text-xs sm:text-sm font-medium"
                     >
                       {facility}
                     </span>
@@ -189,31 +207,31 @@ const PGDetail = () => {
 
             {/* Rooms */}
             {pgData.rooms && pgData.rooms.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold mb-4">Available Rooms</h2>
+              <div className="bg-[#0F1720] border border-primary/10 rounded-lg p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-[#E5E7EB]">Available Rooms</h2>
                 <div className="space-y-4">
                   {pgData.rooms
                     .filter(room => room.available_beds > 0)
                     .map((room) => (
                       <div
                         key={room.room_id}
-                        className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                        className="border border-primary/10 rounded-lg p-4 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 transition-all bg-[#0B0F14]"
                       >
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h3 className="text-lg font-semibold">{room.room_name}</h3>
-                            <p className="text-sm text-gray-600 mt-1">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-start gap-3 mb-3">
+                          <div className="flex-1">
+                            <h3 className="text-base sm:text-lg font-semibold text-[#E5E7EB]">{room.room_name}</h3>
+                            <p className="text-xs sm:text-sm text-[#9CA3AF] mt-1">
                               {room.gender_type} • {room.available_beds} bed{room.available_beds !== 1 ? 's' : ''} available
                             </p>
                             {room.room_description && (
-                              <p className="text-gray-700 mt-2">{room.room_description}</p>
+                              <p className="text-[#E5E7EB] mt-2 text-sm sm:text-base">{room.room_description}</p>
                             )}
                           </div>
-                          <div className="text-right">
-                            <div className="text-2xl font-bold text-blue-600">
+                          <div className="text-left sm:text-right">
+                            <div className="text-xl sm:text-2xl font-bold text-[#22D3EE]">
                               ₹{room.rent_per_bed}
                             </div>
-                            <div className="text-sm text-gray-600">per bed/month</div>
+                            <div className="text-xs sm:text-sm text-[#9CA3AF]">per bed/month</div>
                           </div>
                         </div>
                         
@@ -224,7 +242,7 @@ const PGDetail = () => {
                                 key={idx}
                                 src={img}
                                 alt={`${room.room_name} ${idx + 1}`}
-                                className="w-full h-24 object-cover rounded"
+                                className="w-full h-20 sm:h-24 object-cover rounded border border-primary/10"
                               />
                             ))}
                           </div>
@@ -232,7 +250,7 @@ const PGDetail = () => {
 
                         <button
                           onClick={() => handleInquiryClick(room)}
-                          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors"
+                          className="w-full bg-[#14B8A6] text-white py-2 sm:py-2.5 rounded-lg hover:bg-[#2DD4BF] transition-colors font-semibold text-sm sm:text-base shadow-md hover:shadow-lg"
                         >
                           Send Inquiry
                         </button>
@@ -245,20 +263,20 @@ const PGDetail = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6 sticky top-4">
-              <h2 className="text-xl font-semibold mb-4">Quick Info</h2>
+            <div className="bg-[#0F1720] border border-primary/10 rounded-lg p-4 sm:p-6 lg:sticky lg:top-20">
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-[#E5E7EB]">Quick Info</h2>
               <div className="space-y-3">
                 <div>
-                  <span className="text-sm text-gray-600">Food Available</span>
-                  <p className="font-semibold">{pgData.food_enabled ? 'Yes' : 'No'}</p>
+                  <span className="text-xs sm:text-sm text-[#9CA3AF]">Food Available</span>
+                  <p className="font-semibold text-[#E5E7EB] text-sm sm:text-base">{pgData.food_enabled ? 'Yes' : 'No'}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600">Total Rooms</span>
-                  <p className="font-semibold">{pgData.rooms?.length || 0}</p>
+                  <span className="text-xs sm:text-sm text-[#9CA3AF]">Total Rooms</span>
+                  <p className="font-semibold text-[#E5E7EB] text-sm sm:text-base">{pgData.rooms?.length || 0}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600">Available Beds</span>
-                  <p className="font-semibold">
+                  <span className="text-xs sm:text-sm text-[#9CA3AF]">Available Beds</span>
+                  <p className="font-semibold text-[#E5E7EB] text-sm sm:text-base">
                     {pgData.rooms?.reduce((sum, room) => sum + room.available_beds, 0) || 0}
                   </p>
                 </div>
@@ -280,12 +298,12 @@ const PGDetail = () => {
         size="md"
       >
         <form onSubmit={handleInquirySubmit}>
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">
-              Room: <span className="font-semibold">{selectedRoom?.room_name}</span>
+          <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+            <p className="text-sm text-[#9CA3AF] mb-2">
+              Room: <span className="font-semibold text-[#E5E7EB]">{selectedRoom?.room_name}</span>
             </p>
-            <p className="text-sm text-gray-600">
-              Rent: <span className="font-semibold">₹{selectedRoom?.rent_per_bed}/bed/month</span>
+            <p className="text-sm text-[#9CA3AF]">
+              Rent: <span className="font-semibold text-[#E5E7EB]">₹{selectedRoom?.rent_per_bed}/bed/month</span>
             </p>
           </div>
 

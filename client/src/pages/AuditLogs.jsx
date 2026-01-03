@@ -31,9 +31,16 @@ const AuditLogs = () => {
   ];
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold text-[#E5E7EB] mb-6">Audit Logs</h1>
-      <DataTable columns={columns} data={logs} loading={loading} />
+    <div className="p-3 sm:p-4 md:p-6">
+      {/* Header */}
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB]">Audit Logs</h1>
+        <p className="text-sm text-[#9CA3AF] mt-1">View system activity logs</p>
+      </div>
+      {/* Table */}
+      <div className="bg-[#0F1720] border border-primary/10 rounded-lg overflow-hidden">
+        <DataTable columns={columns} data={logs} loading={loading} />
+      </div>
     </div>
   );
 };

@@ -93,18 +93,21 @@ const Payments = () => {
     const statusConfig = {
       received: {
         label: 'Received',
-        bgColor: 'bg-green-100',
-        textColor: 'text-green-800',
+        bgColor: 'bg-green-500/20',
+        textColor: 'text-green-300',
+        border: 'border-green-500/30',
       },
       pending: {
         label: 'Pending',
-        bgColor: 'bg-yellow-100',
-        textColor: 'text-yellow-800',
+        bgColor: 'bg-yellow-500/20',
+        textColor: 'text-yellow-300',
+        border: 'border-yellow-500/30',
       },
       failed: {
         label: 'Failed',
-        bgColor: 'bg-red-100',
-        textColor: 'text-red-800',
+        bgColor: 'bg-red-500/20',
+        textColor: 'text-red-300',
+        border: 'border-red-500/30',
       },
     };
 
@@ -112,7 +115,7 @@ const Payments = () => {
 
     return (
       <span
-        className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${config.bgColor} ${config.textColor}`}
+        className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${config.bgColor} ${config.textColor} ${config.border}`}
       >
         {config.label}
       </span>
@@ -148,68 +151,77 @@ const Payments = () => {
   ];
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#E5E7EB]">Payments</h1>
-        <Button onClick={() => setIsModalOpen(true)}>Add Payment</Button>
+    <div className="p-3 sm:p-4 md:p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB]">Payments</h1>
+          <p className="text-sm text-[#9CA3AF] mt-1">Manage all payment records</p>
+        </div>
+        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">Add Payment</Button>
       </div>
 
-      {/* Simple Filters */}
-      <div className="mb-4 flex flex-wrap gap-3">
-        <input
-          type="text"
-          placeholder="Search by tenant name, amount..."
-          value={filters.search}
-          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-          className="flex-1 min-w-[200px] px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
-        />
-        <select
-          value={filters.status}
-          onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-          className="px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
-        >
-          <option value="all">All Status</option>
-          <option value="received">Received</option>
-          <option value="pending">Pending</option>
-          <option value="failed">Failed</option>
-        </select>
-        <select
-          value={filters.mode}
-          onChange={(e) => setFilters({ ...filters, mode: e.target.value })}
-          className="px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
-        >
-          <option value="all">All Modes</option>
-          <option value="cash">Cash</option>
-          <option value="qr">QR</option>
-          <option value="manual">Manual</option>
-        </select>
-        {(filters.search || filters.status !== 'all' || filters.mode !== 'all') && (
-          <button
-            onClick={() => setFilters({ search: '', status: 'all', mode: 'all' })}
-            className="px-4 py-2 text-sm text-primary hover:text-accent font-medium"
+      {/* Filters */}
+      <div className="bg-[#0F1720] border border-primary/10 rounded-lg p-4 sm:p-5 mb-4 sm:mb-6">
+        <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-3">
+          <input
+            type="text"
+            placeholder="Search by tenant name, amount..."
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            className="flex-1 w-full sm:min-w-[200px] px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
+          />
+          <select
+            value={filters.status}
+            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            className="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
           >
-            Clear
-          </button>
-        )}
+            <option value="all" className="bg-[#0B0F14] text-[#E5E7EB]">All Status</option>
+            <option value="received" className="bg-[#0B0F14] text-[#E5E7EB]">Received</option>
+            <option value="pending" className="bg-[#0B0F14] text-[#E5E7EB]">Pending</option>
+            <option value="failed" className="bg-[#0B0F14] text-[#E5E7EB]">Failed</option>
+          </select>
+          <select
+            value={filters.mode}
+            onChange={(e) => setFilters({ ...filters, mode: e.target.value })}
+            className="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
+          >
+            <option value="all" className="bg-[#0B0F14] text-[#E5E7EB]">All Modes</option>
+            <option value="cash" className="bg-[#0B0F14] text-[#E5E7EB]">Cash</option>
+            <option value="qr" className="bg-[#0B0F14] text-[#E5E7EB]">QR</option>
+            <option value="manual" className="bg-[#0B0F14] text-[#E5E7EB]">Manual</option>
+          </select>
+          {(filters.search || filters.status !== 'all' || filters.mode !== 'all') && (
+            <button
+              onClick={() => setFilters({ search: '', status: 'all', mode: 'all' })}
+              className="w-full sm:w-auto px-4 py-2 sm:py-2.5 text-sm text-[#22D3EE] hover:text-[#1FB6C1] font-semibold transition-colors"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredPayments}
-        loading={loading}
-        onEdit={(payment) => {
-          setEditingPayment(payment);
-          setFormData({
-            tenant_id: payment.tenant_id,
-            pg_id: payment.pg_id,
-            amount: payment.amount,
-            month_for: formatDateForInput(payment.month_for),
-            mode: payment.mode,
-            status: payment.status,
-          });
-          setIsModalOpen(true);
-        }}
-      />
+      {/* Table */}
+      <div className="bg-[#0F1720] border border-primary/10 rounded-lg overflow-hidden">
+        <DataTable
+          columns={columns}
+          data={filteredPayments}
+          loading={loading}
+          onEdit={(payment) => {
+            setEditingPayment(payment);
+            setFormData({
+              tenant_id: payment.tenant_id,
+              pg_id: payment.pg_id,
+              amount: payment.amount,
+              month_for: formatDateForInput(payment.month_for),
+              mode: payment.mode,
+              status: payment.status,
+            });
+            setIsModalOpen(true);
+          }}
+        />
+      </div>
 
       <Modal
         isOpen={isModalOpen}
@@ -226,12 +238,12 @@ const Payments = () => {
             <select
               value={formData.tenant_id}
               onChange={(e) => setFormData({ ...formData, tenant_id: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
               required
             >
-              <option value="">Select Tenant</option>
+              <option value="" className="bg-[#0B0F14] text-[#E5E7EB]">Select Tenant</option>
               {tenants.map((tenant) => (
-                <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
+                <option key={tenant.id} value={tenant.id} className="bg-[#0B0F14] text-[#E5E7EB]">{tenant.name}</option>
               ))}
             </select>
           </div>
@@ -254,12 +266,12 @@ const Payments = () => {
             <select
               value={formData.mode}
               onChange={(e) => setFormData({ ...formData, mode: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
               required
             >
-              <option value="cash">Cash</option>
-              <option value="qr">QR</option>
-              <option value="manual">Manual</option>
+              <option value="cash" className="bg-[#0B0F14] text-[#E5E7EB]">Cash</option>
+              <option value="qr" className="bg-[#0B0F14] text-[#E5E7EB]">QR</option>
+              <option value="manual" className="bg-[#0B0F14] text-[#E5E7EB]">Manual</option>
             </select>
           </div>
           <div className="mb-4">
@@ -267,12 +279,12 @@ const Payments = () => {
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
               required
             >
-              <option value="pending">Pending</option>
-              <option value="received">Received</option>
-              <option value="failed">Failed</option>
+              <option value="pending" className="bg-[#0B0F14] text-[#E5E7EB]">Pending</option>
+              <option value="received" className="bg-[#0B0F14] text-[#E5E7EB]">Received</option>
+              <option value="failed" className="bg-[#0B0F14] text-[#E5E7EB]">Failed</option>
             </select>
           </div>
           <div className="flex gap-2 justify-end">

@@ -53,12 +53,18 @@ const MessPlans = () => {
   ];
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#E5E7EB]">Mess Plans</h1>
-        <Button onClick={() => setIsModalOpen(true)}>Add Mess Plan</Button>
+    <div className="p-3 sm:p-4 md:p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB]">Mess Plans</h1>
+          <p className="text-sm text-[#9CA3AF] mt-1">Manage mess meal plans</p>
+        </div>
+        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">Add Mess Plan</Button>
       </div>
-      <DataTable
+      {/* Table */}
+      <div className="bg-[#0F1720] border border-primary/10 rounded-lg overflow-hidden">
+        <DataTable
         columns={columns}
         data={plans}
         loading={loading}
@@ -78,6 +84,7 @@ const MessPlans = () => {
           }
         }}
       />
+      </div>
       <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingPlan(null); }} title={editingPlan ? 'Edit Mess Plan' : 'Add Mess Plan'}>
         <form onSubmit={handleSubmit}>
           <Input label="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
