@@ -17,22 +17,22 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md', closeOnOutsideCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={handleBackdropClick}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B0F14]/80 backdrop-blur-sm p-3 sm:p-4" onClick={handleBackdropClick}>
       <div
-        className={`bg-card rounded shadow-xl border border-border ${sizeClasses[size]} w-full m-4 max-h-[90vh] overflow-y-auto`}
+        className={`bg-[#0F1720] rounded-lg shadow-xl border border-primary/10 ${sizeClasses[size]} w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center p-5 border-b border-border bg-secondary/30">
-          <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+        <div className="flex justify-between items-center p-4 sm:p-5 border-b border-primary/10 bg-[#0B0F14] sticky top-0 z-10">
+          <h2 className="text-lg sm:text-xl font-semibold text-[#E5E7EB] pr-2 truncate">{title}</h2>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground text-2xl leading-none w-8 h-8 flex items-center justify-center hover:bg-secondary rounded transition-colors"
+            className="text-[#9CA3AF] hover:text-[#E5E7EB] text-2xl leading-none w-8 h-8 flex items-center justify-center hover:bg-[#0F1720] rounded transition-colors flex-shrink-0"
             aria-label="Close"
           >
             ×
           </button>
         </div>
-        <div className="p-5">{children}</div>
+        <div className="p-4 sm:p-5">{children}</div>
       </div>
     </div>
   );

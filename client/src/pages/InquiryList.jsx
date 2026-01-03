@@ -89,17 +89,17 @@ const InquiryList = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'NEW':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-500/20 text-blue-300 border border-blue-500/30';
       case 'CONTACTED':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30';
       case 'VISITED':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-500/20 text-purple-300 border border-purple-500/30';
       case 'BOOKED':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-500/20 text-green-300 border border-green-500/30';
       case 'REJECTED':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-500/20 text-red-300 border border-red-500/30';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-500/20 text-gray-300 border border-gray-500/30';
     }
   };
 
@@ -151,7 +151,7 @@ const InquiryList = () => {
       header: 'Status',
       accessor: 'status',
       render: (row) => (
-        <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(row.status)}`}>
+        <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${getStatusColor(row.status)}`}>
           {row.status}
         </span>
       ),
@@ -162,7 +162,7 @@ const InquiryList = () => {
       render: (row) => (
         <button
           onClick={() => openStatusModal(row)}
-          className="text-blue-600 hover:text-blue-800 text-sm"
+          className="px-2 py-1 bg-[#1FB6C1]/20 text-[#1FB6C1] rounded-lg hover:bg-[#1FB6C1]/30 transition-all text-xs font-medium border border-[#1FB6C1]/30 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={row.status === 'BOOKED' || row.status === 'REJECTED'}
         >
           Update Status
@@ -172,68 +172,63 @@ const InquiryList = () => {
   ];
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Booking Inquiries</h1>
-        <p className="text-gray-600">Manage inquiries from potential tenants</p>
+    <div className="p-3 sm:p-4 md:p-6">
+      {/* Header */}
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB] mb-1 sm:mb-2">Booking Inquiries</h1>
+        <p className="text-sm sm:text-base text-[#9CA3AF]">Manage inquiries from potential tenants</p>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="flex gap-4 items-center">
-          <label className="text-sm font-medium">Filter by Status:</label>
+      <div className="bg-[#0F1720] border border-primary/10 rounded-lg p-4 sm:p-5 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
+          <label className="text-sm sm:text-base font-semibold text-[#E5E7EB] whitespace-nowrap">Filter by Status:</label>
           <select
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
-            className="px-3 py-2 border rounded-md"
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
           >
-            <option value="all">All</option>
-            <option value="NEW">New</option>
-            <option value="CONTACTED">Contacted</option>
-            <option value="VISITED">Visited</option>
-            <option value="BOOKED">Booked</option>
-            <option value="REJECTED">Rejected</option>
+            <option value="all" className="bg-[#0B0F14] text-[#E5E7EB]">All</option>
+            <option value="NEW" className="bg-[#0B0F14] text-[#E5E7EB]">New</option>
+            <option value="CONTACTED" className="bg-[#0B0F14] text-[#E5E7EB]">Contacted</option>
+            <option value="VISITED" className="bg-[#0B0F14] text-[#E5E7EB]">Visited</option>
+            <option value="BOOKED" className="bg-[#0B0F14] text-[#E5E7EB]">Booked</option>
+            <option value="REJECTED" className="bg-[#0B0F14] text-[#E5E7EB]">Rejected</option>
           </select>
         </div>
       </div>
 
       {/* Table */}
-      {loading ? (
-        <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      ) : (
-        <>
-          <DataTable
-            data={inquiries}
-            columns={columns}
-            loading={loading}
-            emptyMessage="No inquiries found"
-          />
+      <div className="bg-[#0F1720] border border-primary/10 rounded-lg overflow-hidden">
+        <DataTable
+          data={inquiries}
+          columns={columns}
+          loading={loading}
+          emptyMessage="No inquiries found"
+        />
+      </div>
 
-          {/* Pagination */}
-          {total > filters.limit && (
-            <div className="mt-4 flex justify-center gap-2">
-              <button
-                onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
-                disabled={filters.page === 1}
-                className="px-4 py-2 border rounded-md disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="px-4 py-2">
-                Page {filters.page} of {Math.ceil(total / filters.limit)}
-              </span>
-              <button
-                onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
-                disabled={filters.page >= Math.ceil(total / filters.limit)}
-                className="px-4 py-2 border rounded-md disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </>
+      {/* Pagination */}
+      {total > filters.limit && (
+        <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-2">
+          <button
+            onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
+            disabled={filters.page === 1}
+            className="w-full sm:w-auto px-4 py-2 border border-primary/20 rounded-lg bg-[#0B0F14] text-[#E5E7EB] hover:bg-[#0F1720] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 text-sm text-[#E5E7EB]">
+            Page <span className="font-semibold">{filters.page}</span> of <span className="font-semibold">{Math.ceil(total / filters.limit)}</span>
+          </span>
+          <button
+            onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
+            disabled={filters.page >= Math.ceil(total / filters.limit)}
+            className="w-full sm:w-auto px-4 py-2 border border-primary/20 rounded-lg bg-[#0B0F14] text-[#E5E7EB] hover:bg-[#0F1720] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium"
+          >
+            Next
+          </button>
+        </div>
       )}
 
       {/* Status Update Modal */}
@@ -249,31 +244,31 @@ const InquiryList = () => {
       >
         {selectedInquiry && (
           <div>
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 mb-2">
-                <strong>Tenant:</strong> {selectedInquiry.tenant_name}
+            <div className="mb-4 space-y-2">
+              <p className="text-sm text-[#9CA3AF]">
+                <strong className="text-[#E5E7EB]">Tenant:</strong> <span className="text-[#E5E7EB]">{selectedInquiry.tenant_name}</span>
               </p>
-              <p className="text-sm text-gray-600 mb-2">
-                <strong>Room:</strong> {selectedInquiry.room_name}
+              <p className="text-sm text-[#9CA3AF]">
+                <strong className="text-[#E5E7EB]">Room:</strong> <span className="text-[#E5E7EB]">{selectedInquiry.room_name}</span>
               </p>
-              <p className="text-sm text-gray-600">
-                <strong>Current Status:</strong>{' '}
-                <span className={getStatusColor(selectedInquiry.status)}>
+              <p className="text-sm text-[#9CA3AF]">
+                <strong className="text-[#E5E7EB]">Current Status:</strong>{' '}
+                <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${getStatusColor(selectedInquiry.status)}`}>
                   {selectedInquiry.status}
                 </span>
               </p>
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">New Status</label>
+              <label className="block text-sm font-semibold text-[#E5E7EB] mb-2">New Status</label>
               <select
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
               >
-                <option value={selectedInquiry.status}>{selectedInquiry.status} (Current)</option>
+                <option value={selectedInquiry.status} className="bg-[#0B0F14] text-[#E5E7EB]">{selectedInquiry.status} (Current)</option>
                 {getNextStatusOptions(selectedInquiry.status).map((status) => (
-                  <option key={status} value={status}>
+                  <option key={status} value={status} className="bg-[#0B0F14] text-[#E5E7EB]">
                     {status}
                   </option>
                 ))}

@@ -32,7 +32,7 @@ const AuditLogs = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold text-foreground mb-6">Audit Logs</h1>
+      <h1 className="text-3xl font-bold text-[#E5E7EB] mb-6">Audit Logs</h1>
       <DataTable columns={columns} data={logs} loading={loading} />
     </div>
   );

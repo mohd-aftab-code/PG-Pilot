@@ -61,7 +61,7 @@ const LayoutWrapper = ({ children }) => {
   const sidebarWidth = sidebarVisible ? (sidebarOpen ? SIDEBAR_OPEN_WIDTH : SIDEBAR_COLLAPSED_WIDTH) : 0;
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-gradient-to-br from-[#0B0F14] via-[#0F1720] to-[#0B0F14] min-h-screen">
       <Navbar 
         sidebarWidth={sidebarWidth} 
         sidebarOpen={sidebarOpen} 
@@ -77,7 +77,7 @@ const LayoutWrapper = ({ children }) => {
         />
       )}
       <main
-        className="transition-all duration-300 bg-background"
+        className="transition-all duration-300 bg-gradient-to-br from-[#0B0F14] via-[#0F1720] to-[#0B0F14]"
         style={{ 
           marginLeft: isMobile ? 0 : `${sidebarWidth}px`, 
           paddingTop: '4rem',

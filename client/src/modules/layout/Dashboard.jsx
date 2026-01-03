@@ -295,11 +295,11 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-6 bg-gradient-to-br from-[#0B0F14] via-[#0F1720] to-[#0B0F14] min-h-screen">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading dashboard...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#22D3EE] mx-auto mb-4"></div>
+            <p className="text-[#9CA3AF]">Loading dashboard...</p>
           </div>
         </div>
       </div>
@@ -307,42 +307,42 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-br from-[#0B0F14] via-[#0F1720] to-[#0B0F14] min-h-screen">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {user?.name || 'User'}!</p>
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB] mb-1 sm:mb-2">Dashboard</h1>
+        <p className="text-sm sm:text-base text-[#9CA3AF]">Welcome back, {user?.name || 'User'}!</p>
       </div>
       
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-6 md:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
         {statCards.map((card, idx) => {
           const IconComponent = card.icon;
           return (
             <div
               key={idx}
-              className="bg-card p-5 md:p-6 rounded-xl border border-border hover:shadow-xl hover:border-primary/50 transition-all cursor-pointer group relative overflow-hidden"
+              className="bg-[#0F1720] p-4 sm:p-5 md:p-6 rounded-xl border border-primary/10 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 transition-all cursor-pointer group relative overflow-hidden"
               onClick={() => navigate(card.route)}
             >
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full"></div>
+              <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full"></div>
               <div className="relative">
-              <div className="flex items-center justify-between mb-4">
-                  <div className={`w-14 h-14 ${card.color} rounded-xl flex items-center justify-center ${card.iconColor} shadow-lg group-hover:scale-110 transition-transform`}>
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 ${card.color} rounded-xl flex items-center justify-center ${card.iconColor} shadow-lg group-hover:scale-110 transition-transform`}>
                   <IconComponent />
                 </div>
-                  <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors flex items-center gap-1 font-medium">
+                  <span className="text-xs text-[#9CA3AF] group-hover:text-[#22D3EE] transition-colors flex items-center gap-1 font-medium hidden sm:flex">
                   View
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </span>
               </div>
-                <h3 className="text-muted-foreground text-sm font-medium mb-1">{card.title}</h3>
-                <p className="text-3xl font-bold text-foreground mb-1">{card.value}</p>
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">{card.subtitle}</p>
+                <h3 className="text-[#9CA3AF] text-xs sm:text-sm font-medium mb-1">{card.title}</h3>
+                <p className="text-2xl sm:text-3xl font-bold text-[#E5E7EB] mb-1">{card.value}</p>
+                <div className="flex items-center justify-between flex-wrap gap-1">
+                  <p className="text-xs text-[#9CA3AF] truncate flex-1 min-w-0">{card.subtitle}</p>
                   {card.trend && (
-                    <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full font-medium">
+                    <span className="text-xs px-2 py-0.5 bg-primary/20 text-[#22D3EE] rounded-full font-medium whitespace-nowrap">
                       {card.trend}
                     </span>
                   )}
@@ -354,20 +354,21 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Activity & Quick Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
         {/* Recent Activity */}
-        <div className="lg:col-span-2 bg-card p-5 md:p-6 rounded-xl border border-border">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="lg:col-span-2 bg-[#0F1720] p-4 sm:p-5 md:p-6 rounded-xl border border-primary/10">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-[#E5E7EB] flex items-center gap-2">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#22D3EE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Recent Activity
+              <span className="hidden sm:inline">Recent Activity</span>
+              <span className="sm:hidden">Activity</span>
             </h2>
             {recentActivity.length > 0 && (
               <button
                 onClick={() => navigate('/payments')}
-                className="text-xs text-primary hover:underline font-medium"
+                className="text-xs text-[#22D3EE] hover:text-[#1FB6C1] hover:underline font-medium"
               >
                 View All
               </button>
@@ -378,7 +379,7 @@ const Dashboard = () => {
               {recentActivity.map((activity, idx) => (
                 <div 
                   key={idx} 
-                  className="flex items-start gap-3 p-3 bg-secondary/30 rounded-lg hover:bg-secondary/50 transition-colors border border-border/50 cursor-pointer"
+                  className="flex items-start gap-3 p-3 bg-[#0B0F14] rounded-lg hover:bg-[#0F1720] transition-colors border border-primary/10 cursor-pointer"
                   onClick={() => {
                     if (activity.type === 'payment') navigate('/payments');
                     else if (activity.type === 'inquiry') navigate('/inquiries');
@@ -386,18 +387,18 @@ const Dashboard = () => {
                   }}
                 >
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    activity.type === 'payment' ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-200' :
-                    activity.type === 'inquiry' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-200' :
-                    'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-200'
+                    activity.type === 'payment' ? 'bg-green-500/20 text-green-400' :
+                    activity.type === 'inquiry' ? 'bg-blue-500/20 text-blue-400' :
+                    'bg-red-500/20 text-red-400'
                   }`}>
                     {activity.type === 'payment' ? <IconDollar /> :
                      activity.type === 'inquiry' ? <IconInquiry /> :
                      <IconAlert />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground text-sm mb-1">{activity.title}</p>
-                    <p className="text-xs text-muted-foreground mb-1">{activity.description}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="font-semibold text-[#E5E7EB] text-sm mb-1">{activity.title}</p>
+                    <p className="text-xs text-[#9CA3AF] mb-1">{activity.description}</p>
+                    <p className="text-xs text-[#9CA3AF]">
                       {new Date(activity.date).toLocaleDateString('en-IN', { 
                         day: 'numeric', 
                         month: 'short', 
@@ -412,60 +413,60 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-[#0B0F14] rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-8 h-8 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="text-muted-foreground text-sm">No recent activity</p>
+              <p className="text-[#9CA3AF] text-sm">No recent activity</p>
             </div>
           )}
         </div>
 
         {/* Quick Stats */}
-        <div className="bg-card p-5 md:p-6 rounded-xl border border-border">
-          <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-            <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-[#0F1720] p-5 md:p-6 rounded-xl border border-primary/10">
+          <h2 className="text-xl font-semibold text-[#E5E7EB] mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-[#22D3EE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
             Quick Stats
           </h2>
           <div className="space-y-4">
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-blue-700 dark:text-blue-300">Vacant Beds</span>
-                <span className="text-lg font-bold text-blue-900 dark:text-blue-100">{stats.vacantBeds}</span>
+                <span className="text-xs font-medium text-blue-400">Vacant Beds</span>
+                <span className="text-lg font-bold text-blue-300">{stats.vacantBeds}</span>
               </div>
-              <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
+              <div className="w-full bg-blue-500/20 rounded-full h-2">
                 <div 
                   className="bg-blue-500 h-2 rounded-full transition-all"
                   style={{ width: `${stats.occupancyRate}%` }}
                 ></div>
               </div>
             </div>
-            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+            <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-green-700 dark:text-green-300">Occupied Beds</span>
-                <span className="text-lg font-bold text-green-900 dark:text-green-100">{stats.occupiedBeds}</span>
+                <span className="text-xs font-medium text-green-400">Occupied Beds</span>
+                <span className="text-lg font-bold text-green-300">{stats.occupiedBeds}</span>
               </div>
-              <div className="w-full bg-green-200 dark:bg-green-800 rounded-full h-2">
+              <div className="w-full bg-green-500/20 rounded-full h-2">
                 <div 
                   className="bg-green-500 h-2 rounded-full transition-all"
                   style={{ width: `${stats.occupancyRate}%` }}
                 ></div>
               </div>
             </div>
-            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+            <div className="p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-orange-700 dark:text-orange-300">Pending Payments</span>
-                <span className="text-lg font-bold text-orange-900 dark:text-orange-100">{stats.pendingPayments}</span>
+                <span className="text-xs font-medium text-orange-400">Pending Payments</span>
+                <span className="text-lg font-bold text-orange-300">{stats.pendingPayments}</span>
               </div>
             </div>
             {stats.marketplaceViews > 0 && (
-              <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+              <div className="p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-purple-700 dark:text-purple-300">Today's Views</span>
-                  <span className="text-lg font-bold text-purple-900 dark:text-purple-100">{stats.marketplaceViews}</span>
+                  <span className="text-xs font-medium text-purple-400">Today's Views</span>
+                  <span className="text-lg font-bold text-purple-300">{stats.marketplaceViews}</span>
                 </div>
               </div>
             )}
@@ -476,9 +477,9 @@ const Dashboard = () => {
       {/* Quick Actions and System Info */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Quick Actions */}
-        <div className="bg-card p-5 md:p-6 rounded-xl border border-border">
-          <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-            <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-[#0F1720] p-5 md:p-6 rounded-xl border border-primary/10">
+          <h2 className="text-xl font-semibold text-[#E5E7EB] mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-[#22D3EE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             Quick Actions
@@ -517,12 +518,12 @@ const Dashboard = () => {
             </Button>
           </div>
           {stats.newInquiries > 0 && (
-            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">New Inquiries</span>
+                <span className="text-sm font-medium text-blue-400">New Inquiries</span>
                 <button
                   onClick={() => navigate('/inquiries')}
-                  className="text-sm font-bold text-blue-900 dark:text-blue-100 hover:underline"
+                  className="text-sm font-bold text-blue-300 hover:text-blue-200 hover:underline"
                 >
                   {stats.newInquiries} new
                 </button>
@@ -532,46 +533,46 @@ const Dashboard = () => {
         </div>
 
         {/* System Information */}
-        <div className="bg-card p-5 md:p-6 rounded-xl border border-border">
-          <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-            <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-[#0F1720] p-5 md:p-6 rounded-xl border border-primary/10">
+          <h2 className="text-xl font-semibold text-[#E5E7EB] mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-[#22D3EE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             System Information
           </h2>
           <div className="space-y-3">
-            <div className="flex items-center justify-between py-3 px-3 bg-secondary/30 rounded-lg">
-              <span className="text-muted-foreground flex items-center gap-2 text-sm">
+            <div className="flex items-center justify-between py-3 px-3 bg-[#0B0F14] rounded-lg border border-primary/10">
+              <span className="text-[#9CA3AF] flex items-center gap-2 text-sm">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Role
               </span>
-              <span className="text-foreground font-medium">
+              <span className="text-[#E5E7EB] font-medium">
                 {user?.role === 'superadmin' ? (
-                  <span className="px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 rounded-md text-xs font-semibold">
+                  <span className="px-2.5 py-1 bg-purple-500/20 text-purple-300 rounded-md text-xs font-semibold">
                     Super Admin
                   </span>
                 ) : (
-                  <span className="px-2.5 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-md text-xs font-semibold">
+                  <span className="px-2.5 py-1 bg-blue-500/20 text-blue-300 rounded-md text-xs font-semibold">
                     PG Admin
                   </span>
                 )}
               </span>
             </div>
             {user?.pg_id && (
-              <div className="flex items-center justify-between py-3 px-3 bg-secondary/30 rounded-lg">
-                <span className="text-muted-foreground flex items-center gap-2 text-sm">
+              <div className="flex items-center justify-between py-3 px-3 bg-[#0B0F14] rounded-lg border border-primary/10">
+                <span className="text-[#9CA3AF] flex items-center gap-2 text-sm">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                   PG ID
                 </span>
-                <span className="text-foreground font-medium font-mono text-sm">{user.pg_id}</span>
+                <span className="text-[#E5E7EB] font-medium font-mono text-sm">{user.pg_id}</span>
               </div>
             )}
-            <div className="flex items-center justify-between py-3 px-3 bg-secondary/30 rounded-lg">
-              <span className="text-muted-foreground flex items-center gap-2 text-sm">
+            <div className="flex items-center justify-between py-3 px-3 bg-[#0B0F14] rounded-lg border border-primary/10">
+              <span className="text-[#9CA3AF] flex items-center gap-2 text-sm">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -579,8 +580,8 @@ const Dashboard = () => {
               </span>
               <span className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1 ${
                 stats.subscriptionStatus === 'active' 
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                  : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                  ? 'bg-green-500/20 text-green-300'
+                  : 'bg-red-500/20 text-red-300'
               }`}>
                 {stats.subscriptionStatus === 'active' ? (
                   <>
@@ -595,14 +596,14 @@ const Dashboard = () => {
               </span>
             </div>
             {stats.subscriptionExpiry && (
-              <div className="flex items-center justify-between py-3 px-3 bg-secondary/30 rounded-lg">
-                <span className="text-muted-foreground flex items-center gap-2 text-sm">
+              <div className="flex items-center justify-between py-3 px-3 bg-[#0B0F14] rounded-lg border border-primary/10">
+                <span className="text-[#9CA3AF] flex items-center gap-2 text-sm">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   Expires
                 </span>
-                <span className="text-foreground font-medium text-sm">
+                <span className="text-[#E5E7EB] font-medium text-sm">
                   {new Date(stats.subscriptionExpiry).toLocaleDateString('en-IN', { 
                     day: 'numeric', 
                     month: 'short', 

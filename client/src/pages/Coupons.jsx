@@ -56,13 +56,13 @@ const Coupons = () => {
   ];
 
   if (user?.role !== 'superadmin') {
-    return <div className="p-6 text-foreground">Access denied. Superadmin only.</div>;
+    return <div className="p-6 text-[#E5E7EB]">Access denied. Superadmin only.</div>;
   }
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Coupons</h1>
+        <h1 className="text-3xl font-bold text-[#E5E7EB]">Coupons</h1>
         <Button onClick={() => setIsModalOpen(true)}>Add Coupon</Button>
       </div>
       <DataTable columns={columns} data={coupons} loading={loading} onEdit={(c) => { setEditingCoupon(c); setFormData({ code: c.code, discount_percent: c.discount_percent, max_uses: c.max_uses || '', expires_on: formatDateForInput(c.expires_on) }); setIsModalOpen(true); }} onDelete={async (c) => { if (window.confirm('Delete coupon?')) { try { await api.delete(`/api/coupons/${c.id}`); fetchCoupons(); } catch (error) { alert(error.response?.data?.error || 'Error'); } } }} />

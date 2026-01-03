@@ -65,15 +65,15 @@ const Subscriptions = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Subscriptions</h1>
+        <h1 className="text-3xl font-bold text-[#E5E7EB]">Subscriptions</h1>
         <Button onClick={() => setIsModalOpen(true)}>Subscribe to Plan</Button>
       </div>
       <DataTable columns={columns} data={subscriptions} loading={loading} />
       <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setFormData({ pg_id: pgId, plan_id: '', start_date: '', custom_price: '' }); }} title="Subscribe to Plan">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-foreground text-sm font-semibold mb-2">Plan *</label>
-            <select value={formData.plan_id} onChange={(e) => setFormData({ ...formData, plan_id: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground" required>
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Plan *</label>
+            <select value={formData.plan_id} onChange={(e) => setFormData({ ...formData, plan_id: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]" required>
               <option value="">Select Plan</option>
               {plans.map((plan) => <option key={plan.id} value={plan.id}>{plan.name} - ₹{plan.price}</option>)}
             </select>

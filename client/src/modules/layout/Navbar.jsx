@@ -20,7 +20,7 @@ const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebar
 
   return (
     <nav 
-      className="fixed top-0 left-0 right-0 bg-card border-b border-border shadow-sm z-40 h-16 flex items-center px-4 md:px-6"
+      className="fixed top-0 left-0 right-0 bg-[#0F1720]/95 backdrop-blur-md border-b border-primary/10 shadow-lg z-40 h-16 flex items-center px-4 md:px-6"
       style={{ 
         left: isMobile ? 0 : `${sidebarWidth}px`,
         width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`
@@ -31,7 +31,7 @@ const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebar
           {isMobile && (
             <button
               onClick={onSidebarOpen}
-              className="p-2 hover:bg-secondary rounded transition-colors text-foreground flex-shrink-0"
+              className="p-2 hover:bg-[#0B0F14] rounded-lg transition-colors text-[#E5E7EB] flex-shrink-0"
               aria-label="Toggle menu"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +42,7 @@ const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebar
           {!isMobile && (
             <button
               onClick={setSidebarOpen}
-              className="p-2 hover:bg-secondary rounded transition-colors text-foreground flex-shrink-0"
+              className="p-2 hover:bg-[#0B0F14] rounded-lg transition-colors text-[#E5E7EB] flex-shrink-0"
               aria-label="Toggle sidebar"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,21 +56,21 @@ const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebar
           {user && (
             <button
               onClick={() => navigate('/profile')}
-              className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-secondary rounded hover:bg-secondary/80 transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-[#0B0F14] rounded-lg hover:bg-[#0F1720] border border-primary/10 transition-colors cursor-pointer"
             >
-              <svg className="w-4 h-4 text-muted-foreground flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-[#9CA3AF] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               <div className="hidden md:flex items-center gap-1 min-w-0">
-                <span className="text-sm text-foreground truncate max-w-[120px]">{user.name}</span>
-                <span className="text-xs text-muted-foreground hidden lg:inline whitespace-nowrap">
+                <span className="text-sm text-[#E5E7EB] truncate max-w-[120px]">{user.name}</span>
+                <span className="text-xs text-[#9CA3AF] hidden lg:inline whitespace-nowrap">
                   ({user.role === 'superadmin' ? 'Super Admin' : 'PG Admin'})
                 </span>
               </div>
             </button>
           )}
           <button
-            className="p-2 hover:bg-secondary rounded transition-colors text-foreground relative flex-shrink-0"
+            className="p-2 hover:bg-[#0B0F14] rounded-lg transition-colors text-[#E5E7EB] relative flex-shrink-0"
             aria-label="Notifications"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@ const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebar
           </button>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-3 md:px-4 py-2 bg-destructive text-destructive-foreground rounded hover:opacity-90 transition-all text-sm font-medium flex-shrink-0"
+            className="flex items-center gap-2 px-3 md:px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 border border-red-500/20 transition-all text-sm font-medium flex-shrink-0"
             aria-label="Logout"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -78,15 +78,15 @@ const Referrals = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Referrals</h1>
+        <h1 className="text-3xl font-bold text-[#E5E7EB]">Referrals</h1>
         <Button onClick={() => setIsModalOpen(true)}>Add Referral</Button>
       </div>
       <DataTable columns={columns} data={referrals} loading={loading} onEdit={user?.role === 'superadmin' ? (ref) => handleActivate(ref) : null} />
       <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setFormData({ referred_by: getStoredPgId(), referred_pg: '', reward_days: 7 }); }} title="Add Referral">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-foreground text-sm font-semibold mb-2">Referred PG *</label>
-            <select value={formData.referred_pg} onChange={(e) => setFormData({ ...formData, referred_pg: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground" required>
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Referred PG *</label>
+            <select value={formData.referred_pg} onChange={(e) => setFormData({ ...formData, referred_pg: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]" required>
               <option value="">Select PG</option>
               {pgs.filter(pg => pg.id != formData.referred_by).map((pg) => <option key={pg.id} value={pg.id}>{pg.name} ({pg.pg_uid})</option>)}
             </select>

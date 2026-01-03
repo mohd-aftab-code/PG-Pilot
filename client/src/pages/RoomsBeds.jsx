@@ -37,7 +37,7 @@ const SkeletonLoader = ({ rows = 5 }) => {
     <div className="space-y-3">
       {Array.from({ length: rows }).map((_, idx) => (
         <div key={idx} className="animate-pulse">
-          <div className="bg-secondary rounded-lg p-4 border border-border">
+          <div className="bg-[#0B0F14] rounded-lg p-4 border border-primary/10">
             <div className="flex items-center justify-between">
               <div className="flex-1 space-y-2">
                 <div className="h-4 bg-muted rounded w-3/4"></div>
@@ -58,21 +58,21 @@ const RoomCard = ({ room, isSelected, onSelect, onEdit }) => {
     <div
       className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
         isSelected
-          ? 'border-primary bg-primary/5 shadow-md'
-          : 'border-border bg-card hover:border-primary/50 hover:shadow-sm'
+          ? 'border-[#22D3EE] bg-[#22D3EE]/10 shadow-md'
+          : 'border-primary/10 bg-[#0F1720] hover:border-primary/30 hover:shadow-sm'
       }`}
       onClick={() => onSelect(room)}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3 flex-1">
           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-            isSelected ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
+            isSelected ? 'bg-[#22D3EE] text-[#0B0F14]' : 'bg-[#0B0F14] text-[#E5E7EB]'
           }`}>
             <IconHome />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate">{room.room_name}</h3>
-            <p className="text-sm text-muted-foreground">Room ID: {room.id}</p>
+            <h3 className="font-semibold text-[#E5E7EB] truncate">{room.room_name}</h3>
+            <p className="text-sm text-[#9CA3AF]">Room ID: {room.id}</p>
           </div>
         </div>
         <button
@@ -80,7 +80,7 @@ const RoomCard = ({ room, isSelected, onSelect, onEdit }) => {
             e.stopPropagation();
             onEdit(room);
           }}
-          className="p-2 hover:bg-secondary rounded transition-colors text-muted-foreground hover:text-foreground"
+          className="p-2 hover:bg-[#0B0F14] rounded transition-colors text-[#9CA3AF] hover:text-[#E5E7EB]"
           title="Edit room"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,23 +88,23 @@ const RoomCard = ({ room, isSelected, onSelect, onEdit }) => {
           </svg>
         </button>
       </div>
-      <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-border">
+      <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-primary/10">
         <div>
-          <p className="text-xs text-muted-foreground mb-1">Total Beds</p>
-          <p className="text-lg font-semibold text-foreground">{room.total_beds}</p>
+          <p className="text-xs text-[#9CA3AF] mb-1">Total Beds</p>
+          <p className="text-lg font-semibold text-[#E5E7EB]">{room.total_beds}</p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground mb-1">Rent per Bed</p>
-          <p className="text-lg font-semibold text-foreground">₹{room.rent_per_bed}</p>
+          <p className="text-xs text-[#9CA3AF] mb-1">Rent per Bed</p>
+          <p className="text-lg font-semibold text-[#E5E7EB]">₹{room.rent_per_bed}</p>
         </div>
       </div>
       {room.gender_type && (
         <div className="mt-2">
-          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
+          <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-300 rounded">
             {room.gender_type}
           </span>
           {room.show_in_marketplace && (
-            <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded ml-2">
+            <span className="text-xs px-2 py-1 bg-green-500/20 text-green-300 rounded ml-2">
               Marketplace
             </span>
           )}
@@ -119,11 +119,11 @@ const BedCard = ({ bed, onStatusChange }) => {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'occupied':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border-blue-300 dark:border-blue-700';
+        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
       case 'blocked':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 border-red-300 dark:border-red-700';
+        return 'bg-red-500/20 text-red-300 border-red-500/30';
       default:
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 border-green-300 dark:border-green-700';
+        return 'bg-green-500/20 text-green-300 border-green-500/30';
     }
   };
 
@@ -139,14 +139,14 @@ const BedCard = ({ bed, onStatusChange }) => {
   };
 
   return (
-    <div className="p-3 rounded-lg border border-border bg-card hover:shadow-sm transition-all">
+    <div className="p-3 rounded-lg border border-primary/10 bg-[#0F1720] hover:shadow-sm transition-all">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-[#0B0F14] flex items-center justify-center">
             <IconBed />
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-foreground">Bed #{bed.bed_number}</h3>
+            <h3 className="font-semibold text-sm text-[#E5E7EB]">Bed #{bed.bed_number}</h3>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -155,7 +155,7 @@ const BedCard = ({ bed, onStatusChange }) => {
           </span>
           <button
             onClick={() => onStatusChange(bed, getNextStatus(bed.status))}
-            className="p-1.5 hover:bg-secondary rounded transition-colors text-muted-foreground hover:text-foreground"
+            className="p-1.5 hover:bg-[#0B0F14] rounded transition-colors text-[#9CA3AF] hover:text-[#E5E7EB]"
             title={`Change to ${getNextStatus(bed.status)}`}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -362,8 +362,8 @@ const RoomsBeds = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-1">Rooms & Beds</h1>
-          <p className="text-muted-foreground text-sm">Manage your rooms and bed availability</p>
+          <h1 className="text-3xl font-bold text-[#E5E7EB] mb-1">Rooms & Beds</h1>
+          <p className="text-[#9CA3AF] text-sm">Manage your rooms and bed availability</p>
         </div>
         <Button 
           onClick={() => setIsRoomModalOpen(true)} 
@@ -377,25 +377,25 @@ const RoomsBeds = () => {
       {/* Stats Summary */}
       {!loading && rooms.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <div className="bg-card p-4 rounded-lg border border-border">
+          <div className="bg-[#0F1720] p-4 rounded-lg border border-primary/10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
                 <IconHome />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Total Rooms</p>
-                <p className="text-xl font-bold text-foreground">{rooms.length}</p>
+                <p className="text-xs text-[#9CA3AF]">Total Rooms</p>
+                <p className="text-xl font-bold text-[#E5E7EB]">{rooms.length}</p>
               </div>
             </div>
           </div>
-          <div className="bg-card p-4 rounded-lg border border-border">
+          <div className="bg-[#0F1720] p-4 rounded-lg border border-primary/10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
                 <IconBed />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Total Beds</p>
-                <p className="text-xl font-bold text-foreground">
+                <p className="text-xs text-[#9CA3AF]">Total Beds</p>
+                <p className="text-xl font-bold text-[#E5E7EB]">
                   {rooms.reduce((sum, room) => sum + (room.total_beds || 0), 0)}
                 </p>
               </div>
@@ -412,28 +412,28 @@ const RoomsBeds = () => {
             placeholder="Search rooms..."
             value={roomFilter.search}
             onChange={(e) => setRoomFilter({ ...roomFilter, search: e.target.value })}
-            className="w-full pl-10 pr-4 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+            className="w-full pl-10 pr-4 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
           />
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none">
             <IconSearch />
           </div>
         </div>
       </div>
 
       {/* Rooms Table */}
-      <div className="bg-card rounded-lg border border-border overflow-hidden">
+      <div className="bg-[#0F1720] rounded-lg border border-primary/10 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-muted/50 border-b border-border">
+            <thead className="bg-muted/50 border-b border-primary/10">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-12"></th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Room Name</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Beds</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rent/Bed</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Gender</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Marketplace</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Images</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider w-12"></th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Room Name</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Total Beds</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Rent/Bed</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Gender</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Marketplace</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Images</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -465,10 +465,10 @@ const RoomsBeds = () => {
                               e.stopPropagation();
                               toggleRoom(room.id);
                             }}
-                            className="p-1 hover:bg-secondary rounded transition-colors"
+                            className="p-1 hover:bg-[#0B0F14] rounded transition-colors"
                           >
                             <svg 
-                              className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                              className={`w-4 h-4 text-[#9CA3AF] transition-transform ${isExpanded ? 'rotate-90' : ''}`}
                               fill="none" 
                               stroke="currentColor" 
                               viewBox="0 0 24 24"
@@ -478,15 +478,15 @@ const RoomsBeds = () => {
                           </button>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="font-medium text-foreground">{room.room_name}</div>
+                          <div className="font-medium text-[#E5E7EB]">{room.room_name}</div>
                           {room.room_description && (
-                            <div className="text-xs text-muted-foreground mt-1 truncate max-w-xs">
+                            <div className="text-xs text-[#9CA3AF] mt-1 truncate max-w-xs">
                               {room.room_description}
                             </div>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-foreground">{room.total_beds}</td>
-                        <td className="px-4 py-3 text-foreground">₹{room.rent_per_bed}</td>
+                        <td className="px-4 py-3 text-[#E5E7EB]">{room.total_beds}</td>
+                        <td className="px-4 py-3 text-[#E5E7EB]">₹{room.rent_per_bed}</td>
                         <td className="px-4 py-3">
                           <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded capitalize">
                             {room.gender_type || 'unisex'}
@@ -511,7 +511,7 @@ const RoomsBeds = () => {
                               View ({typeof room.room_images === 'string' ? JSON.parse(room.room_images).length : room.room_images.length})
                             </button>
                           ) : (
-                            <span className="text-xs text-muted-foreground">-</span>
+                            <span className="text-xs text-[#9CA3AF]">-</span>
                           )}
                         </td>
                         <td className="px-4 py-3">
@@ -531,7 +531,7 @@ const RoomsBeds = () => {
                               });
                               setIsRoomModalOpen(true);
                             }}
-                            className="p-2 hover:bg-secondary rounded transition-colors text-muted-foreground hover:text-foreground"
+                            className="p-2 hover:bg-[#0B0F14] rounded transition-colors text-[#9CA3AF] hover:text-[#E5E7EB]"
                             title="Edit room"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -551,12 +551,12 @@ const RoomsBeds = () => {
                               ) : filteredRoomBeds.length > 0 ? (
                                 <>
                                   <div className="flex items-center justify-between mb-3">
-                                    <h4 className="font-semibold text-foreground">Beds in {room.room_name}</h4>
+                                    <h4 className="font-semibold text-[#E5E7EB]">Beds in {room.room_name}</h4>
                                     <select
                                       value={bedFilter.status}
                                       onChange={(e) => setBedFilter({ ...bedFilter, status: e.target.value })}
                                       onClick={(e) => e.stopPropagation()}
-                                      className="px-3 py-1.5 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+                                      className="px-3 py-1.5 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
                                     >
                                       <option value="all">All Status</option>
                                       <option value="vacant">Vacant</option>
@@ -575,7 +575,7 @@ const RoomsBeds = () => {
                                   </div>
                                 </>
                               ) : (
-                                <div className="text-center py-4 text-muted-foreground">
+                                <div className="text-center py-4 text-[#9CA3AF]">
                                   {roomBeds.length === 0 
                                     ? 'No beds found for this room' 
                                     : `No beds found with status: ${bedFilter.status}`}
@@ -592,10 +592,10 @@ const RoomsBeds = () => {
                 <tr>
                   <td colSpan="8" className="px-4 py-12 text-center">
                     <div className="flex flex-col items-center">
-                      <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
+                      <div className="w-16 h-16 bg-[#0B0F14] rounded-full flex items-center justify-center mb-4">
                         <IconHome />
                       </div>
-                      <p className="text-muted-foreground mb-4">
+                      <p className="text-[#9CA3AF] mb-4">
                         {roomFilter.search ? 'No rooms found matching your search' : 'No rooms added yet'}
                       </p>
                       <Button
@@ -660,7 +660,7 @@ const RoomsBeds = () => {
             <select
               value={formData.gender_type}
               onChange={(e) => setFormData({ ...formData, gender_type: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
             >
               <option value="unisex">Unisex</option>
               <option value="male">Male</option>
@@ -676,7 +676,7 @@ const RoomsBeds = () => {
                 onChange={(e) => setFormData({ ...formData, show_in_marketplace: e.target.checked })}
                 className="mr-2"
               />
-              <span className="text-sm text-foreground">Show in Marketplace</span>
+              <span className="text-sm text-[#E5E7EB]">Show in Marketplace</span>
             </label>
           </div>
 
@@ -685,7 +685,7 @@ const RoomsBeds = () => {
             <textarea
               value={formData.room_description}
               onChange={(e) => setFormData({ ...formData, room_description: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
               rows="3"
               placeholder="Describe the room (optional)"
             />
@@ -701,11 +701,11 @@ const RoomsBeds = () => {
                 const files = Array.from(e.target.files);
                 setFormData({ ...formData, images: files });
               }}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
             />
             {formData.images.length > 0 && (
               <div className="mt-2">
-                <p className="text-sm text-muted-foreground mb-2">
+                <p className="text-sm text-[#9CA3AF] mb-2">
                   {formData.images.length} image(s) selected
                 </p>
                 <div className="grid grid-cols-3 gap-2">
@@ -714,7 +714,7 @@ const RoomsBeds = () => {
                       <img
                         src={URL.createObjectURL(image)}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-20 object-cover rounded border border-border"
+                        className="w-full h-20 object-cover rounded border border-primary/10"
                       />
                     </div>
                   ))}
@@ -723,14 +723,14 @@ const RoomsBeds = () => {
             )}
             {editingRoom && editingRoom.room_images && (
               <div className="mt-2">
-                <p className="text-sm text-muted-foreground mb-2">Existing Images:</p>
+                <p className="text-sm text-[#9CA3AF] mb-2">Existing Images:</p>
                 <div className="grid grid-cols-3 gap-2">
                   {(typeof editingRoom.room_images === 'string' ? JSON.parse(editingRoom.room_images) : editingRoom.room_images).map((img, index) => (
                     <div key={index} className="relative">
                       <img
                         src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
                         alt={`Existing ${index + 1}`}
-                        className="w-full h-20 object-cover rounded border border-border"
+                        className="w-full h-20 object-cover rounded border border-primary/10"
                       />
                     </div>
                   ))}
@@ -764,7 +764,7 @@ const RoomsBeds = () => {
                 <img
                   src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
                   alt={`Room image ${index + 1}`}
-                  className="w-full h-48 object-cover rounded-lg border border-border"
+                  className="w-full h-48 object-cover rounded-lg border border-primary/10"
                 />
                 <a
                   href={img.startsWith('http') ? img : `http://localhost:5000${img}`}

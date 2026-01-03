@@ -58,7 +58,7 @@ const Invoices = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
+        <h1 className="text-3xl font-bold text-[#E5E7EB]">Invoices</h1>
         <Button onClick={() => setIsModalOpen(true)}>Add Invoice</Button>
       </div>
       <DataTable columns={columns} data={invoices} loading={loading} onEdit={(inv) => { setEditingInvoice(inv); setFormData({ pg_id: inv.pg_id, amount: inv.amount, invoice_date: formatDateForInput(inv.invoice_date), due_date: formatDateForInput(inv.due_date), status: inv.status }); setIsModalOpen(true); }} />
@@ -68,8 +68,8 @@ const Invoices = () => {
           <Input label="Invoice Date" type="date" value={formData.invoice_date} onChange={(e) => setFormData({ ...formData, invoice_date: e.target.value })} />
           <Input label="Due Date" type="date" value={formData.due_date} onChange={(e) => setFormData({ ...formData, due_date: e.target.value })} />
           <div className="mb-4">
-            <label className="block text-foreground text-sm font-semibold mb-2">Status *</label>
-            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground" required>
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Status *</label>
+            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]" required>
               <option value="unpaid">Unpaid</option>
               <option value="paid">Paid</option>
             </select>

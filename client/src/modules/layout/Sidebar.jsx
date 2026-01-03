@@ -153,26 +153,26 @@ const Sidebar = ({ open, onClose, isMobile }) => {
     <>
       {isMobile && open && (
         <div 
-          className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm"
+          className="fixed inset-0 bg-[#0B0F14]/80 z-30 backdrop-blur-sm"
           onClick={onClose}
         />
       )}
       <aside
-        className={`fixed top-0 left-0 h-screen bg-sidebar-background text-sidebar-foreground shadow-lg z-30 transition-all duration-300 ${
+        className={`fixed top-0 left-0 h-screen bg-[#0F1720] text-[#E5E7EB] shadow-lg z-30 transition-all duration-300 border-r border-primary/10 ${
           open ? 'w-64' : 'w-20'
         } ${isMobile ? (open ? 'translate-x-0' : '-translate-x-full') : ''}`}
         style={{ width: open ? '256px' : '80px', paddingTop: '4rem' }}
       >
         {/* Logo Section */}
-        <div className="fixed top-0 left-0 h-16 bg-sidebar-background border-b border-sidebar-border flex items-center justify-start z-40 transition-all duration-300"
+        <div className="fixed top-0 left-0 h-16 bg-[#0F1720] border-b border-primary/10 flex items-center justify-start z-40 transition-all duration-300"
           style={{ width: open ? '256px' : '80px' }}
         >
-          <div className="flex items-center  w-full">
-            <div className="w-10 h-10 bg-primary rounded flex items-center justify-center flex-shrink-0">
-
+          <div className="flex items-center gap-3 px-3 w-full">
+            <div className="w-10 h-10 bg-[#22D3EE]/20 rounded-lg flex items-center justify-center flex-shrink-0 border border-primary/20">
+              <span className="text-[#22D3EE] font-bold text-sm">PG</span>
             </div>
             {open && (
-              <h1 className="text-lg font-bold text-sidebar-foreground whitespace-nowrap">PG Pilot</h1>
+              <h1 className="text-lg font-bold text-[#E5E7EB] whitespace-nowrap">Pilot</h1>
             )}
           </div>
         </div>
@@ -186,10 +186,10 @@ const Sidebar = ({ open, onClose, isMobile }) => {
                 <li key={item.path}>
                   <Link
                     to={item.path}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded transition-all group ${
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group ${
                       isActive
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
-                        : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground'
+                        ? 'bg-[#1FB6C1]/20 text-[#22D3EE] border-l-4 border-[#22D3EE] shadow-sm'
+                        : 'text-[#9CA3AF] hover:bg-[#0B0F14] hover:text-[#E5E7EB]'
                     }`}
                     onClick={isMobile ? onClose : undefined}
                   >

@@ -182,7 +182,7 @@ const PGManagement = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">PG Management</h1>
+        <h1 className="text-3xl font-bold text-[#E5E7EB]">PG Management</h1>
         {user?.role === 'superadmin' && (
           <Button onClick={() => setIsModalOpen(true)}>Add New PG</Button>
         )}
@@ -251,7 +251,7 @@ const PGManagement = () => {
             required
           />
           <div className="mb-4">
-            <label className="block text-foreground text-sm font-semibold mb-2">
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">
               PG Images
             </label>
             <input
@@ -262,11 +262,11 @@ const PGManagement = () => {
                 const files = Array.from(e.target.files);
                 setFormData({ ...formData, images: files });
               }}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
             />
             {formData.images.length > 0 && (
               <div className="mt-2">
-                <p className="text-sm text-muted-foreground mb-2">
+                <p className="text-sm text-[#9CA3AF] mb-2">
                   {formData.images.length} image(s) selected
                 </p>
                 <div className="grid grid-cols-3 gap-2">
@@ -275,7 +275,7 @@ const PGManagement = () => {
                       <img
                         src={URL.createObjectURL(image)}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-20 object-cover rounded border border-border"
+                        className="w-full h-20 object-cover rounded border border-primary/10"
                       />
                     </div>
                   ))}
@@ -284,14 +284,14 @@ const PGManagement = () => {
             )}
             {editingPG && editingPG.images && (
               <div className="mt-2">
-                <p className="text-sm text-muted-foreground mb-2">Existing Images:</p>
+                <p className="text-sm text-[#9CA3AF] mb-2">Existing Images:</p>
                 <div className="grid grid-cols-3 gap-2">
                   {(typeof editingPG.images === 'string' ? JSON.parse(editingPG.images) : editingPG.images).map((img, index) => (
                     <div key={index} className="relative">
                       <img
                         src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
                         alt={`Existing ${index + 1}`}
-                        className="w-full h-20 object-cover rounded border border-border"
+                        className="w-full h-20 object-cover rounded border border-primary/10"
                       />
                     </div>
                   ))}
@@ -307,7 +307,7 @@ const PGManagement = () => {
                 onChange={(e) => setFormData({ ...formData, food_enabled: e.target.checked })}
                 className="mr-2"
               />
-              <span className="text-foreground">Food Enabled</span>
+              <span className="text-[#E5E7EB]">Food Enabled</span>
             </label>
           </div>
           <Input
@@ -320,7 +320,7 @@ const PGManagement = () => {
           
           {/* Facilities Section */}
           <div className="mb-4">
-            <label className="block text-foreground text-sm font-semibold mb-3">
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-3">
               Facilities *
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -340,11 +340,11 @@ const PGManagement = () => {
                     }}
                     className="mr-2 w-4 h-4"
                   />
-                  <span className="text-sm text-foreground">{facility.replace('_', ' ')}</span>
+                  <span className="text-sm text-[#E5E7EB]">{facility.replace('_', ' ')}</span>
                 </label>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-[#9CA3AF] mt-2">
               Select all facilities available at your PG
             </p>
           </div>

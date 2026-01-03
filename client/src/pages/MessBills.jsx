@@ -71,15 +71,15 @@ const MessBills = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Mess Bills</h1>
+        <h1 className="text-3xl font-bold text-[#E5E7EB]">Mess Bills</h1>
         <Button onClick={() => setIsModalOpen(true)}>Add Mess Bill</Button>
       </div>
       <DataTable columns={columns} data={bills} loading={loading} onEdit={(bill) => { setEditingBill(bill); setFormData({ tenant_id: bill.tenant_id, pg_id: bill.pg_id, month_for: formatDateForInput(bill.month_for), amount: bill.amount, status: bill.status }); setIsModalOpen(true); }} />
       <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingBill(null); }} title={editingBill ? 'Edit Mess Bill' : 'Add Mess Bill'}>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-foreground text-sm font-semibold mb-2">Tenant *</label>
-            <select value={formData.tenant_id} onChange={(e) => setFormData({ ...formData, tenant_id: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground" required>
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Tenant *</label>
+            <select value={formData.tenant_id} onChange={(e) => setFormData({ ...formData, tenant_id: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]" required>
               <option value="">Select Tenant</option>
               {tenants.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
@@ -87,8 +87,8 @@ const MessBills = () => {
           <Input label="Month For" type="date" value={formData.month_for} onChange={(e) => setFormData({ ...formData, month_for: e.target.value })} required />
           <Input label="Amount" type="number" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required />
           <div className="mb-4">
-            <label className="block text-foreground text-sm font-semibold mb-2">Status *</label>
-            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground" required>
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Status *</label>
+            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]" required>
               <option value="pending">Pending</option>
               <option value="paid">Paid</option>
             </select>

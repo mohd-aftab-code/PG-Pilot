@@ -72,13 +72,13 @@ const Plans = () => {
   ];
 
   if (user?.role !== 'superadmin') {
-    return <div className="p-6 text-foreground">Access denied. Superadmin only.</div>;
+    return <div className="p-6 text-[#E5E7EB]">Access denied. Superadmin only.</div>;
   }
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Plans</h1>
+        <h1 className="text-3xl font-bold text-[#E5E7EB]">Plans</h1>
         <Button onClick={() => setIsModalOpen(true)}>Add Plan</Button>
       </div>
       <DataTable
@@ -118,11 +118,11 @@ const Plans = () => {
           <Input label="Max Rooms" type="number" value={formData.max_rooms} onChange={(e) => setFormData({ ...formData, max_rooms: parseInt(e.target.value) || 10 })} required />
           <Input label="Max Beds" type="number" value={formData.max_beds} onChange={(e) => setFormData({ ...formData, max_beds: parseInt(e.target.value) || 50 })} required />
           <div className="mb-4">
-            <label className="block text-foreground text-sm font-semibold mb-2">Description</label>
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Description</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-[#E5E7EB]"
               rows="3"
             />
           </div>

@@ -188,13 +188,13 @@ const Tenants = () => {
   const StatusBadge = ({ isActive }) => {
     if (isActive === 1 || isActive === true) {
       return (
-        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-500/20 text-green-300">
           Active
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">
+      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-500/20 text-red-300">
         Inactive
       </span>
     );
@@ -229,14 +229,14 @@ const Tenants = () => {
       header: 'Aadhaar', 
       accessor: 'aadhaar_url', 
       render: (val, row) => {
-        if (!val) return <span className="text-muted-foreground">-</span>;
+        if (!val) return <span className="text-[#9CA3AF]">-</span>;
         const docUrl = val.startsWith('http') ? val : `http://localhost:5000${val}`;
         return (
           <a
             href={docUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary hover:underline text-sm font-medium"
+            className="text-[#22D3EE] hover:text-[#1FB6C1] hover:underline text-sm font-medium transition-colors"
           >
             View Document
           </a>
@@ -247,47 +247,123 @@ const Tenants = () => {
   ];
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Tenants</h1>
-        <Button onClick={() => setIsModalOpen(true)}>Add New Tenant</Button>
-      </div>
-
-      {/* Simple Filters */}
-      <div className="mb-4 flex flex-wrap gap-3">
-        <input
-          type="text"
-          placeholder="Search by name, phone, email..."
-          value={filters.search}
-          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-          className="flex-1 min-w-[200px] px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-        />
-        <select
-          value={filters.status}
-          onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-          className="px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-        >
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-        {(filters.search || filters.status !== 'all') && (
-          <button
-            onClick={() => setFilters({ search: '', status: 'all' })}
-            className="px-4 py-2 text-sm text-primary hover:text-accent font-medium"
+    <div className="p-4 md:p-6 lg:p-8">
+      {/* Header Section */}
+      <div className="mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-[#E5E7EB] mb-2">Tenants</h1>
+            <p className="text-[#9CA3AF] text-sm md:text-base">
+              Manage all your PG tenants, their details, and room assignments
+            </p>
+          </div>
+          <Button 
+            onClick={() => setIsModalOpen(true)}
+            className="w-full sm:w-auto"
           >
-            Clear
-          </button>
-        )}
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add New Tenant
+          </Button>
+        </div>
+
+        {/* Filters Section */}
+        <div className="bg-[#0F1720] border border-primary/10 rounded-lg p-4 md:p-5">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 relative">
+              <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search by name, phone, email..."
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                className="w-full pl-10 pr-4 py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] placeholder:text-[#9CA3AF] transition-all"
+              />
+            </div>
+            <select
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              className="w-full sm:w-auto px-3 md:px-4 py-2 md:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+            {(filters.search || filters.status !== 'all') && (
+              <button
+                onClick={() => setFilters({ search: '', status: 'all' })}
+                className="w-full sm:w-auto px-3 md:px-4 py-2 md:py-2.5 text-xs md:text-sm text-[#22D3EE] hover:text-[#1FB6C1] font-medium border border-primary/20 hover:border-primary/40 rounded-lg bg-[#0B0F14] hover:bg-[#0F1720] transition-all flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredTenants}
-        loading={loading}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
+        <div className="bg-[#0F1720] border border-primary/10 rounded-lg p-3 md:p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <p className="text-[#9CA3AF] text-xs md:text-sm font-medium mb-1">Total Tenants</p>
+              <p className="text-xl md:text-2xl font-bold text-[#E5E7EB] truncate">{filteredTenants.length}</p>
+            </div>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[#0F1720] border border-primary/10 rounded-lg p-3 md:p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <p className="text-[#9CA3AF] text-xs md:text-sm font-medium mb-1">Active</p>
+              <p className="text-xl md:text-2xl font-bold text-green-400 truncate">
+                {filteredTenants.filter(t => t.is_active === 1).length}
+              </p>
+            </div>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[#0F1720] border border-primary/10 rounded-lg p-3 md:p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <p className="text-[#9CA3AF] text-xs md:text-sm font-medium mb-1">Inactive</p>
+              <p className="text-xl md:text-2xl font-bold text-red-400 truncate">
+                {filteredTenants.filter(t => t.is_active !== 1).length}
+              </p>
+            </div>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-red-500/20 rounded-lg flex items-center justify-center flex-shrink-0 ml-2">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Data Table */}
+      <div className="bg-[#0F1720] border border-primary/10 rounded-lg overflow-hidden">
+        <DataTable
+          columns={columns}
+          data={filteredTenants}
+          loading={loading}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </div>
 
       <Modal
         isOpen={isModalOpen}
@@ -320,29 +396,36 @@ const Tenants = () => {
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           />
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Aadhaar Document</label>
-            <input
-              type="file"
-              accept="image/*,.pdf"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                setFormData({ ...formData, aadhaar_file: file });
-              }}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-            />
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Aadhaar Document</label>
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  setFormData({ ...formData, aadhaar_file: file });
+                }}
+                className="w-full px-3 py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#22D3EE]/20 file:text-[#22D3EE] hover:file:bg-[#22D3EE]/30 transition-all"
+              />
+            </div>
             {formData.aadhaar_file && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Selected: {formData.aadhaar_file.name}
-              </p>
+              <div className="mt-2 p-3 bg-[#0B0F14] border border-primary/10 rounded-lg">
+                <p className="text-xs text-[#9CA3AF] flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Selected: <span className="text-[#E5E7EB] font-medium">{formData.aadhaar_file.name}</span>
+                </p>
+              </div>
             )}
             {editingTenant && editingTenant.aadhaar_url && !formData.aadhaar_file && (
-              <div className="mt-2 p-2 bg-muted rounded border border-border">
-                <p className="text-xs text-muted-foreground mb-2">Current Document:</p>
+              <div className="mt-2 p-3 bg-[#0B0F14] rounded-lg border border-primary/10">
+                <p className="text-xs text-[#9CA3AF] mb-2">Current Document:</p>
                 <a
                   href={editingTenant.aadhaar_url.startsWith('http') ? editingTenant.aadhaar_url : `http://localhost:5000${editingTenant.aadhaar_url}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
+                  className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-[#22D3EE] bg-[#22D3EE]/10 hover:bg-[#22D3EE]/20 rounded-lg transition-colors"
                 >
                   <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -354,7 +437,7 @@ const Tenants = () => {
             )}
           </div>
           <div className="mb-4">
-            <label className="block text-foreground text-sm font-semibold mb-2">Room</label>
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Room</label>
             <select
               value={selectedRoomId}
               onChange={(e) => {
@@ -366,7 +449,7 @@ const Tenants = () => {
                   setBeds([]);
                 }
               }}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              className="w-full px-3 py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all"
             >
               <option value="">Select Room</option>
               {rooms.map((room) => (
@@ -375,11 +458,11 @@ const Tenants = () => {
             </select>
           </div>
           <div className="mb-4">
-            <label className="block text-foreground text-sm font-semibold mb-2">Bed</label>
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Bed</label>
             <select
               value={formData.bed_id}
               onChange={(e) => setFormData({ ...formData, bed_id: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              className="w-full px-3 py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all"
             >
               <option value="">Select Bed</option>
               {beds.map((bed) => (
@@ -406,14 +489,14 @@ const Tenants = () => {
             onChange={(e) => setFormData({ ...formData, deposit_amount: e.target.value })}
           />
           <div className="mb-4">
-            <label className="flex items-center">
+            <label className="flex items-center gap-3 p-3 bg-[#0B0F14] border border-primary/10 rounded-lg cursor-pointer hover:bg-[#0F1720] transition-colors">
               <input
                 type="checkbox"
                 checked={formData.is_active}
                 onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                className="mr-2"
+                className="w-4 h-4 text-[#22D3EE] bg-[#0B0F14] border-primary/20 rounded focus:ring-[#22D3EE] focus:ring-2"
               />
-              <span className="text-foreground">Active</span>
+              <span className="text-[#E5E7EB] font-medium">Active Tenant</span>
             </label>
           </div>
           <div className="flex gap-2 justify-end">

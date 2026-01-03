@@ -55,7 +55,7 @@ const MessPlans = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Mess Plans</h1>
+        <h1 className="text-3xl font-bold text-[#E5E7EB]">Mess Plans</h1>
         <Button onClick={() => setIsModalOpen(true)}>Add Mess Plan</Button>
       </div>
       <DataTable
