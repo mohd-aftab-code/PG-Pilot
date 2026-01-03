@@ -12,35 +12,41 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Color Variables */
-  --background: 0 0% 100%;
-  --foreground: 215 20% 31%;
-  --card: 0 0% 100%;
-  --card-foreground: 215 20% 31%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 215 20% 31%;
-  --primary: 200 100% 20%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 210 25% 90%;
-  --secondary-foreground: 215 20% 31%;
-  --muted: 210 25% 90%;
-  --muted-foreground: 215 10% 50%;
-  --accent: 184 97% 40%;
-  --accent-foreground: 0 0% 100%;
+  /* Dark Color Scheme Variables */
+  --background: 210 20% 5%; /* #0B0F14 */
+  --foreground: 210 10% 90%; /* #E5E7EB - Text Light */
+  --card: 210 20% 8%; /* #0F1720 - Card BG */
+  --card-foreground: 210 10% 90%; /* #E5E7EB */
+  --popover: 210 20% 8%; /* #0F1720 */
+  --popover-foreground: 210 10% 90%; /* #E5E7EB */
+  --primary: 188 100% 50%; /* #22D3EE - Neon Cyan */
+  --primary-foreground: 210 20% 5%; /* #0B0F14 */
+  --secondary: 210 20% 8%; /* #0F1720 */
+  --secondary-foreground: 210 10% 90%; /* #E5E7EB */
+  --muted: 210 20% 8%; /* #0F1720 */
+  --muted-foreground: 210 5% 65%; /* #9CA3AF - Text Muted */
+  --accent: 184 70% 45%; /* #1FB6C1 - Teal Accent */
+  --accent-foreground: 210 20% 5%; /* #0B0F14 */
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
-  --border: 210 20% 88%;
-  --input: 210 20% 88%;
-  --ring: 200 100% 20%;
+  --border: 210 20% 15%;
+  --input: 210 20% 15%;
+  --ring: 188 100% 50%; /* #22D3EE - Neon Cyan */
   --radius: 0.5rem;
-  --sidebar-background: 200 100% 20%;
-  --sidebar-foreground: 0 0% 100%;
-  --sidebar-primary: 184 97% 40%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 200 100% 25%;
-  --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-border: 200 100% 25%;
-  --sidebar-ring: 184 97% 40%;
+  --sidebar-background: 210 20% 8%; /* #0F1720 */
+  --sidebar-foreground: 210 10% 90%; /* #E5E7EB */
+  --sidebar-primary: 184 70% 45%; /* #1FB6C1 */
+  --sidebar-primary-foreground: 210 20% 5%; /* #0B0F14 */
+  --sidebar-accent: 210 20% 12%;
+  --sidebar-accent-foreground: 210 10% 90%; /* #E5E7EB */
+  --sidebar-border: 210 20% 15%;
+  --sidebar-ring: 188 100% 50%; /* #22D3EE */
+  
+  /* Custom Color Variables */
+  --button: 172 80% 42%; /* #14B8A6 - Button */
+  --button-hover: 172 75% 50%; /* #2DD4BF - Button Hover */
+  --neon-cyan: 188 100% 50%; /* #22D3EE - Neon Cyan */
+  --teal-accent: 184 70% 45%; /* #1FB6C1 - Teal Accent */
 }
 
 * {

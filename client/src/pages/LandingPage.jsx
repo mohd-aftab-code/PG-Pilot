@@ -1199,26 +1199,26 @@ const LandingPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-[#0B0F14] via-[#0F1720] to-[#0B0F14]">
       {/* Header */}
-      <header className="bg-primary sticky top-0 z-50 shadow-md">
-        <div className="container mx-auto px-4 md:px-8 py-3 md:py-4 flex justify-between items-center min-h-[60px] md:h-16">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-white/10 rounded flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xs md:text-sm">PG</span>
+      <header className="bg-[#0F1720]/95 backdrop-blur-md sticky top-0 z-50 shadow-lg border-b border-primary/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-3 sm:py-4 flex justify-between items-center min-h-[56px] sm:min-h-[64px]">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+              <span className="text-primary font-bold text-sm sm:text-base">PG</span>
             </div>
-            <span className="text-lg md:text-xl font-bold text-primary-foreground">Pilot</span>
+            <span className="text-xl sm:text-2xl font-bold text-[#E5E7EB]">Pilot</span>
           </div>
-          <div className="flex gap-2 md:gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <button
               onClick={() => setShowLoginModal(true)}
-              className="px-3 md:px-5 py-1.5 md:py-2 text-primary-foreground hover:text-accent transition-colors font-semibold text-xs md:text-sm uppercase tracking-wide"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 text-[#E5E7EB] hover:text-[#22D3EE] transition-colors font-semibold text-sm sm:text-base"
             >
               Sign In
             </button>
             <button
               onClick={() => setShowSignupModal(true)}
-              className="px-4 md:px-6 py-1.5 md:py-2 bg-accent text-white rounded hover:bg-accent/90 transition-colors font-semibold text-xs md:text-sm uppercase tracking-wide"
+              className="px-5 sm:px-6 py-2 sm:py-2.5 bg-[#14B8A6] text-white rounded-lg hover:bg-[#2DD4BF] transition-colors font-semibold text-sm sm:text-base shadow-md hover:shadow-lg"
             >
               Sign Up
             </button>
@@ -1227,85 +1227,85 @@ const LandingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 md:px-8 py-12 md:py-20 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-primary mb-4 md:mb-6 leading-tight px-2">
-            Run Your Entire PG on
-            <span className="text-accent"> Autopilot</span>
+      <section className="relative w-full px-4 sm:px-6 md:px-8 py-16 sm:py-20 md:py-28 lg:py-32 text-center">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4 sm:mb-6 md:mb-8 leading-[1.1] sm:leading-tight">
+            <span className="text-[#E5E7EB] block mb-1 sm:mb-2">Run Your Entire PG on</span>
+            <span className="text-[#22D3EE] block">Autopilot</span>
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-foreground mb-6 md:mb-10 max-w-2xl mx-auto leading-relaxed px-2">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-[#D1D5DB] mb-8 sm:mb-10 md:mb-12 max-w-3xl mx-auto leading-relaxed px-2">
             Reduce manual work, never miss rent, track every bed in real time. 
             Simplify rent, tenants & mess in one place — built specifically for Indian PG owners.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center flex-wrap px-2 mb-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
             <button
               onClick={() => setShowSignupModal(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-3.5 bg-primary text-primary-foreground rounded-sm hover:bg-primary/90 transition-all text-sm md:text-lg font-semibold shadow-lg hover:shadow-xl uppercase tracking-wide"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 sm:px-8 md:px-10 py-3.5 sm:py-4 bg-[#14B8A6] text-white rounded-lg hover:bg-[#2DD4BF] transition-all text-sm sm:text-base md:text-lg font-semibold shadow-lg hover:shadow-xl active:scale-95"
             >
               Get Started Free
               <IconArrowRight />
             </button>
             <button
               onClick={() => setShowLoginModal(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-3.5 border-2 border-primary text-primary rounded-sm hover:bg-primary hover:text-primary-foreground transition-all text-sm md:text-lg font-semibold uppercase tracking-wide"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 sm:px-8 md:px-10 py-3.5 sm:py-4 border-2 border-[#22D3EE] text-[#22D3EE] rounded-lg hover:bg-[#22D3EE] hover:text-[#0B0F14] transition-all text-sm sm:text-base md:text-lg font-semibold active:scale-95"
             >
               Learn More
             </button>
           </div>
-          <p className="text-xs md:text-sm text-foreground/70 px-2">
+          <p className="text-xs sm:text-sm md:text-base text-[#9CA3AF]">
             No credit card required · Setup in 10 minutes
           </p>
         </div>
       </section>
 
       {/* Social Proof Stats Strip */}
-      <section className="bg-white py-8 md:py-12 border-b border-border">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 text-center">
-            <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">150+</div>
-              <div className="text-foreground font-semibold text-xs md:text-sm mb-1">PG Owners</div>
-              <div className="text-foreground/70 text-xs">trust PG Pilot to run their properties.</div>
+      <section className="relative w-full py-12 sm:py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12 text-center">
+            <div className="px-2">
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">150+</div>
+              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">PG Owners</div>
+              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">trust PG Pilot to run their properties.</div>
             </div>
-            <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">2000+</div>
-              <div className="text-foreground font-semibold text-xs md:text-sm mb-1">Rooms Managed</div>
-              <div className="text-foreground/70 text-xs">across India with real-time tracking.</div>
+            <div className="px-2">
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">2000+</div>
+              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Rooms Managed</div>
+              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">across India with real-time tracking.</div>
             </div>
-            <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">5000+</div>
-              <div className="text-foreground font-semibold text-xs md:text-sm mb-1">Tenants Tracked</div>
-              <div className="text-foreground/70 text-xs">with complete profiles and history.</div>
+            <div className="px-2">
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">5000+</div>
+              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Tenants Tracked</div>
+              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">with complete profiles and history.</div>
             </div>
-            <div>
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-primary mb-1 md:mb-2">25+</div>
-              <div className="text-foreground font-semibold text-xs md:text-sm mb-1">Cities</div>
-              <div className="text-foreground/70 text-xs">where PG owners rely on PG Pilot.</div>
+            <div className="px-2">
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">25+</div>
+              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Cities</div>
+              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">where PG owners rely on PG Pilot.</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Marketplace Section - For Tenants */}
-      <section className="bg-gradient-to-br from-blue-50 to-indigo-50 py-12 md:py-20">
-        <div className="container mx-auto px-4 md:px-8">
+      <section className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-8 md:mb-12">
-              <p className="text-xs md:text-sm font-bold text-accent uppercase tracking-wider mb-2">For Tenants</p>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-4 px-2">
+            <div className="text-center mb-8 sm:mb-12 md:mb-16">
+              <p className="text-xs sm:text-sm md:text-base font-semibold text-[#1FB6C1] uppercase tracking-wider mb-2 sm:mb-3">For Tenants</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-[#E5E7EB] mb-4 sm:mb-6 leading-tight">
                 Find Your Perfect PG
               </h2>
-              <p className="text-sm md:text-lg text-foreground max-w-2xl mx-auto px-2">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#D1D5DB] max-w-3xl mx-auto px-2">
                 Search from verified PGs with real-time availability. Filter by location, budget, facilities, and more.
               </p>
             </div>
 
             {/* Compact Search Form */}
-            <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 mb-8">
-              <form onSubmit={handleSearchSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="bg-[#0F1720] rounded-xl shadow-xl border border-primary/10 p-4 sm:p-5 md:p-6 mb-8 sm:mb-10">
+              <form onSubmit={handleSearchSubmit} className="space-y-4 sm:space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <div className="relative">
-                    <label className="block text-xs font-semibold mb-1 text-gray-700">City *</label>
+                    <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-[#E5E7EB]">City *</label>
                     <input
                       type="text"
                       value={searchParams.city}
@@ -1319,12 +1319,12 @@ const LandingPage = () => {
                       onBlur={() => {
                         setTimeout(() => setShowCitySuggestions(false), 200);
                       }}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-full px-4 py-3 sm:py-3.5 text-sm sm:text-base border border-primary/20 bg-[#0B0F14] text-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                       placeholder="e.g., Noida"
                       required
                     />
                     {showCitySuggestions && citySuggestions.length > 0 && (
-                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                      <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
                         {citySuggestions.map((city, idx) => (
                           <button
                             key={idx}
@@ -1333,10 +1333,10 @@ const LandingPage = () => {
                               setSearchParams({ ...searchParams, city });
                               setShowCitySuggestions(false);
                             }}
-                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
+                            className="w-full text-left px-4 py-2 text-sm text-[#E5E7EB] hover:bg-[#0F1720] focus:bg-[#0F1720] focus:outline-none border-b border-primary/20 last:border-b-0"
                           >
                             <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                               </svg>
@@ -1347,16 +1347,16 @@ const LandingPage = () => {
                       </div>
                     )}
                     {suggestionsLoading && showCitySuggestions && (
-                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-2">
+                      <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg p-2">
                         <div className="flex items-center justify-center">
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent"></div>
-                          <span className="ml-2 text-xs text-gray-500">Loading...</span>
+                          <span className="ml-2 text-xs text-muted-foreground">Loading...</span>
                         </div>
                       </div>
                     )}
                   </div>
                   <div className="relative">
-                    <label className="block text-xs font-semibold mb-1 text-gray-700">Area</label>
+                    <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-[#E5E7EB]">Area</label>
                     <input
                       type="text"
                       value={searchParams.area}
@@ -1370,11 +1370,11 @@ const LandingPage = () => {
                       onBlur={() => {
                         setTimeout(() => setShowAreaSuggestions(false), 200);
                       }}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-full px-4 py-3 sm:py-3.5 text-sm sm:text-base border border-primary/20 bg-[#0B0F14] text-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                       placeholder="e.g., Sector 44"
                     />
                     {showAreaSuggestions && areaSuggestions.length > 0 && (
-                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                      <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
                         {areaSuggestions.map((area, idx) => (
                           <button
                             key={idx}
@@ -1383,10 +1383,10 @@ const LandingPage = () => {
                               setSearchParams({ ...searchParams, area });
                               setShowAreaSuggestions(false);
                             }}
-                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
+                            className="w-full text-left px-4 py-2 text-sm text-[#E5E7EB] hover:bg-[#0F1720] focus:bg-[#0F1720] focus:outline-none border-b border-primary/20 last:border-b-0"
                           >
                             <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                               </svg>
                               <span>{area}</span>
@@ -1396,39 +1396,39 @@ const LandingPage = () => {
                       </div>
                     )}
                     {suggestionsLoading && showAreaSuggestions && (
-                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-2">
+                      <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg p-2">
                         <div className="flex items-center justify-center">
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent"></div>
-                          <span className="ml-2 text-xs text-gray-500">Loading...</span>
+                          <span className="ml-2 text-xs text-muted-foreground">Loading...</span>
                         </div>
                       </div>
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1 text-gray-700">Budget (₹)</label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-[#E5E7EB]">Budget (₹)</label>
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       <input
                         type="number"
                         value={searchParams.budget_min}
                         onChange={(e) => setSearchParams({ ...searchParams, budget_min: e.target.value })}
-                        className="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                        className="w-full px-3 sm:px-4 py-3 sm:py-3.5 text-sm sm:text-base border border-primary/20 bg-[#0B0F14] text-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                         placeholder="Min"
                       />
                       <input
                         type="number"
                         value={searchParams.budget_max}
                         onChange={(e) => setSearchParams({ ...searchParams, budget_max: e.target.value })}
-                        className="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                        className="w-full px-3 sm:px-4 py-3 sm:py-3.5 text-sm sm:text-base border border-primary/20 bg-[#0B0F14] text-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                         placeholder="Max"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1 text-gray-700">Gender</label>
+                    <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-[#E5E7EB]">Gender</label>
                     <select
                       value={searchParams.gender}
                       onChange={(e) => setSearchParams({ ...searchParams, gender: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-full px-4 py-3 sm:py-3.5 text-sm sm:text-base border border-primary/20 bg-[#0B0F14] text-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                     >
                       <option value="">Any</option>
                       <option value="male">Male</option>
@@ -1440,7 +1440,7 @@ const LandingPage = () => {
 
                 <div className="flex flex-wrap items-center gap-4 pt-2">
                   <div className="flex items-center gap-3">
-                    <label className="flex items-center text-sm text-gray-700 cursor-pointer">
+                    <label className="flex items-center text-sm text-[#E5E7EB] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={searchParams.has_food}
@@ -1449,7 +1449,7 @@ const LandingPage = () => {
                       />
                       <span>Food</span>
                     </label>
-                    <label className="flex items-center text-sm text-gray-700 cursor-pointer">
+                    <label className="flex items-center text-sm text-[#E5E7EB] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={searchParams.has_wifi}
@@ -1458,7 +1458,7 @@ const LandingPage = () => {
                       />
                       <span>WiFi</span>
                     </label>
-                    <label className="flex items-center text-sm text-gray-700 cursor-pointer">
+                    <label className="flex items-center text-sm text-[#E5E7EB] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={searchParams.has_ac}
@@ -1471,7 +1471,7 @@ const LandingPage = () => {
                   <button
                     type="submit"
                     disabled={searchLoading}
-                    className="ml-auto px-6 py-2.5 bg-accent text-white rounded-md hover:bg-accent/90 disabled:opacity-50 font-semibold text-sm transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+                    className="w-full sm:w-auto sm:ml-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-[#14B8A6] text-white rounded-lg hover:bg-[#2DD4BF] disabled:opacity-50 font-semibold text-sm sm:text-base transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-95"
                   >
                     {searchLoading ? (
                       <>
@@ -1499,31 +1499,31 @@ const LandingPage = () => {
               {searchLoading && (
                 <div className="text-center py-12">
                   <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-accent"></div>
-                  <p className="mt-4 text-gray-600">Searching for PGs...</p>
+                  <p className="mt-4 text-[#D1D5DB]">Searching for PGs...</p>
                 </div>
               )}
 
               {!searchLoading && searchResults.length === 0 && !hasSearched && (
-                <div className="bg-white rounded-lg shadow-md p-8 md:p-12 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-[#0F1720] rounded-lg shadow-md border border-primary/20 p-8 md:p-12 text-center">
+                  <div className="w-16 h-16 bg-[#0B0F14] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Start Your Search</h3>
-                  <p className="text-gray-600">Enter a city above and click "Search PGs" to find available PGs.</p>
+                  <h3 className="text-xl font-semibold text-[#E5E7EB] mb-2">Start Your Search</h3>
+                  <p className="text-[#D1D5DB]">Enter a city above and click "Search PGs" to find available PGs.</p>
                 </div>
               )}
 
               {!searchLoading && searchResults.length === 0 && hasSearched && (
-                <div className="bg-white rounded-lg shadow-md p-8 md:p-12 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-[#0F1720] rounded-lg shadow-md border border-primary/20 p-8 md:p-12 text-center">
+                  <div className="w-16 h-16 bg-[#0B0F14] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">No PGs Found</h3>
-                  <p className="text-gray-600 mb-4">Try adjusting your search filters or search in a different city/area.</p>
+                  <h3 className="text-xl font-semibold text-[#E5E7EB] mb-2">No PGs Found</h3>
+                  <p className="text-[#D1D5DB] mb-4">Try adjusting your search filters or search in a different city/area.</p>
                   <button
                     onClick={() => {
                       setSearchParams({
@@ -1550,7 +1550,7 @@ const LandingPage = () => {
               {!searchLoading && searchResults.length > 0 && (
                 <>
                   <div className="mb-4 flex items-center justify-between">
-                    <p className="text-sm md:text-base text-gray-700">
+                    <p className="text-sm md:text-base text-[#E5E7EB]">
                       Found <span className="font-bold text-primary">{searchTotal}</span> PG{searchTotal !== 1 ? 's' : ''} matching your search
                     </p>
                   </div>
@@ -1558,14 +1558,14 @@ const LandingPage = () => {
                     {searchResults.map((pg) => (
                       <div
                         key={pg.pg_id}
-                        className="bg-white rounded-lg shadow-md p-5 md:p-6 hover:shadow-xl transition-all duration-300 border border-gray-100"
+                        className="bg-[#0F1720] rounded-lg shadow-md border border-primary/20 p-5 md:p-6 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300"
                       >
                         {/* PG Images */}
                         {pg.images && Array.isArray(pg.images) && pg.images.length > 0 && (
                           <div className="mb-4">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                               {pg.images.slice(0, 4).map((img, idx) => (
-                                <div key={idx} className="relative aspect-video rounded-lg overflow-hidden border border-gray-200">
+                                <div key={idx} className="relative aspect-video rounded-lg overflow-hidden border border-border">
                                   <img
                                     src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
                                     alt={`${pg.pg_name} - Image ${idx + 1}`}
@@ -1583,7 +1583,7 @@ const LandingPage = () => {
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex-1">
                             <h3 className="text-xl font-bold text-primary mb-1">{pg.pg_name || 'PG Name'}</h3>
-                            <p className="text-sm text-gray-600 flex items-center gap-1">
+                            <p className="text-sm text-[#D1D5DB] flex items-center gap-1">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1609,7 +1609,7 @@ const LandingPage = () => {
                         </div>
 
                         {pg.address && (
-                          <p className="text-gray-700 mb-3 text-sm">{pg.address}</p>
+                          <p className="text-[#E5E7EB] mb-3 text-sm">{pg.address}</p>
                         )}
 
                         {pg.facilities && Array.isArray(pg.facilities) && pg.facilities.length > 0 && (
@@ -1617,7 +1617,7 @@ const LandingPage = () => {
                             {pg.facilities.map((facility, idx) => (
                               <span
                                 key={idx}
-                                className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
+                                className="px-2.5 py-1 bg-teal-accent/20 text-teal-accent text-xs font-medium rounded-full"
                               >
                                 {facility}
                               </span>
@@ -1627,24 +1627,24 @@ const LandingPage = () => {
 
                         {pg.rooms && Array.isArray(pg.rooms) && pg.rooms.length > 0 ? (
                           <div className="mt-4 mb-4">
-                            <h4 className="text-sm font-semibold mb-2 text-gray-800">Available Rooms:</h4>
+                            <h4 className="text-sm font-semibold mb-2 text-[#E5E7EB]">Available Rooms:</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                               {pg.rooms.map((room) => (
                                 <div
                                   key={room.room_id || Math.random()}
-                                  className="flex justify-between items-center p-2.5 bg-gray-50 rounded border border-gray-200"
+                                  className="flex justify-between items-center p-2.5 bg-[#0B0F14] rounded border border-primary/20"
                                 >
                                   <div>
-                                    <span className="font-medium text-sm">{room.room_name || 'Room'}</span>
+                                    <span className="font-medium text-sm text-[#E5E7EB]">{room.room_name || 'Room'}</span>
                                     {room.gender_type && (
-                                      <span className="text-xs text-gray-600 ml-2">
+                                      <span className="text-xs text-[#9CA3AF] ml-2">
                                         ({room.gender_type})
                                       </span>
                                     )}
                                   </div>
                                   <div className="text-right">
                                     <div className="font-bold text-primary">₹{room.rent_per_bed || 0}/bed</div>
-                                    <div className="text-xs text-gray-600">
+                                    <div className="text-xs text-[#9CA3AF]">
                                       {room.available_beds || 0} bed{(room.available_beds || 0) !== 1 ? 's' : ''} available
                                     </div>
                                   </div>
@@ -1653,14 +1653,14 @@ const LandingPage = () => {
                             </div>
                           </div>
                         ) : (
-                          <div className="mt-4 mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                          <div className="mt-4 mb-4 p-3 bg-[#0B0F14] border border-primary/20 rounded text-sm text-[#D1D5DB]">
                             No rooms available at the moment. Please contact the PG owner for availability.
                           </div>
                         )}
 
                         <button
                           onClick={() => navigate(`/marketplace/pg/${pg.pg_id}`)}
-                          className="w-full bg-accent text-white py-2.5 rounded-md hover:bg-accent/90 font-semibold transition-all shadow-md hover:shadow-lg text-sm"
+                          className="w-full bg-[#14B8A6] text-white py-2.5 rounded-md hover:bg-[#2DD4BF] font-semibold transition-all shadow-md hover:shadow-lg text-sm"
                         >
                           View Details & Send Inquiry
                         </button>
@@ -1674,19 +1674,19 @@ const LandingPage = () => {
                       <button
                         onClick={() => handleMarketplaceSearch(searchPage - 1)}
                         disabled={searchPage === 1}
-                        className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-medium text-sm"
+                        className="px-4 py-2 border border-primary/20 bg-[#0F1720] text-[#E5E7EB] rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#0B0F14] transition-colors font-medium text-sm"
                       >
                         ← Previous
                       </button>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-[#E5E7EB]">
                           Page <span className="font-semibold">{searchPage}</span> of <span className="font-semibold">{Math.ceil(searchTotal / searchLimit)}</span>
                         </span>
                       </div>
                       <button
                         onClick={() => handleMarketplaceSearch(searchPage + 1)}
                         disabled={searchPage >= Math.ceil(searchTotal / searchLimit)}
-                        className="px-4 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-medium text-sm"
+                        className="px-4 py-2 border border-primary/20 bg-[#0F1720] text-[#E5E7EB] rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#0B0F14] transition-colors font-medium text-sm"
                       >
                         Next →
                       </button>
@@ -1700,27 +1700,27 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="bg-[#E4EDF3] py-12 md:py-20">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="text-center mb-8 md:mb-16">
-            <p className="text-xs md:text-sm font-bold text-accent uppercase tracking-wider mb-2">Key Features</p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-4 px-2">
+      <section id="features" className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="text-center mb-10 sm:mb-12 md:mb-16 lg:mb-20">
+            <p className="text-xs sm:text-sm md:text-base font-semibold text-[#1FB6C1] uppercase tracking-wider mb-2 sm:mb-3">Key Features</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-[#E5E7EB] mb-4 sm:mb-6 leading-tight px-2">
               Everything You Need to Run Your PG Smoothly
             </h2>
           </div>
-          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             {features.map((feature, idx) => {
               const IconComponent = feature.icon;
               return (
                 <div 
                   key={idx} 
-                  className="bg-white p-4 md:p-6 rounded-sm shadow-[0_1px_4px_0_rgba(0,0,0,0.15)] hover:shadow-xl transition-all duration-500 border-l-4 border-accent relative overflow-hidden group"
+                  className="bg-[#0F1720] p-5 sm:p-6 md:p-7 rounded-lg shadow-[0_1px_4px_0_rgba(0,0,0,0.3)] hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border-l-4 border-accent relative overflow-hidden group border border-primary/10"
                 >
-                  <div className="w-10 h-10 md:w-12 md:h-12 text-accent mb-3 md:mb-4 flex items-center justify-center">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 text-accent mb-3 sm:mb-4 flex items-center justify-center">
                     <IconComponent />
                   </div>
-                  <h3 className="text-lg md:text-xl font-bold text-primary mb-2 md:mb-3 leading-tight">{feature.title}</h3>
-                  <p className="text-foreground text-xs md:text-sm leading-relaxed">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-primary mb-2 sm:mb-3 leading-tight">{feature.title}</h3>
+                  <p className="text-[#E5E7EB] text-sm sm:text-base leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -1731,41 +1731,41 @@ const LandingPage = () => {
       </section>
 
       {/* Subscription Plans Section */}
-      <section id="pricing-plans" className="py-12 md:py-20 bg-white">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="text-center mb-8 md:mb-16">
-            <p className="text-xs md:text-sm font-bold text-accent uppercase tracking-wider mb-2">Simple Pricing</p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-4 px-2">
+      <section id="pricing-plans" className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="text-center mb-10 sm:mb-12 md:mb-16 lg:mb-20">
+            <p className="text-xs sm:text-sm md:text-base font-semibold text-[#1FB6C1] uppercase tracking-wider mb-2 sm:mb-3">Simple Pricing</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-[#E5E7EB] mb-4 sm:mb-6 leading-tight px-2">
               Choose Your Plan
             </h2>
-            <p className="text-sm md:text-lg text-foreground max-w-2xl mx-auto px-2">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#D1D5DB] max-w-3xl mx-auto px-2">
               Plans designed for Indian PG owners. Start with free trial, upgrade as your business grows.
             </p>
           </div>
           {loading ? (
-            <div className="text-center text-foreground text-sm md:text-base">Loading plans...</div>
+            <div className="text-center text-[#E5E7EB] text-sm sm:text-base">Loading plans...</div>
           ) : (
-            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-8 max-w-6xl mx-auto">
               {plans.map((plan, idx) => (
                 <div
                   key={plan.id}
-                  className={`bg-white border rounded-sm p-5 md:p-8 hover:shadow-xl transition-all duration-500 ${
-                    idx === 1 ? 'border-accent border-2 shadow-lg md:scale-105' : 'border-border shadow-[0_1px_4px_0_rgba(0,0,0,0.15)]'
+                  className={`bg-[#0F1720] border rounded-lg p-5 sm:p-6 md:p-8 hover:shadow-xl transition-all duration-300 ${
+                    idx === 1 ? 'border-accent border-2 shadow-lg md:scale-105' : 'border-primary/10 shadow-[0_1px_4px_0_rgba(0,0,0,0.3)]'
                   }`}
                 >
                   {idx === 1 && (
-                    <div className="bg-primary text-primary-foreground text-xs font-bold px-2 md:px-3 py-1 rounded-sm inline-block mb-3 md:mb-4 uppercase tracking-wide">
+                    <div className="bg-primary text-primary-foreground text-xs sm:text-sm font-bold px-3 sm:px-4 py-1.5 rounded-lg inline-block mb-3 sm:mb-4 uppercase tracking-wide">
                       Most Popular
                     </div>
                   )}
-                  <h3 className="text-xl md:text-2xl font-bold text-primary mb-2">{plan.name}</h3>
-                  <div className="mb-4 md:mb-6">
-                    <span className="text-3xl md:text-5xl font-black text-primary">₹{plan.price}</span>
-                    <span className="text-foreground text-sm md:text-base">/month</span>
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-primary mb-2 sm:mb-3">{plan.name}</h3>
+                  <div className="mb-4 sm:mb-5 md:mb-6">
+                    <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-primary">₹{plan.price}</span>
+                    <span className="text-[#E5E7EB] text-sm sm:text-base md:text-lg ml-1">/month</span>
                   </div>
-                  <ul className="space-y-2 md:space-y-3 mb-6 md:mb-8">
+                  <ul className="space-y-2 sm:space-y-2.5 md:space-y-3 mb-6 sm:mb-7 md:mb-8">
                     {plan.features.map((feature, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-2 text-foreground text-xs md:text-sm">
+                      <li key={fIdx} className="flex items-start gap-2 sm:gap-3 text-[#E5E7EB] text-sm sm:text-base">
                         <IconCheck />
                         <span className="flex-1">{feature}</span>
                       </li>
@@ -1774,10 +1774,10 @@ const LandingPage = () => {
                   <button
                     onClick={() => handleSubscribe(plan.id)}
                     disabled={paymentLoading}
-                    className={`w-full py-2.5 md:py-3 rounded-sm font-semibold transition-all uppercase tracking-wide text-xs md:text-sm flex items-center justify-center gap-2 ${
+                    className={`w-full py-3 sm:py-3.5 md:py-4 rounded-lg font-semibold transition-all text-sm sm:text-base flex items-center justify-center gap-2 active:scale-95 ${
                       idx === 1
-                        ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
-                        : 'bg-secondary text-foreground hover:bg-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed'
+                        ? 'bg-[#14B8A6] text-white hover:bg-[#2DD4BF] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
+                        : 'bg-[#0B0F14] text-[#E5E7EB] hover:bg-[#0F1720] disabled:opacity-50 disabled:cursor-not-allowed'
                     }`}
                   >
                     {paymentLoading ? (
@@ -1801,32 +1801,32 @@ const LandingPage = () => {
 
 
       {/* Footer */}
-      <footer className="bg-primary text-primary-foreground py-8 md:py-12">
-        <div className="container mx-auto px-4 md:px-8">
+      <footer className="relative w-full border-t border-primary/10 py-10 sm:py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
             <div className="sm:col-span-2 md:col-span-1">
               <h3 className="font-bold text-base md:text-lg mb-3 md:mb-4">PG Pilot – PG Management System</h3>
-              <p className="text-primary-foreground/80 text-xs md:text-sm leading-relaxed mb-3 md:mb-0">
+              <p className="text-[#D1D5DB] text-xs md:text-sm leading-relaxed mb-3 md:mb-0">
                 Built specially for Indian PG and hostel owners. Manage rent, tenants and payments — all in one place.
               </p>
               <div className="flex gap-2 md:gap-3 mt-3 md:mt-4">
-                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
+                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-primary/20 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconFacebook />
                 </a>
-                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
+                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-primary/20 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconTwitter />
                 </a>
-                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
+                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-primary/20 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconLinkedin />
                 </a>
-                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-white/10 rounded flex items-center justify-center hover:bg-accent transition-colors">
+                <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-primary/20 rounded flex items-center justify-center hover:bg-accent transition-colors">
                   <IconInstagram />
                 </a>
               </div>
             </div>
             <div>
               <h4 className="font-bold text-foreground mb-3 md:mb-4 text-sm md:text-base">Quick Links</h4>
-              <ul className="space-y-2 text-xs md:text-sm text-primary-foreground/80">
+              <ul className="space-y-2 text-xs md:text-sm text-[#D1D5DB]">
                 <li><Link to="/marketplace/search" className="hover:text-accent transition-colors">Find PG</Link></li>
                 <li><a href="#features" className="hover:text-accent transition-colors">Features</a></li>
                 <li><a href="#pricing" className="hover:text-accent transition-colors">Pricing</a></li>
@@ -1835,37 +1835,37 @@ const LandingPage = () => {
               </ul>
             </div>
             <div className="sm:col-span-2 md:col-span-1">
-              <h4 className="font-bold text-primary-foreground mb-3 md:mb-4 text-sm md:text-base">Contact</h4>
-              <ul className="space-y-2 md:space-y-3 text-xs md:text-sm text-primary-foreground/80">
+              <h4 className="font-bold text-[#E5E7EB] mb-3 md:mb-4 text-sm md:text-base">Contact</h4>
+              <ul className="space-y-2 md:space-y-3 text-xs md:text-sm text-[#D1D5DB]">
                 <li>
-                  <b className="block text-primary-foreground mb-1">Address</b>
-                  <hr className="border-primary-foreground/20 mb-1 md:mb-2" />
-                  <p className="text-primary-foreground/80">Noida, Uttar Pradesh, India</p>
+                  <b className="block text-[#E5E7EB] mb-1">Address</b>
+                  <hr className="border-primary/20 mb-1 md:mb-2" />
+                  <p className="text-[#D1D5DB]">Noida, Uttar Pradesh, India</p>
                 </li>
                 <li>
-                  <b className="block text-primary-foreground mb-1">Email</b>
-                  <hr className="border-primary-foreground/20 mb-1 md:mb-2" />
-                  <a href="mailto:support@pgpilot.com" className="text-primary-foreground/80 hover:text-accent transition-colors break-all">support@pgpilot.com</a>
+                  <b className="block text-[#E5E7EB] mb-1">Email</b>
+                  <hr className="border-primary/20 mb-1 md:mb-2" />
+                  <a href="mailto:support@pgpilot.com" className="text-[#D1D5DB] hover:text-accent transition-colors break-all">support@pgpilot.com</a>
                 </li>
                 <li>
-                  <b className="block text-primary-foreground mb-1">Phone</b>
-                  <hr className="border-primary-foreground/20 mb-1 md:mb-2" />
-                  <p className="text-primary-foreground/80">Phone support available between 10 AM – 7 PM IST</p>
+                  <b className="block text-[#E5E7EB] mb-1">Phone</b>
+                  <hr className="border-primary/20 mb-1 md:mb-2" />
+                  <p className="text-[#D1D5DB]">Phone support available between 10 AM – 7 PM IST</p>
                 </li>
                 <li>
-                  <b className="block text-primary-foreground mb-1">Support</b>
-                  <hr className="border-primary-foreground/20 mb-1 md:mb-2" />
-                  <p className="text-primary-foreground/80 mb-1">Available 24/7</p>
-                  <p className="text-primary-foreground/80">WhatsApp onboarding and training available</p>
+                  <b className="block text-[#E5E7EB] mb-1">Support</b>
+                  <hr className="border-primary/20 mb-1 md:mb-2" />
+                  <p className="text-[#D1D5DB] mb-1">Available 24/7</p>
+                  <p className="text-[#D1D5DB]">WhatsApp onboarding and training available</p>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-primary-foreground/20 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
-            <p className="text-xs md:text-sm text-primary-foreground/80 text-center md:text-left">
+          <div className="border-t border-primary/20 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
+            <p className="text-xs md:text-sm text-[#D1D5DB] text-center md:text-left">
               © 2024 PG Pilot – Built for Indian PG Owners
             </p>
-            <div className="flex gap-4 md:gap-6 text-xs md:text-sm text-primary-foreground/80">
+            <div className="flex gap-4 md:gap-6 text-xs md:text-sm text-[#D1D5DB]">
               <a href="#" className="hover:text-accent transition-colors">Contact us</a>
               <span>|</span>
               <a href="#" className="hover:text-accent transition-colors">Privacy policy</a>
@@ -1924,7 +1924,7 @@ const LandingPage = () => {
           <button
             type="submit"
             disabled={loginLoading || googleLoginLoading}
-            className="w-full bg-primary text-primary-foreground py-2.5 px-4 rounded hover:bg-accent disabled:opacity-50 transition-all font-medium shadow-sm hover:shadow"
+            className="w-full bg-[#14B8A6] text-white py-2.5 px-4 rounded hover:bg-[#2DD4BF] disabled:opacity-50 transition-all font-medium shadow-sm hover:shadow"
           >
             {loginLoading ? 'Signing in...' : 'Sign In'}
           </button>
@@ -2107,7 +2107,7 @@ const LandingPage = () => {
           <button
             type="submit"
             disabled={signupLoading || googleSignupLoading}
-            className="w-full bg-primary text-primary-foreground py-2.5 px-4 rounded hover:bg-accent disabled:opacity-50 transition-all font-medium shadow-sm hover:shadow"
+            className="w-full bg-[#14B8A6] text-white py-2.5 px-4 rounded hover:bg-[#2DD4BF] disabled:opacity-50 transition-all font-medium shadow-sm hover:shadow"
           >
             {signupLoading ? 'Creating account...' : 'Sign Up'}
           </button>
