@@ -1231,12 +1231,12 @@ const LandingPage = () => {
       <section className="relative w-full px-4 sm:px-6 md:px-8 py-16 sm:py-20 md:py-28 lg:py-32 text-center">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4 sm:mb-6 md:mb-8 leading-[1.1] sm:leading-tight">
-            <span className="text-[#E5E7EB] block mb-1 sm:mb-2">Run Your Entire PG on</span>
-            <span className="text-[#22D3EE] block">Autopilot</span>
+            <span className="text-[#E5E7EB] block mb-1 sm:mb-2">The Complete Platform for</span>
+            <span className="text-[#22D3EE] block">PG Management & Discovery</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-[#D1D5DB] mb-8 sm:mb-10 md:mb-12 max-w-3xl mx-auto leading-relaxed px-2">
-            Reduce manual work, never miss rent, track every bed in real time. 
-            Simplify rent, tenants & mess in one place — built specifically for Indian PG owners.
+            For PG owners: Manage your entire property on autopilot. For tenants: Find verified PGs with real-time availability. 
+            One powerful platform connecting PG owners and tenants across India.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
             <button
@@ -1247,14 +1247,19 @@ const LandingPage = () => {
               <IconArrowRight />
             </button>
             <button
-              onClick={() => setShowLoginModal(true)}
+              onClick={() => {
+                const marketplaceSection = document.getElementById('marketplace-section');
+                if (marketplaceSection) {
+                  marketplaceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 sm:px-8 md:px-10 py-3.5 sm:py-4 border-2 border-[#22D3EE] text-[#22D3EE] rounded-lg hover:bg-[#22D3EE] hover:text-[#0B0F14] transition-all text-sm sm:text-base md:text-lg font-semibold active:scale-95"
             >
-              Learn More
+              Search PGs
             </button>
           </div>
           <p className="text-xs sm:text-sm md:text-base text-[#9CA3AF]">
-            No credit card required · Setup in 10 minutes
+            No credit card required · Free for tenants · Setup in 10 minutes for owners
           </p>
         </div>
       </section>
@@ -1266,38 +1271,143 @@ const LandingPage = () => {
             <div className="px-2">
               <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">150+</div>
               <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">PG Owners</div>
-              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">trust PG Pilot to run their properties.</div>
+              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">trust PG Pilot to manage their properties.</div>
             </div>
             <div className="px-2">
               <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">2000+</div>
-              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Rooms Managed</div>
-              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">across India with real-time tracking.</div>
+              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Rooms Listed</div>
+              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">available for tenants to discover.</div>
             </div>
             <div className="px-2">
               <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">5000+</div>
-              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Tenants Tracked</div>
-              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">with complete profiles and history.</div>
+              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Active Tenants</div>
+              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">using the platform to find their perfect PG.</div>
             </div>
             <div className="px-2">
               <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">25+</div>
               <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Cities</div>
-              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">where PG owners rely on PG Pilot.</div>
+              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">across India where we operate.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dual Purpose Section - Who is this for? */}
+      <section className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="text-center mb-10 sm:mb-12 md:mb-16">
+            <p className="text-xs sm:text-sm md:text-base font-semibold text-[#1FB6C1] uppercase tracking-wider mb-2 sm:mb-3">Who is this for?</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-[#E5E7EB] mb-4 sm:mb-6 leading-tight px-2">
+              One Platform, Two Powerful Solutions
+            </h2>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#D1D5DB] max-w-3xl mx-auto px-2">
+              Whether you're managing a PG or looking for one, we've got you covered.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10">
+            {/* For PG Owners */}
+            <div className="bg-[#0F1720] p-6 sm:p-8 md:p-10 rounded-xl border border-primary/10 hover:border-primary/30 transition-all shadow-lg hover:shadow-xl">
+              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#22D3EE]/10 rounded-xl flex items-center justify-center">
+                  <IconHome className="w-6 h-6 sm:w-7 sm:h-7 text-[#22D3EE]" />
+                </div>
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#E5E7EB]">For PG Owners</h3>
+              </div>
+              <p className="text-[#D1D5DB] text-sm sm:text-base md:text-lg mb-4 sm:mb-6 leading-relaxed">
+                Run your entire PG on autopilot. Manage tenants, track payments, handle complaints, and automate everything — all in one powerful dashboard.
+              </p>
+              <ul className="space-y-3 mb-6 sm:mb-8">
+                <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
+                  <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                  <span>Complete tenant management with documents & history</span>
+                </li>
+                <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
+                  <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                  <span>Automated payment tracking & reminders</span>
+                </li>
+                <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
+                  <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                  <span>Real-time room & bed availability tracking</span>
+                </li>
+                <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
+                  <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                  <span>Mess management & automated billing</span>
+                </li>
+                <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
+                  <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                  <span>List your PG on marketplace for free</span>
+                </li>
+              </ul>
+              <button
+                onClick={() => setShowSignupModal(true)}
+                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-[#14B8A6] text-white rounded-lg hover:bg-[#2DD4BF] transition-all font-semibold text-sm sm:text-base shadow-md hover:shadow-lg active:scale-95"
+              >
+                Start Managing Your PG
+              </button>
+            </div>
+
+            {/* For Tenants */}
+            <div className="bg-[#0F1720] p-6 sm:p-8 md:p-10 rounded-xl border border-primary/10 hover:border-primary/30 transition-all shadow-lg hover:shadow-xl">
+              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#22D3EE]/10 rounded-xl flex items-center justify-center">
+                  <IconUsers className="w-6 h-6 sm:w-7 sm:h-7 text-[#22D3EE]" />
+                </div>
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#E5E7EB]">For Tenants</h3>
+              </div>
+              <p className="text-[#D1D5DB] text-sm sm:text-base md:text-lg mb-4 sm:mb-6 leading-relaxed">
+                Find your perfect PG with powerful search. Browse verified listings, check real-time availability, and connect directly with PG owners.
+              </p>
+              <ul className="space-y-3 mb-6 sm:mb-8">
+                <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
+                  <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                  <span>Search verified PGs with real-time availability</span>
+                </li>
+                <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
+                  <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                  <span>Filter by location, budget, facilities & more</span>
+                </li>
+                <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
+                  <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                  <span>View detailed PG profiles with photos & amenities</span>
+                </li>
+                <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
+                  <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                  <span>Send inquiries directly to PG owners</span>
+                </li>
+                <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
+                  <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                  <span>100% free — no charges for tenants</span>
+                </li>
+              </ul>
+              <button
+                onClick={() => {
+                  const marketplaceSection = document.getElementById('marketplace-section');
+                  if (marketplaceSection) {
+                    marketplaceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 border-2 border-[#22D3EE] text-[#22D3EE] rounded-lg hover:bg-[#22D3EE] hover:text-[#0B0F14] transition-all font-semibold text-sm sm:text-base active:scale-95"
+              >
+                Search PGs Now
+              </button>
             </div>
           </div>
         </div>
       </section>
 
       {/* Marketplace Section - For Tenants */}
-      <section className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24">
+      <section id="marketplace-section" className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-8 sm:mb-12 md:mb-16">
-              <p className="text-xs sm:text-sm md:text-base font-semibold text-[#1FB6C1] uppercase tracking-wider mb-2 sm:mb-3">For Tenants</p>
+              <p className="text-xs sm:text-sm md:text-base font-semibold text-[#1FB6C1] uppercase tracking-wider mb-2 sm:mb-3">PG Marketplace</p>
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-[#E5E7EB] mb-4 sm:mb-6 leading-tight">
                 Find Your Perfect PG
               </h2>
               <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#D1D5DB] max-w-3xl mx-auto px-2">
-                Search from verified PGs with real-time availability. Filter by location, budget, facilities, and more.
+                Powerful search platform connecting tenants with verified PG owners. Search by location, budget, facilities, and more. 
+                Real-time availability, detailed profiles, and direct inquiry system — all free for tenants.
               </p>
             </div>
 
@@ -1439,9 +1549,9 @@ const LandingPage = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <div className="flex items-center gap-3">
-                    <label className="flex items-center text-sm text-[#E5E7EB] cursor-pointer">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                    <label className="flex items-center text-xs sm:text-sm text-[#E5E7EB] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={searchParams.has_food}
@@ -1450,7 +1560,7 @@ const LandingPage = () => {
                       />
                       <span>Food</span>
                     </label>
-                    <label className="flex items-center text-sm text-[#E5E7EB] cursor-pointer">
+                    <label className="flex items-center text-xs sm:text-sm text-[#E5E7EB] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={searchParams.has_wifi}
@@ -1459,7 +1569,7 @@ const LandingPage = () => {
                       />
                       <span>WiFi</span>
                     </label>
-                    <label className="flex items-center text-sm text-[#E5E7EB] cursor-pointer">
+                    <label className="flex items-center text-xs sm:text-sm text-[#E5E7EB] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={searchParams.has_ac}
@@ -1581,15 +1691,15 @@ const LandingPage = () => {
                           </div>
                         )}
 
-                        <div className="flex justify-between items-start mb-3">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0 mb-3">
                           <div className="flex-1">
-                            <h3 className="text-xl font-bold text-primary mb-1">{pg.pg_name || 'PG Name'}</h3>
-                            <p className="text-sm text-[#D1D5DB] flex items-center gap-1">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <h3 className="text-lg sm:text-xl font-bold text-primary mb-1">{pg.pg_name || 'PG Name'}</h3>
+                            <p className="text-xs sm:text-sm text-[#D1D5DB] flex items-center gap-1">
+                              <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                               </svg>
-                              {pg.area && `${pg.area}, `}{pg.city || 'City not specified'}
+                              <span className="truncate">{pg.area && `${pg.area}, `}{pg.city || 'City not specified'}</span>
                             </p>
                           </div>
                           {pg.address && (
@@ -1598,9 +1708,9 @@ const LandingPage = () => {
                                 const address = encodeURIComponent(`${pg.address}, ${pg.area || ''}, ${pg.city || ''}`);
                                 window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
                               }}
-                              className="text-accent hover:text-accent/80 text-sm font-medium flex items-center gap-1"
+                              className="text-accent hover:text-accent/80 text-xs sm:text-sm font-medium flex items-center gap-1 self-start sm:self-auto"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                               </svg>
@@ -1700,14 +1810,164 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section id="how-it-works" className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="text-center mb-10 sm:mb-12 md:mb-16 lg:mb-20">
+            <p className="text-xs sm:text-sm md:text-base font-semibold text-[#1FB6C1] uppercase tracking-wider mb-2 sm:mb-3">How It Works</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-[#E5E7EB] mb-4 sm:mb-6 leading-tight px-2">
+              Get Started in 3 Simple Steps
+            </h2>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#D1D5DB] max-w-3xl mx-auto px-2">
+              From registration to accessing your dashboard — we've made it simple and fast.
+            </p>
+          </div>
+
+          <div className="max-w-5xl mx-auto">
+            <div className="relative">
+              {/* Connection Line - Desktop */}
+              <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-[#22D3EE]/20 via-[#22D3EE]/40 to-[#22D3EE]/20 transform -translate-y-1/2 z-0"></div>
+              
+              {/* Steps */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 md:gap-10 relative z-10">
+                {/* Step 1: Register */}
+                <div className="relative">
+                  <div className="bg-[#0F1720] p-6 sm:p-8 rounded-xl border border-primary/10 hover:border-primary/30 transition-all shadow-lg hover:shadow-xl group relative z-10">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#22D3EE]/10 rounded-full flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-[#22D3EE]/20 transition-all group-hover:scale-110">
+                        <svg className="w-8 h-8 sm:w-10 sm:h-10 text-[#22D3EE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <div className="absolute -top-3 -right-3 md:top-auto md:right-auto md:-top-4 md:left-1/2 md:-translate-x-1/2 w-8 h-8 bg-[#22D3EE] rounded-full flex items-center justify-center text-[#0B0F14] font-black text-sm sm:text-base z-20">
+                        1
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-bold text-[#E5E7EB] mb-2 sm:mb-3">Register</h3>
+                      <p className="text-[#D1D5DB] text-sm sm:text-base leading-relaxed mb-4">
+                        Create your account with basic details. Enter your PG name and location. Takes less than 2 minutes.
+                      </p>
+                      <ul className="text-left w-full space-y-2 text-sm text-[#E5E7EB]">
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="w-4 h-4 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                          <span>Sign up with phone or Google</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="w-4 h-4 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                          <span>Add PG details</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="w-4 h-4 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                          <span>Account created instantly</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 2: Payment */}
+                <div className="relative">
+                  <div className="bg-[#0F1720] p-6 sm:p-8 rounded-xl border border-primary/10 hover:border-primary/30 transition-all shadow-lg hover:shadow-xl group relative z-10">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#22D3EE]/10 rounded-full flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-[#22D3EE]/20 transition-all group-hover:scale-110">
+                        <svg className="w-8 h-8 sm:w-10 sm:h-10 text-[#22D3EE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-6 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                      </div>
+                      <div className="absolute -top-3 -right-3 md:top-auto md:right-auto md:-top-4 md:left-1/2 md:-translate-x-1/2 w-8 h-8 bg-[#22D3EE] rounded-full flex items-center justify-center text-[#0B0F14] font-black text-sm sm:text-base z-20">
+                        2
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-bold text-[#E5E7EB] mb-2 sm:mb-3">Choose Plan & Pay</h3>
+                      <p className="text-[#D1D5DB] text-sm sm:text-base leading-relaxed mb-4">
+                        Select a subscription plan that fits your needs. Secure payment via Razorpay. Multiple payment options available.
+                      </p>
+                      <ul className="text-left w-full space-y-2 text-sm text-[#E5E7EB]">
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="w-4 h-4 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                          <span>Choose from flexible plans</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="w-4 h-4 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                          <span>Secure Razorpay payment</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="w-4 h-4 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                          <span>Instant activation</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 3: Access Dashboard */}
+                <div className="relative">
+                  <div className="bg-[#0F1720] p-6 sm:p-8 rounded-xl border border-primary/10 hover:border-primary/30 transition-all shadow-lg hover:shadow-xl group relative z-10">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#22D3EE]/10 rounded-full flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-[#22D3EE]/20 transition-all group-hover:scale-110">
+                        <svg className="w-8 h-8 sm:w-10 sm:h-10 text-[#22D3EE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                      </div>
+                      <div className="absolute -top-3 -right-3 md:top-auto md:right-auto md:-top-4 md:left-1/2 md:-translate-x-1/2 w-8 h-8 bg-[#22D3EE] rounded-full flex items-center justify-center text-[#0B0F14] font-black text-sm sm:text-base z-20">
+                        3
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-bold text-[#E5E7EB] mb-2 sm:mb-3">Access Dashboard</h3>
+                      <p className="text-[#D1D5DB] text-sm sm:text-base leading-relaxed mb-4">
+                        Start managing your PG immediately. Access all features, manage tenants, track payments, and more — all from one dashboard.
+                      </p>
+                      <ul className="text-left w-full space-y-2 text-sm text-[#E5E7EB]">
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="w-4 h-4 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                          <span>Full dashboard access</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="w-4 h-4 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                          <span>All features unlocked</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="w-4 h-4 text-[#22D3EE] flex-shrink-0 mt-0.5" />
+                          <span>Start managing right away</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile Connection Lines */}
+              <div className="md:hidden flex flex-col items-center gap-4 mt-6">
+                <div className="w-0.5 h-8 bg-gradient-to-b from-[#22D3EE]/40 to-[#22D3EE]/20"></div>
+                <div className="w-0.5 h-8 bg-gradient-to-b from-[#22D3EE]/40 to-[#22D3EE]/20"></div>
+              </div>
+
+              {/* CTA Button */}
+              <div className="text-center mt-8 sm:mt-10 md:mt-12">
+                <button
+                  onClick={() => setShowSignupModal(true)}
+                  className="px-8 sm:px-10 md:px-12 py-3.5 sm:py-4 bg-[#14B8A6] text-white rounded-lg hover:bg-[#2DD4BF] transition-all font-semibold text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center gap-2 mx-auto"
+                >
+                  Get Started Now
+                  <IconArrowRight />
+                </button>
+                <p className="text-xs sm:text-sm text-[#9CA3AF] mt-3">
+                  No credit card required for signup · Setup in 10 minutes
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="text-center mb-10 sm:mb-12 md:mb-16 lg:mb-20">
             <p className="text-xs sm:text-sm md:text-base font-semibold text-[#1FB6C1] uppercase tracking-wider mb-2 sm:mb-3">Key Features</p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-[#E5E7EB] mb-4 sm:mb-6 leading-tight px-2">
-              Everything You Need to Run Your PG Smoothly
+              Powerful Features for PG Owners
             </h2>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#D1D5DB] max-w-3xl mx-auto px-2 mt-4">
+              Everything you need to manage your PG efficiently and grow your business.
+            </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             {features.map((feature, idx) => {
@@ -1818,7 +2078,8 @@ const LandingPage = () => {
             <div className="sm:col-span-2 md:col-span-1">
               <h3 className="font-bold text-base md:text-lg mb-3 md:mb-4">PG Pilot – PG Management System</h3>
               <p className="text-[#D1D5DB] text-xs md:text-sm leading-relaxed mb-3 md:mb-0">
-                Built specially for Indian PG and hostel owners. Manage rent, tenants and payments — all in one place.
+                The complete platform for PG management and discovery. For owners: manage your property on autopilot. 
+                For tenants: find verified PGs with real-time availability. Connecting PG owners and tenants across India.
               </p>
               <div className="flex gap-2 md:gap-3 mt-3 md:mt-4">
                 <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-primary/20 rounded flex items-center justify-center hover:bg-accent transition-colors">
@@ -1874,7 +2135,7 @@ const LandingPage = () => {
           </div>
           <div className="border-t border-primary/20 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
             <p className="text-xs md:text-sm text-[#D1D5DB] text-center md:text-left">
-              © 2024 PG Pilot – Built for Indian PG Owners
+              © 2024 PG Pilot – Connecting PG Owners & Tenants Across India
             </p>
             <div className="flex gap-4 md:gap-6 text-xs md:text-sm text-[#D1D5DB]">
               <a href="#" className="hover:text-accent transition-colors">Contact us</a>

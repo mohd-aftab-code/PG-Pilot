@@ -146,3 +146,108 @@ select {
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
 }
+
+/* Background Animation - Floating Particles */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  33% {
+    transform: translateY(-30px) translateX(20px);
+    opacity: 0.5;
+  }
+  66% {
+    transform: translateY(-60px) translateX(-20px);
+    opacity: 0.3;
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-40px) translateX(30px);
+    opacity: 0.4;
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animated-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.animated-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(34, 211, 238, 0.03) 0%,
+    rgba(31, 182, 193, 0.05) 25%,
+    rgba(34, 211, 238, 0.03) 50%,
+    rgba(31, 182, 193, 0.05) 75%,
+    rgba(34, 211, 238, 0.03) 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.floating-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.floating-particle-1 {
+  width: 200px;
+  height: 200px;
+  top: 10%;
+  left: 10%;
+  animation: float 20s ease-in-out infinite;
+}
+
+.floating-particle-2 {
+  width: 150px;
+  height: 150px;
+  top: 60%;
+  right: 15%;
+  animation: floatSlow 25s ease-in-out infinite;
+  animation-delay: -5s;
+}
+
+.floating-particle-3 {
+  width: 180px;
+  height: 180px;
+  bottom: 20%;
+  left: 20%;
+  animation: float 22s ease-in-out infinite;
+  animation-delay: -10s;
+}
+
+.floating-particle-4 {
+  width: 120px;
+  height: 120px;
+  top: 30%;
+  right: 30%;
+  animation: floatSlow 18s ease-in-out infinite;
+  animation-delay: -8s;
+}

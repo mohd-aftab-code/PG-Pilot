@@ -242,8 +242,8 @@ const Dashboard = () => {
       title: 'Total Tenants', 
       value: stats.tenants,
       subtitle: `${stats.activeTenants} active`,
-      color: 'bg-blue-500', 
-      iconColor: 'text-white',
+      color: 'bg-[#22D3EE]/10', 
+      iconColor: 'text-[#22D3EE]',
       icon: IconUsers, 
       route: '/tenants',
       trend: null,
@@ -252,8 +252,8 @@ const Dashboard = () => {
       title: 'Occupancy Rate', 
       value: `${stats.occupancyRate}%`,
       subtitle: `${stats.occupiedBeds}/${stats.totalBeds} beds`,
-      color: 'bg-green-500', 
-      iconColor: 'text-white',
+      color: 'bg-[#22D3EE]/10', 
+      iconColor: 'text-[#22D3EE]',
       icon: IconHome, 
       route: '/rooms',
       trend: stats.vacantBeds > 0 ? `${stats.vacantBeds} vacant` : 'Full',
@@ -264,8 +264,8 @@ const Dashboard = () => {
       subtitle: stats.lastMonthRevenue > 0 
         ? `Last month: ₹${stats.lastMonthRevenue.toLocaleString('en-IN')}`
         : `${stats.payments} total payments`,
-      color: 'bg-emerald-500', 
-      iconColor: 'text-white',
+      color: 'bg-[#22D3EE]/10', 
+      iconColor: 'text-[#22D3EE]',
       icon: IconDollar, 
       route: '/payments',
       trend: stats.lastMonthRevenue > 0 
@@ -276,8 +276,8 @@ const Dashboard = () => {
       title: 'New Inquiries', 
       value: stats.newInquiries,
       subtitle: `${stats.inquiries} total inquiries`,
-      color: 'bg-purple-500', 
-      iconColor: 'text-white',
+      color: 'bg-[#22D3EE]/10', 
+      iconColor: 'text-[#22D3EE]',
       icon: IconInquiry, 
       route: '/inquiries',
       trend: stats.newInquiries > 0 ? 'New' : null,
@@ -286,8 +286,8 @@ const Dashboard = () => {
       title: 'Open Complaints', 
       value: stats.openComplaints,
       subtitle: `${stats.complaints} total`,
-      color: stats.openComplaints > 0 ? 'bg-red-500' : 'bg-orange-500', 
-      iconColor: 'text-white',
+      color: 'bg-[#22D3EE]/10', 
+      iconColor: 'text-[#22D3EE]',
       icon: IconAlert, 
       route: '/complaints',
       trend: stats.openComplaints > 0 ? 'Action needed' : null,
@@ -350,7 +350,7 @@ const Dashboard = () => {
               <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full"></div>
               <div className="relative">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <div className={`w-12 h-12 sm:w-14 sm:h-14 ${card.color} rounded-xl flex items-center justify-center ${card.iconColor} shadow-lg group-hover:scale-110 transition-transform`}>
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 ${card.color} rounded-xl flex items-center justify-center ${card.iconColor} group-hover:scale-110 transition-transform`}>
                   <IconComponent />
                 </div>
                   <span className="text-xs text-[#9CA3AF] group-hover:text-[#22D3EE] transition-colors flex items-center gap-1 font-medium hidden sm:flex">
