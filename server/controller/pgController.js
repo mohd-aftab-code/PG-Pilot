@@ -87,12 +87,13 @@ const createPG = async (req, res) => {
     }
 
     // Insert PG first with temporary pg_uid (will be updated after getting insertId)
+    // Also include user_id if user is pg_admin for bidirectional relationship
     const tempPgUid = `TEMP_${Date.now()}`;
     const imagesJson = imagePaths.length > 0 ? JSON.stringify(imagePaths) : null;
     
     const [result] = await database.query(
-      `INSERT INTO pgs (pg_uid, name, address, city, area, pincode, food_enabled, default_due_day, images) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO pgs (pg_uid, name, address, city, area, pincode, food_enabled, default_due_day, images, user_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         tempPgUid,
         name, 
@@ -102,7 +103,8 @@ const createPG = async (req, res) => {
         pincode || null, 
         food_enabled || 0, 
         default_due_day || 5,
-        imagesJson
+        imagesJson,
+        role === 'pg_admin' ? userId : null // Store user_id in pgs table
       ]
     );
 
@@ -110,17 +112,106 @@ const createPG = async (req, res) => {
     
     // Generate and update pg_uid with proper format
     const pgUid = `PG_ID_${String(pgId).padStart(3, '0')}`;
-    await database.query(
-      'UPDATE pgs SET pg_uid = ? WHERE id = ?',
-      [pgUid, pgId]
+    
+    // Auto-start 30-day FREE TRIAL when PG is registered
+    const trialStartDate = new Date();
+    const trialEndDate = new Date();
+    trialEndDate.setDate(trialEndDate.getDate() + 30); // 30 days from today
+    
+    // Update PG with pg_uid and trial dates
+    // Also ensure user_id is set (in case it wasn't set during INSERT)
+    const [updatePgResult] = await database.query(
+      `UPDATE pgs 
+       SET pg_uid = ?, 
+           trial_start_date = ?, 
+           trial_end_date = ?, 
+           subscription_status = 'TRIAL',
+           user_id = COALESCE(user_id, ?)
+       WHERE id = ?`,
+      [pgUid, trialStartDate.toISOString().split('T')[0], trialEndDate.toISOString().split('T')[0], role === 'pg_admin' ? userId : null, pgId]
     );
+    
+    console.log(`PG Controller: Updated PG ${pgId} with pg_uid ${pgUid}, trial dates, and user_id ${role === 'pg_admin' ? userId : 'null'}`, {
+      affectedRows: updatePgResult.affectedRows,
+      user_id: role === 'pg_admin' ? userId : null
+    });
 
     // If user is pg_admin, assign the PG to them
+    // IMPORTANT: Do this AFTER the PG is fully created and updated
     if (role === 'pg_admin') {
-      await database.query(
-        'UPDATE users SET pg_id = ? WHERE id = ?',
-        [pgId, userId]
-      );
+      try {
+        // Verify PG exists before updating user
+        const [pgCheck] = await database.query('SELECT id, name FROM pgs WHERE id = ?', [pgId]);
+        if (pgCheck.length === 0) {
+          throw new Error(`PG ${pgId} does not exist after creation`);
+        }
+        
+        console.log(`PG Controller: Verifying PG exists before user update:`, {
+          pgId: pgId,
+          pgName: pgCheck[0].name,
+          userId: userId
+        });
+        
+        // Get current user state before update
+        const [userBefore] = await database.query('SELECT id, pg_id, name FROM users WHERE id = ?', [userId]);
+        console.log(`PG Controller: User state BEFORE update:`, userBefore[0]);
+        
+        // Update user's pg_id with the PG's ID (from pgs table)
+        const [updateResult] = await database.query(
+          'UPDATE users SET pg_id = ? WHERE id = ?',
+          [pgId, userId]
+        );
+        
+        console.log(`PG Controller: UPDATE query executed:`, {
+          query: 'UPDATE users SET pg_id = ? WHERE id = ?',
+          params: [pgId, userId],
+          affectedRows: updateResult.affectedRows,
+          changedRows: updateResult.changedRows,
+          insertId: updateResult.insertId,
+          warningCount: updateResult.warningCount
+        });
+        
+        // Verify the update was successful
+        if (updateResult.affectedRows === 0) {
+          console.error(`PG Controller: CRITICAL ERROR - Failed to update pg_id for user ${userId}. No rows affected.`);
+          // Try to get user info for debugging
+          const [userCheck] = await database.query('SELECT id, pg_id, name FROM users WHERE id = ?', [userId]);
+          console.error('PG Controller: User state after failed update:', userCheck[0]);
+          
+          // Try one more time with explicit check
+          console.log('PG Controller: Retrying user update...');
+          const [retryResult] = await database.query(
+            'UPDATE users SET pg_id = ? WHERE id = ?',
+            [pgId, userId]
+          );
+          console.log('PG Controller: Retry result:', {
+            affectedRows: retryResult.affectedRows,
+            changedRows: retryResult.changedRows
+          });
+        } else {
+          // Verify the update by reading back
+          const [verifyUser] = await database.query('SELECT id, pg_id, name FROM users WHERE id = ?', [userId]);
+          console.log('PG Controller: User state AFTER successful update:', verifyUser[0]);
+          
+          // Double-check: pg_id should match pgId
+          if (verifyUser[0].pg_id != pgId) {
+            console.error(`PG Controller: MISMATCH ERROR - User pg_id (${verifyUser[0].pg_id}) does not match PG id (${pgId})`);
+          } else {
+            console.log(`PG Controller: ✅ SUCCESS - User ${userId} successfully assigned to PG ${pgId}`);
+          }
+        }
+      } catch (updateError) {
+        console.error('PG Controller: ERROR updating user pg_id:', updateError);
+        console.error('PG Controller: Error details:', {
+          message: updateError.message,
+          code: updateError.code,
+          sqlState: updateError.sqlState,
+          sqlMessage: updateError.sqlMessage,
+          stack: updateError.stack
+        });
+        // Don't fail the entire request, but log the error
+        // The PG is created, but user assignment failed
+      }
     }
 
     // Save facilities to pg_facilities table
@@ -163,10 +254,28 @@ const createPG = async (req, res) => {
     // Fetch the created PG (with auto-generated pg_uid)
     const [pgs] = await database.query('SELECT * FROM pgs WHERE id = ?', [pgId]);
 
+    // If user is pg_admin, also return updated user info with pg_id
+    let updatedUser = null;
+    if (role === 'pg_admin') {
+      try {
+        const [users] = await database.query(
+          'SELECT id, pg_id, name, email, phone, role FROM users WHERE id = ?',
+          [userId]
+        );
+        if (users.length > 0) {
+          updatedUser = users[0];
+          console.log('PG Controller: Returning updated user info:', updatedUser);
+        }
+      } catch (userError) {
+        console.error('PG Controller: Error fetching updated user:', userError);
+      }
+    }
+
     res.status(201).json({ 
       message: 'PG created successfully', 
       pg: pgs[0],
-      user_updated: role === 'pg_admin'
+      user_updated: role === 'pg_admin',
+      user: updatedUser // Include updated user with pg_id
     });
   } catch (error) {
     console.error('Create PG error:', error);

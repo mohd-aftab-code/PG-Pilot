@@ -1,8 +1,9 @@
 const database = require('../config/database');
 
-// Get active subscription for a PG
+// Get active subscription for a PG (includes trial check)
 const getActiveSubscription = async (pgId) => {
   try {
+    // First check for active paid subscription
     const [subscriptions] = await database.query(
       `SELECT ps.*, p.max_pgs, p.max_rooms, p.max_beds 
        FROM pg_subscriptions ps 
@@ -14,7 +15,64 @@ const getActiveSubscription = async (pgId) => {
       [pgId]
     );
 
-    return subscriptions.length > 0 ? subscriptions[0] : null;
+    if (subscriptions.length > 0) {
+      return subscriptions[0];
+    }
+
+    // If no paid subscription, check if trial is active
+    const [pgs] = await database.query(
+      `SELECT trial_start_date, trial_end_date, subscription_status 
+       FROM pgs 
+       WHERE id = ?`,
+      [pgId]
+    );
+
+    if (pgs.length > 0) {
+      const pg = pgs[0];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalize to start of day
+      const todayStr = today.toISOString().split('T')[0];
+      
+      // Check if trial is active - use proper date comparison
+      let isTrialActive = false;
+      if (pg.subscription_status === 'TRIAL' && pg.trial_end_date) {
+        try {
+          // Convert trial_end_date to Date object for proper comparison
+          const trialEndDate = new Date(pg.trial_end_date + 'T00:00:00');
+          trialEndDate.setHours(0, 0, 0, 0);
+          isTrialActive = trialEndDate >= today;
+          
+          // Fallback: string comparison if date comparison fails
+          if (!isTrialActive && typeof pg.trial_end_date === 'string') {
+            const trialEndStr = pg.trial_end_date.split('T')[0];
+            isTrialActive = trialEndStr >= todayStr;
+          }
+        } catch (dateError) {
+          // Fallback to string comparison
+          if (typeof pg.trial_end_date === 'string') {
+            const trialEndStr = pg.trial_end_date.split('T')[0];
+            isTrialActive = trialEndStr >= todayStr;
+          }
+        }
+      }
+      
+      if (isTrialActive) {
+        // Return a trial subscription object with default limits
+        return {
+          id: null,
+          pg_id: pgId,
+          plan_id: null,
+          start_date: pg.trial_start_date,
+          expiry_date: pg.trial_end_date,
+          is_trial: true,
+          max_pgs: 1,
+          max_rooms: 10, // Default trial limits
+          max_beds: 50
+        };
+      }
+    }
+
+    return null;
   } catch (error) {
     console.error('Get active subscription error:', error);
     return null;

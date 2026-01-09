@@ -1,4 +1,4 @@
-const Razorpay = require('razorpay');
+ const Razorpay = require('razorpay');
 const database = require('../config/database');
 
 // Initialize Razorpay
@@ -147,6 +147,15 @@ const verifyPayment = async (req, res) => {
         [finalPgId, plan_id, startDate.toISOString().split('T')[0], expiryDate.toISOString().split('T')[0], plan.price]
       );
       subscriptionId = result.insertId;
+      
+      // Activate subscription: Change subscription_status from TRIAL to ACTIVE
+      await database.query(
+        `UPDATE pgs 
+         SET subscription_status = 'ACTIVE' 
+         WHERE id = ?`,
+        [finalPgId]
+      );
+      console.log(`Subscription activated for PG ${finalPgId}: Changed status from TRIAL to ACTIVE`);
     } catch (subscriptionError) {
       // Handle foreign key constraint error specifically
       if (subscriptionError.code === 'ER_NO_REFERENCED_ROW_2' || subscriptionError.errno === 1452) {
@@ -268,7 +277,7 @@ PG Pilot Team
 
     res.json({
       message: 'Payment verified and subscription created successfully',
-      subscription_id: result.insertId,
+      subscription_id: subscriptionId,
       expiry_date: expiryDate.toISOString().split('T')[0],
       plan: {
         id: plan.id,

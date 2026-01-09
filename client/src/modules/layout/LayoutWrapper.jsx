@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
+import TrialBanner from '../../components/common/TrialBanner';
 
 const SIDEBAR_OPEN_WIDTH = 256;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -86,6 +87,7 @@ const LayoutWrapper = ({ children }) => {
         }}
         onClick={handleMainClick}
       >
+        <TrialBanner />
         {children}
       </main>
     </div>

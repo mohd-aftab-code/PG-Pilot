@@ -12,18 +12,9 @@ const LandingPage = () => {
   const location = useLocation();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showPGModal, setShowPGModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
-  const [pendingPlanId, setPendingPlanId] = useState(null);
-  const [paymentLoading, setPaymentLoading] = useState(false);
   const [razorpayKey, setRazorpayKey] = useState(null);
-  const [pgFormData, setPgFormData] = useState({
-    name: '',
-    address: '',
-    food_enabled: false,
-    default_due_day: 5,
-  });
 
   // Handle Google Authentication (for both login and signup)
   const handleGoogleAuth = async (response) => {
@@ -56,55 +47,46 @@ const LandingPage = () => {
           password: '',
           confirmPassword: '',
           role: 'pg_admin',
-          pg_name: '',
-          pg_location: '',
         });
 
         setTimeout(async () => {
-          // If user came from subscription flow, handle it
-          if (pendingPlanId) {
-            if (!user.pg_id) {
-              setPendingPlanId(pendingPlanId);
-              setShowPGModal(true);
+          // Refresh user data to get latest state
+          try {
+            const currentUserResponse = await api.get('/api/auth/me');
+            const currentUser = currentUserResponse.data.user;
+            setStoredUser(currentUser);
+            
+            // Role-based redirect
+            if (currentUser.role === 'superadmin') {
+              navigate('/pgs', { replace: true });
               return;
             }
-            // Proceed with payment
-            await initiatePayment(pendingPlanId);
-            return;
-          }
-
-          // Role-based redirect
-          if (user.role === 'superadmin') {
-            navigate('/pgs');
-          } else {
-            // For PG Admin, check subscription before allowing access
-            if (user.pg_id) {
+            
+            // For PG Admin: Redirect based on onboarding state
+            if (currentUser.pg_id) {
+              // Has PG, check subscription
               try {
-                const subResponse = await api.get(`/api/subscriptions/pg/${user.pg_id}/active`);
-                if (subResponse.data.subscription) {
-                  navigate('/dashboard');
+                const subResponse = await api.get(`/api/subscriptions/pg/${currentUser.pg_id}/active`);
+                // Check hasAccess (includes both trial and subscription)
+                if (subResponse.data.hasAccess === true) {
+                  // Has active subscription OR active trial - go to dashboard
+                  navigate('/dashboard', { replace: true });
                 } else {
-                  // No subscription - stay on landing page, scroll to plans
-                  setTimeout(() => {
-                    const plansSection = document.getElementById('pricing-plans');
-                    if (plansSection) {
-                      plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                  }, 300);
+                  // No subscription/trial - go to choose plan
+                  navigate('/choose-plan', { replace: true });
                 }
               } catch (error) {
-                // No subscription - stay on landing page, scroll to plans
-                setTimeout(() => {
-                  const plansSection = document.getElementById('pricing-plans');
-                  if (plansSection) {
-                    plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }, 300);
+                // No subscription found - go to choose plan
+                navigate('/choose-plan', { replace: true });
               }
             } else {
-              // No PG created yet - should not happen in normal flow
-              alert('Please create a PG first, then subscribe to a plan.');
+              // No PG - redirect to register PG
+              navigate('/register-pg', { replace: true });
             }
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+            // Default: redirect to register PG
+            navigate('/register-pg', { replace: true });
           }
         }, 100);
       }
@@ -502,198 +484,19 @@ const LandingPage = () => {
     }
   };
 
-  const handleSubscribe = async (planId) => {
-    try {
-      // First check if user is logged in via API
-      let user;
-      try {
-        const response = await api.get('/api/auth/me');
-        user = response.data?.user;
-      } catch (error) {
-        // If API call fails, try localStorage
-        user = getStoredUser();
-        if (!user) {
-          // User not logged in - show signup modal first with planId
-          setPendingPlanId(planId);
-          setShowSignupModal(true);
-          return;
-        }
-      }
-
-      // Check if user is logged in
-      if (!user) {
-        // User not logged in - show signup modal first with planId
-        setPendingPlanId(planId);
-        setShowSignupModal(true);
-        return;
-      }
-
-      // Check if user is PG Admin
-      if (user.role !== 'pg_admin') {
-        alert(`Only PG Admins can subscribe to plans. Your current role is: ${user.role || 'not set'}. Please register as a PG Admin.`);
-        setPendingPlanId(planId);
-        setShowSignupModal(true);
-        return;
-      }
-
-      // If user doesn't have PG, show creation modal
-      if (!user.pg_id) {
-        setPendingPlanId(planId);
-        setShowPGModal(true);
-        return;
-      }
-
-      // Proceed with payment
-      setPaymentLoading(true);
-      
-      // Wait for Razorpay script if not loaded
-      if (!window.Razorpay) {
-        const checkRazorpay = setInterval(() => {
-          if (window.Razorpay) {
-            clearInterval(checkRazorpay);
-            initiatePayment(planId);
-          }
-        }, 100);
-        
-        // Timeout after 5 seconds
-        setTimeout(() => {
-          clearInterval(checkRazorpay);
-          if (!window.Razorpay) {
-            setPaymentLoading(false);
-            alert('Razorpay is taking too long to load. Please refresh the page and try again.');
-            return;
-          }
-        }, 5000);
-      } else {
-        initiatePayment(planId);
-      }
-    } catch (error) {
-      console.error('Error in handleSubscribe:', error);
-      alert('Failed to initiate subscription. Please try again.');
+  const handleSubscribe = () => {
+    // Check if user is logged in
+    const user = getStoredUser();
+    const hasToken = document.cookie.includes('token=');
+    
+    if (!user || !hasToken) {
+      // User not logged in - show signup modal
+      setShowSignupModal(true);
+      return;
     }
-  };
-
-  const initiatePayment = async (planId) => {
-    try {
-      // Use cached key or fetch it
-      let finalRazorpayKey = razorpayKey;
-      if (!finalRazorpayKey) {
-        const keyResponse = await api.get('/api/subscription-payment/razorpay-key');
-        finalRazorpayKey = keyResponse.data.key;
-        setRazorpayKey(finalRazorpayKey);
-      }
-
-      // Create order
-      const orderResponse = await api.post('/api/subscription-payment/create-order', { plan_id: planId });
-      const { order_id, amount, plan } = orderResponse.data;
-
-      // Initialize Razorpay
-      const options = {
-        key: finalRazorpayKey,
-        amount: amount,
-        currency: 'INR',
-        name: 'PG Pilot',
-        description: `Subscription for ${plan.name}`,
-        order_id: order_id,
-        handler: async function (response) {
-          try {
-            // Verify payment
-            const verifyResponse = await api.post('/api/subscription-payment/verify', {
-              order_id: response.razorpay_order_id,
-              payment_id: response.razorpay_payment_id,
-              signature: response.razorpay_signature,
-              plan_id: planId,
-            });
-
-            // Get plan details for success message
-            const planDetails = verifyResponse.data?.plan || plan;
-            
-            // Show success message with plan details
-            alert(`🎉 Payment Successful!\n\nYour subscription to "${planDetails.name}" has been activated.\n\nAmount: ₹${planDetails.price}\nExpiry Date: ${verifyResponse.data?.expiry_date || 'N/A'}\n\nA confirmation email has been sent to your registered email address.\n\nYou can now access your dashboard!`);
-            
-            // Clear pending plan
-            setPendingPlanId(null);
-            
-            // Redirect to dashboard
-            navigate('/dashboard');
-          } catch (error) {
-            console.error('Payment verification error:', error);
-            alert('Payment verification failed. Please contact support.');
-          }
-        },
-        prefill: {
-          name: getStoredUser()?.name || '',
-          email: getStoredUser()?.email || '',
-          contact: getStoredUser()?.phone || '',
-        },
-        theme: {
-          color: '#004767',
-        },
-      };
-
-      const razorpay = new window.Razorpay(options);
-      setPaymentLoading(false);
-      razorpay.open();
-    } catch (error) {
-      console.error('Payment initiation error:', error);
-      setPaymentLoading(false);
-      alert(error.response?.data?.error || 'Failed to initiate payment. Please try again.');
-    }
-  };
-
-  const handleCreatePG = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await api.post('/api/pgs', pgFormData);
-      const newPG = response.data.pg;
-      
-      // Wait a bit for backend to update user
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Refresh user data from API to get updated pg_id
-      let userUpdated = false;
-      try {
-        const userResponse = await api.get('/api/auth/me');
-        if (userResponse.data?.user) {
-          const updatedUser = userResponse.data.user;
-          setStoredUser(updatedUser);
-          userUpdated = true;
-          
-          // Verify pg_id is set
-          if (!updatedUser.pg_id) {
-            // If still not set, update manually
-            const manualUser = { ...updatedUser, pg_id: newPG.id };
-            setStoredUser(manualUser);
-          }
-        }
-      } catch (err) {
-        console.error('Error refreshing user:', err);
-        // Fallback: update manually
-        const currentUser = getStoredUser();
-        const updatedUser = { ...currentUser, pg_id: newPG.id };
-        setStoredUser(updatedUser);
-        userUpdated = true;
-      }
-      
-      // Close modal
-      setShowPGModal(false);
-      setPgFormData({ name: '', address: '', food_enabled: false, default_due_day: 5 });
-      
-      // Proceed with payment if plan was selected
-      if (pendingPlanId) {
-        // Double check user has pg_id before proceeding
-        const finalUser = getStoredUser();
-        if (finalUser && finalUser.pg_id) {
-          await initiatePayment(pendingPlanId);
-        } else {
-          alert('PG created but user update failed. Please refresh the page and try again.');
-        }
-      }
-      setPendingPlanId(null);
-    } catch (error) {
-      console.error('Error creating PG:', error);
-      alert(error.response?.data?.error || 'Failed to create PG. Please try again.');
-    }
+    
+    // User is logged in - redirect to choose plan page
+    navigate('/choose-plan', { replace: true });
   };
 
   // Login form state
@@ -724,44 +527,43 @@ const LandingPage = () => {
         
         // Small delay to ensure state is saved
         setTimeout(async () => {
-          // If user came from subscription flow, handle it
-          if (pendingPlanId) {
-            if (!user.pg_id) {
-              setPendingPlanId(pendingPlanId);
-              setShowPGModal(true);
+          // Refresh user data to get latest state
+          try {
+            const currentUserResponse = await api.get('/api/auth/me');
+            const currentUser = currentUserResponse.data.user;
+            setStoredUser(currentUser);
+            
+            // Role-based redirect
+            if (currentUser.role === 'superadmin') {
+              navigate('/pgs', { replace: true });
               return;
             }
-            // Proceed with payment
-            await initiatePayment(pendingPlanId);
-            return;
-          }
-
-          // Role-based redirect
-          if (user.role === 'superadmin') {
-            navigate('/pgs');
-          } else {
-            // For PG Admin, check subscription before allowing access
-            if (user.pg_id) {
+            
+            // For PG Admin: Redirect based on onboarding state
+            if (currentUser.pg_id) {
+              // Has PG, check subscription
               try {
-                const subResponse = await api.get(`/api/subscriptions/pg/${user.pg_id}/active`);
-                if (subResponse.data.subscription) {
-                  // Has active subscription - go to dashboard
-                  navigate('/dashboard');
+                const subResponse = await api.get(`/api/subscriptions/pg/${currentUser.pg_id}/active`);
+                // Check hasAccess (includes both trial and subscription)
+                if (subResponse.data.hasAccess === true) {
+                  // Has active subscription OR active trial - go to dashboard
+                  navigate('/dashboard', { replace: true });
                 } else {
-                  // No subscription - stay on landing page to subscribe
-                  alert('Welcome back! Please subscribe to a plan to access your dashboard.');
-                  // User stays on landing page - can select a plan
+                  // No subscription/trial - go to choose plan
+                  navigate('/choose-plan', { replace: true });
                 }
               } catch (error) {
-                // No subscription found
-                alert('Welcome back! Please subscribe to a plan to access your dashboard.');
-                // User stays on landing page - can select a plan
+                // No subscription found - go to choose plan
+                navigate('/choose-plan', { replace: true });
               }
             } else {
-              // No PG created yet - should not happen if flow is correct
-              alert('Please create a PG first, then subscribe to a plan.');
-              // Could redirect to PG creation page or show PG creation modal
+              // No PG - redirect to register PG
+              navigate('/register-pg', { replace: true });
             }
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+            // Default: redirect to register PG
+            navigate('/register-pg', { replace: true });
           }
         }, 100);
       } else {
@@ -786,177 +588,11 @@ const LandingPage = () => {
     password: '',
     confirmPassword: '',
     role: 'pg_admin',
-    pg_name: '',
-    pg_location: '',
   });
   const [signupError, setSignupError] = useState('');
   const [signupLoading, setSignupLoading] = useState(false);
   const [googleSignupLoading, setGoogleSignupLoading] = useState(false);
 
-  // Marketplace search state
-  const [searchParams, setSearchParams] = useState({
-    city: '',
-    area: '',
-    budget_min: '',
-    budget_max: '',
-    gender: '',
-    has_food: false,
-    has_wifi: false,
-    has_ac: false,
-  });
-  const [searchResults, setSearchResults] = useState([]);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [searchPage, setSearchPage] = useState(1);
-  const [searchTotal, setSearchTotal] = useState(0);
-  const [hasSearched, setHasSearched] = useState(false);
-  const searchLimit = 10;
-
-  // Autocomplete suggestions state
-  const [citySuggestions, setCitySuggestions] = useState([]);
-  const [areaSuggestions, setAreaSuggestions] = useState([]);
-  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
-  const [showAreaSuggestions, setShowAreaSuggestions] = useState(false);
-  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
-
-  // Fetch search suggestions
-  const fetchSuggestions = async (query, type = 'both') => {
-    if (!query || query.trim().length < 2) {
-      if (type === 'city' || type === 'both') setCitySuggestions([]);
-      if (type === 'area' || type === 'both') setAreaSuggestions([]);
-      return;
-    }
-
-    setSuggestionsLoading(true);
-    try {
-      const response = await api.get(`/api/search/suggestions?q=${encodeURIComponent(query)}`);
-      if (response.data.success) {
-        if (type === 'city' || type === 'both') {
-          setCitySuggestions(response.data.suggestions.cities || []);
-        }
-        if (type === 'area' || type === 'both') {
-          setAreaSuggestions(response.data.suggestions.areas || []);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
-    } finally {
-      setSuggestionsLoading(false);
-    }
-  };
-
-  // Handle city input change with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchParams.city && searchParams.city.length >= 2) {
-        fetchSuggestions(searchParams.city, 'city');
-        setShowCitySuggestions(true);
-      } else {
-        setCitySuggestions([]);
-        setShowCitySuggestions(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchParams.city]);
-
-  // Handle area input change with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchParams.area && searchParams.area.length >= 2) {
-        fetchSuggestions(searchParams.area, 'area');
-        setShowAreaSuggestions(true);
-      } else {
-        setAreaSuggestions([]);
-        setShowAreaSuggestions(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchParams.area]);
-
-  // Marketplace search function
-  const handleMarketplaceSearch = async (pageNum = 1) => {
-    if (!searchParams.city) {
-      alert('Please enter a city');
-      return;
-    }
-
-    setSearchLoading(true);
-    setShowCitySuggestions(false);
-    setShowAreaSuggestions(false);
-    try {
-      const params = new URLSearchParams({
-        city: searchParams.city,
-        page: pageNum.toString(),
-        limit: searchLimit.toString(),
-      });
-
-      if (searchParams.area) params.append('area', searchParams.area);
-      if (searchParams.budget_min) params.append('budget_min', searchParams.budget_min);
-      if (searchParams.budget_max) params.append('budget_max', searchParams.budget_max);
-      if (searchParams.gender) params.append('gender', searchParams.gender);
-      if (searchParams.has_food) params.append('has_food', 'true');
-      if (searchParams.has_wifi) params.append('has_wifi', 'true');
-      if (searchParams.has_ac) params.append('has_ac', 'true');
-
-      console.log('Searching with params:', params.toString());
-      const response = await api.get(`/api/search/pgs?${params.toString()}`);
-      
-      console.log('=== SEARCH RESPONSE ===');
-      console.log('Full response:', response);
-      console.log('Response data:', response.data);
-      console.log('Success:', response.data?.success);
-      console.log('Data array:', response.data?.data);
-      console.log('Data length:', response.data?.data?.length);
-      console.log('Total:', response.data?.total);
-      
-      if (response.data && response.data.success) {
-        const results = response.data.data || [];
-        const total = response.data.total || 0;
-        
-        console.log('Setting search results:', results);
-        console.log('Results count:', results.length);
-        console.log('Setting total:', total);
-        console.log('First result sample:', results[0]);
-        
-        setSearchResults(results);
-        setSearchTotal(total);
-        setSearchPage(pageNum);
-        setHasSearched(true);
-        
-        // Additional debug
-        console.log('State updated - searchResults length:', results.length);
-        console.log('State updated - hasSearched:', true);
-        
-        // Scroll to results
-        setTimeout(() => {
-          const resultsElement = document.getElementById('search-results');
-          if (resultsElement) {
-            resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 100);
-      } else {
-        console.error('Search failed:', response.data);
-        setSearchResults([]);
-        setSearchTotal(0);
-        setHasSearched(true);
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-      setSearchResults([]);
-      setSearchTotal(0);
-      setHasSearched(true);
-      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Failed to search PGs. Please try again.';
-      alert(errorMessage);
-    } finally {
-      setSearchLoading(false);
-    }
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    handleMarketplaceSearch(1);
-  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -975,14 +611,8 @@ const LandingPage = () => {
       return;
     }
 
-    if (!signupData.pg_name || !signupData.pg_location) {
-      setSignupError('PG Name and Location are required');
-      setSignupLoading(false);
-      return;
-    }
-
     try {
-      const { confirmPassword, pg_name, pg_location, ...signupPayload } = signupData;
+      const { confirmPassword, ...signupPayload } = signupData;
       
       // First create user account
       const response = await api.post('/api/auth/signup', signupPayload);
@@ -990,30 +620,6 @@ const LandingPage = () => {
       if (response.data && response.data.user) {
         const user = response.data.user;
         setStoredUser(user);
-        
-        // If user is pg_admin, create PG with provided details
-        if (user.role === 'pg_admin') {
-          try {
-            const pgResponse = await api.post('/api/pgs', {
-              name: pg_name,
-              address: pg_location,
-              food_enabled: false,
-              default_due_day: 5,
-            });
-            
-            // Update user with pg_id
-            const updatedUser = { ...user, pg_id: pgResponse.data.pg.id };
-            setStoredUser(updatedUser);
-            
-            // Wait a bit for backend to update
-            await new Promise(resolve => setTimeout(resolve, 500));
-          } catch (pgError) {
-            console.error('Error creating PG:', pgError);
-            setSignupError('Account created but failed to create PG. Please try again.');
-            setSignupLoading(false);
-            return;
-          }
-        }
         
         // Close signup modal
         setShowSignupModal(false);
@@ -1024,66 +630,51 @@ const LandingPage = () => {
           password: '',
           confirmPassword: '',
           role: 'pg_admin',
-          pg_name: '',
-          pg_location: '',
         });
         
-        // After successful registration and PG creation:
+        // After successful registration:
         // Step 1: User is now logged in (token set)
-        // Step 2: If PG created, check subscription
-        // Step 3: If no subscription, prompt for subscription
+        // Step 2: Redirect based on user state
         
         setTimeout(async () => {
-          // Refresh user data to get updated pg_id
+          // Refresh user data
           try {
             const currentUserResponse = await api.get('/api/auth/me');
             const currentUser = currentUserResponse.data.user;
             setStoredUser(currentUser);
             
             if (currentUser.role === 'superadmin') {
-              navigate('/pgs');
+              navigate('/pgs', { replace: true });
               return;
             }
             
-            // For PG Admin: Check if they have subscription
+            // For PG Admin: Redirect to onboarding flow
             if (currentUser.pg_id) {
+              // Has PG, check subscription
               try {
                 const subResponse = await api.get(`/api/subscriptions/pg/${currentUser.pg_id}/active`);
-                if (subResponse.data.subscription) {
-                  // Has subscription - go to dashboard
-                  navigate('/dashboard');
+                // Check hasAccess (includes both trial and subscription)
+                if (subResponse.data.hasAccess === true) {
+                  // Has active subscription OR active trial - go to dashboard
+                  navigate('/dashboard', { replace: true });
                 } else {
-                  // No subscription - show success message and scroll to plans
-                  alert('✅ Registration Successful!\n\nYour account and PG have been created.\n\nPlease subscribe to a plan below to access your dashboard.');
-                  // Scroll to plans section
-                  setTimeout(() => {
-                    const plansSection = document.getElementById('pricing-plans');
-                    if (plansSection) {
-                      plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                  }, 500);
+                  // No subscription/trial - go to choose plan
+                  navigate('/choose-plan', { replace: true });
                 }
               } catch (subError) {
-                // No subscription found - show success and scroll to plans
-                alert('✅ Registration Successful!\n\nYour account and PG have been created.\n\nPlease subscribe to a plan below to access your dashboard.');
-                // Scroll to plans section
-                setTimeout(() => {
-                  const plansSection = document.getElementById('pricing-plans');
-                  if (plansSection) {
-                    plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }, 500);
+                // No subscription found - go to choose plan
+                navigate('/choose-plan', { replace: true });
               }
             } else {
-              // PG creation failed or pending
-              alert('✅ Account created successfully!\n\nPlease create your PG first, then subscribe to a plan.');
+              // No PG - redirect to register PG
+              navigate('/register-pg', { replace: true });
             }
           } catch (error) {
             console.error('Error fetching user data:', error);
-            alert('✅ Registration Successful!\n\nPlease login and subscribe to a plan to continue.');
-            setShowLoginModal(true);
+            // Default: redirect to register PG
+            navigate('/register-pg', { replace: true });
           }
-        }, 500);
+        }, 100);
       } else {
         setSignupError(response.data?.message || 'Signup failed');
       }
@@ -1211,6 +802,12 @@ const LandingPage = () => {
             <span className="text-xl sm:text-2xl font-bold text-[#E5E7EB]">Pilot</span>
           </div>
           <div className="flex gap-2 sm:gap-3">
+            <Link
+              to="/for-tenants"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 text-[#E5E7EB] hover:text-[#22D3EE] transition-colors font-semibold text-sm sm:text-base"
+            >
+              I'm a Tenant
+            </Link>
             <button
               onClick={() => setShowLoginModal(true)}
               className="px-4 sm:px-5 py-2 sm:py-2.5 text-[#E5E7EB] hover:text-[#22D3EE] transition-colors font-semibold text-sm sm:text-base"
@@ -1231,12 +828,12 @@ const LandingPage = () => {
       <section className="relative w-full px-4 sm:px-6 md:px-8 py-16 sm:py-20 md:py-28 lg:py-32 text-center">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4 sm:mb-6 md:mb-8 leading-[1.1] sm:leading-tight">
-            <span className="text-[#E5E7EB] block mb-1 sm:mb-2">The Complete Platform for</span>
-            <span className="text-[#22D3EE] block">PG Management & Discovery</span>
+            <span className="text-[#E5E7EB] block mb-1 sm:mb-2">Run Your Entire PG on</span>
+            <span className="text-[#22D3EE] block">Autopilot</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-[#D1D5DB] mb-8 sm:mb-10 md:mb-12 max-w-3xl mx-auto leading-relaxed px-2">
-            For PG owners: Manage your entire property on autopilot. For tenants: Find verified PGs with real-time availability. 
-            One powerful platform connecting PG owners and tenants across India.
+            Reduce manual work, never miss rent, track every bed in real time. 
+            Simplify rent, tenants & mess in one place — built specifically for Indian PG owners.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
             <button
@@ -1248,18 +845,18 @@ const LandingPage = () => {
             </button>
             <button
               onClick={() => {
-                const marketplaceSection = document.getElementById('marketplace-section');
-                if (marketplaceSection) {
-                  marketplaceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const featuresSection = document.getElementById('features');
+                if (featuresSection) {
+                  featuresSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
               }}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 sm:px-8 md:px-10 py-3.5 sm:py-4 border-2 border-[#22D3EE] text-[#22D3EE] rounded-lg hover:bg-[#22D3EE] hover:text-[#0B0F14] transition-all text-sm sm:text-base md:text-lg font-semibold active:scale-95"
             >
-              Search PGs
+              View Features
             </button>
           </div>
           <p className="text-xs sm:text-sm md:text-base text-[#9CA3AF]">
-            No credit card required · Free for tenants · Setup in 10 minutes for owners
+            No credit card required · Setup in 10 minutes · Free trial available
           </p>
         </div>
       </section>
@@ -1275,13 +872,13 @@ const LandingPage = () => {
             </div>
             <div className="px-2">
               <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">2000+</div>
-              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Rooms Listed</div>
-              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">available for tenants to discover.</div>
+              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Rooms Managed</div>
+              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">across all properties on the platform.</div>
             </div>
             <div className="px-2">
-              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">5000+</div>
-              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Active Tenants</div>
-              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">using the platform to find their perfect PG.</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">₹50L+</div>
+              <div className="text-[#E5E7EB] font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2">Revenue Tracked</div>
+              <div className="text-[#D1D5DB] text-xs sm:text-sm leading-relaxed">processed through our platform monthly.</div>
             </div>
             <div className="px-2">
               <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-2 sm:mb-3">25+</div>
@@ -1292,27 +889,26 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Dual Purpose Section - Who is this for? */}
+      {/* Why Choose PG Pilot Section */}
       <section className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="text-center mb-10 sm:mb-12 md:mb-16">
-            <p className="text-xs sm:text-sm md:text-base font-semibold text-[#1FB6C1] uppercase tracking-wider mb-2 sm:mb-3">Who is this for?</p>
+            <p className="text-xs sm:text-sm md:text-base font-semibold text-[#1FB6C1] uppercase tracking-wider mb-2 sm:mb-3">Why Choose PG Pilot</p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-[#E5E7EB] mb-4 sm:mb-6 leading-tight px-2">
-              One Platform, Two Powerful Solutions
+              Everything You Need to Run Your PG Smoothly
             </h2>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#D1D5DB] max-w-3xl mx-auto px-2">
-              Whether you're managing a PG or looking for one, we've got you covered.
+              Built specifically for Indian PG owners. Manage everything from one powerful dashboard.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10">
-            {/* For PG Owners */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10">
             <div className="bg-[#0F1720] p-6 sm:p-8 md:p-10 rounded-xl border border-primary/10 hover:border-primary/30 transition-all shadow-lg hover:shadow-xl">
               <div className="flex items-center gap-3 mb-4 sm:mb-6">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#22D3EE]/10 rounded-xl flex items-center justify-center">
                   <IconHome className="w-6 h-6 sm:w-7 sm:h-7 text-[#22D3EE]" />
                 </div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#E5E7EB]">For PG Owners</h3>
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#E5E7EB]">Complete PG Management</h3>
               </div>
               <p className="text-[#D1D5DB] text-sm sm:text-base md:text-lg mb-4 sm:mb-6 leading-relaxed">
                 Run your entire PG on autopilot. Manage tenants, track payments, handle complaints, and automate everything — all in one powerful dashboard.
@@ -1339,472 +935,40 @@ const LandingPage = () => {
                   <span>List your PG on marketplace for free</span>
                 </li>
               </ul>
-              <button
-                onClick={() => setShowSignupModal(true)}
-                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-[#14B8A6] text-white rounded-lg hover:bg-[#2DD4BF] transition-all font-semibold text-sm sm:text-base shadow-md hover:shadow-lg active:scale-95"
-              >
-                Start Managing Your PG
-              </button>
             </div>
 
-            {/* For Tenants */}
             <div className="bg-[#0F1720] p-6 sm:p-8 md:p-10 rounded-xl border border-primary/10 hover:border-primary/30 transition-all shadow-lg hover:shadow-xl">
               <div className="flex items-center gap-3 mb-4 sm:mb-6">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#22D3EE]/10 rounded-xl flex items-center justify-center">
-                  <IconUsers className="w-6 h-6 sm:w-7 sm:h-7 text-[#22D3EE]" />
+                  <IconChart className="w-6 h-6 sm:w-7 sm:h-7 text-[#22D3EE]" />
                 </div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#E5E7EB]">For Tenants</h3>
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#E5E7EB]">Powerful Analytics</h3>
               </div>
               <p className="text-[#D1D5DB] text-sm sm:text-base md:text-lg mb-4 sm:mb-6 leading-relaxed">
-                Find your perfect PG with powerful search. Browse verified listings, check real-time availability, and connect directly with PG owners.
+                Get insights into your PG business. Track revenue, occupancy rates, payment trends, and more with detailed analytics and reports.
               </p>
               <ul className="space-y-3 mb-6 sm:mb-8">
                 <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
                   <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
-                  <span>Search verified PGs with real-time availability</span>
+                  <span>Revenue tracking & financial reports</span>
                 </li>
                 <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
                   <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
-                  <span>Filter by location, budget, facilities & more</span>
+                  <span>Occupancy rate analytics</span>
                 </li>
                 <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
                   <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
-                  <span>View detailed PG profiles with photos & amenities</span>
+                  <span>Payment history & trends</span>
                 </li>
                 <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
                   <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
-                  <span>Send inquiries directly to PG owners</span>
+                  <span>Tenant retention insights</span>
                 </li>
                 <li className="flex items-start gap-3 text-[#E5E7EB] text-sm sm:text-base">
                   <IconCheck className="w-5 h-5 text-[#22D3EE] flex-shrink-0 mt-0.5" />
-                  <span>100% free — no charges for tenants</span>
+                  <span>Export reports in multiple formats</span>
                 </li>
               </ul>
-              <button
-                onClick={() => {
-                  const marketplaceSection = document.getElementById('marketplace-section');
-                  if (marketplaceSection) {
-                    marketplaceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }}
-                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 border-2 border-[#22D3EE] text-[#22D3EE] rounded-lg hover:bg-[#22D3EE] hover:text-[#0B0F14] transition-all font-semibold text-sm sm:text-base active:scale-95"
-              >
-                Search PGs Now
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Marketplace Section - For Tenants */}
-      <section id="marketplace-section" className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-8 sm:mb-12 md:mb-16">
-              <p className="text-xs sm:text-sm md:text-base font-semibold text-[#1FB6C1] uppercase tracking-wider mb-2 sm:mb-3">PG Marketplace</p>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-[#E5E7EB] mb-4 sm:mb-6 leading-tight">
-                Find Your Perfect PG
-              </h2>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-[#D1D5DB] max-w-3xl mx-auto px-2">
-                Powerful search platform connecting tenants with verified PG owners. Search by location, budget, facilities, and more. 
-                Real-time availability, detailed profiles, and direct inquiry system — all free for tenants.
-              </p>
-            </div>
-
-            {/* Compact Search Form */}
-            <div className="bg-[#0F1720] rounded-xl shadow-xl border border-primary/10 p-4 sm:p-5 md:p-6 mb-8 sm:mb-10">
-              <form onSubmit={handleSearchSubmit} className="space-y-4 sm:space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  <div className="relative">
-                    <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-[#E5E7EB]">City *</label>
-                    <input
-                      type="text"
-                      value={searchParams.city}
-                      onChange={(e) => {
-                        setSearchParams({ ...searchParams, city: e.target.value });
-                        setShowCitySuggestions(true);
-                      }}
-                      onFocus={() => {
-                        if (citySuggestions.length > 0) setShowCitySuggestions(true);
-                      }}
-                      onBlur={() => {
-                        setTimeout(() => setShowCitySuggestions(false), 200);
-                      }}
-                      className="w-full px-4 py-3 sm:py-3.5 text-sm sm:text-base border border-primary/20 bg-[#0B0F14] text-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
-                      placeholder="e.g., Noida"
-                      required
-                    />
-                    {showCitySuggestions && citySuggestions.length > 0 && (
-                      <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
-                        {citySuggestions.map((city, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => {
-                              setSearchParams({ ...searchParams, city });
-                              setShowCitySuggestions(false);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-[#E5E7EB] hover:bg-[#0F1720] focus:bg-[#0F1720] focus:outline-none border-b border-primary/20 last:border-b-0"
-                          >
-                            <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                              <span>{city}</span>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {suggestionsLoading && showCitySuggestions && (
-                      <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg p-2">
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent"></div>
-                          <span className="ml-2 text-xs text-muted-foreground">Loading...</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="relative">
-                    <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-[#E5E7EB]">Area</label>
-                    <input
-                      type="text"
-                      value={searchParams.area}
-                      onChange={(e) => {
-                        setSearchParams({ ...searchParams, area: e.target.value });
-                        setShowAreaSuggestions(true);
-                      }}
-                      onFocus={() => {
-                        if (areaSuggestions.length > 0) setShowAreaSuggestions(true);
-                      }}
-                      onBlur={() => {
-                        setTimeout(() => setShowAreaSuggestions(false), 200);
-                      }}
-                      className="w-full px-4 py-3 sm:py-3.5 text-sm sm:text-base border border-primary/20 bg-[#0B0F14] text-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
-                      placeholder="e.g., Sector 44"
-                    />
-                    {showAreaSuggestions && areaSuggestions.length > 0 && (
-                      <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
-                        {areaSuggestions.map((area, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => {
-                              setSearchParams({ ...searchParams, area });
-                              setShowAreaSuggestions(false);
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-[#E5E7EB] hover:bg-[#0F1720] focus:bg-[#0F1720] focus:outline-none border-b border-primary/20 last:border-b-0"
-                          >
-                            <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                              </svg>
-                              <span>{area}</span>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {suggestionsLoading && showAreaSuggestions && (
-                      <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg p-2">
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent"></div>
-                          <span className="ml-2 text-xs text-muted-foreground">Loading...</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-[#E5E7EB]">Budget (₹)</label>
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <input
-                        type="number"
-                        value={searchParams.budget_min}
-                        onChange={(e) => setSearchParams({ ...searchParams, budget_min: e.target.value })}
-                        className="w-full px-3 sm:px-4 py-3 sm:py-3.5 text-sm sm:text-base border border-primary/20 bg-[#0B0F14] text-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
-                        placeholder="Min"
-                      />
-                      <input
-                        type="number"
-                        value={searchParams.budget_max}
-                        onChange={(e) => setSearchParams({ ...searchParams, budget_max: e.target.value })}
-                        className="w-full px-3 sm:px-4 py-3 sm:py-3.5 text-sm sm:text-base border border-primary/20 bg-[#0B0F14] text-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
-                        placeholder="Max"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold mb-1.5 sm:mb-2 text-[#E5E7EB]">Gender</label>
-                    <select
-                      value={searchParams.gender}
-                      onChange={(e) => setSearchParams({ ...searchParams, gender: e.target.value })}
-                      className="w-full px-4 py-3 sm:py-3.5 text-sm sm:text-base border border-primary/20 bg-[#0B0F14] text-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
-                    >
-                      <option value="">Any</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="unisex">Unisex</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
-                  <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                    <label className="flex items-center text-xs sm:text-sm text-[#E5E7EB] cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={searchParams.has_food}
-                        onChange={(e) => setSearchParams({ ...searchParams, has_food: e.target.checked })}
-                        className="mr-2 w-4 h-4 text-accent focus:ring-accent"
-                      />
-                      <span>Food</span>
-                    </label>
-                    <label className="flex items-center text-xs sm:text-sm text-[#E5E7EB] cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={searchParams.has_wifi}
-                        onChange={(e) => setSearchParams({ ...searchParams, has_wifi: e.target.checked })}
-                        className="mr-2 w-4 h-4 text-accent focus:ring-accent"
-                      />
-                      <span>WiFi</span>
-                    </label>
-                    <label className="flex items-center text-xs sm:text-sm text-[#E5E7EB] cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={searchParams.has_ac}
-                        onChange={(e) => setSearchParams({ ...searchParams, has_ac: e.target.checked })}
-                        className="mr-2 w-4 h-4 text-accent focus:ring-accent"
-                      />
-                      <span>AC</span>
-                    </label>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={searchLoading}
-                    className="w-full sm:w-auto sm:ml-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-[#14B8A6] text-white rounded-lg hover:bg-[#2DD4BF] disabled:opacity-50 font-semibold text-sm sm:text-base transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-95"
-                  >
-                    {searchLoading ? (
-                      <>
-                        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Searching...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        Search PGs
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Search Results */}
-            <div id="search-results">
-              {searchLoading && (
-                <div className="text-center py-12">
-                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-accent"></div>
-                  <p className="mt-4 text-[#D1D5DB]">Searching for PGs...</p>
-                </div>
-              )}
-
-              {!searchLoading && searchResults.length === 0 && !hasSearched && (
-                <div className="bg-[#0F1720] rounded-lg shadow-md border border-primary/20 p-8 md:p-12 text-center">
-                  <div className="w-16 h-16 bg-[#0B0F14] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold text-[#E5E7EB] mb-2">Start Your Search</h3>
-                  <p className="text-[#D1D5DB]">Enter a city above and click "Search PGs" to find available PGs.</p>
-                </div>
-              )}
-
-              {!searchLoading && searchResults.length === 0 && hasSearched && (
-                <div className="bg-[#0F1720] rounded-lg shadow-md border border-primary/20 p-8 md:p-12 text-center">
-                  <div className="w-16 h-16 bg-[#0B0F14] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold text-[#E5E7EB] mb-2">No PGs Found</h3>
-                  <p className="text-[#D1D5DB] mb-4">Try adjusting your search filters or search in a different city/area.</p>
-                  <button
-                    onClick={() => {
-                      setSearchParams({
-                        city: '',
-                        area: '',
-                        budget_min: '',
-                        budget_max: '',
-                        gender: '',
-                        has_food: false,
-                        has_wifi: false,
-                        has_ac: false,
-                      });
-                      setSearchResults([]);
-                      setHasSearched(false);
-                      setSearchTotal(0);
-                    }}
-                    className="text-accent hover:text-accent/80 font-medium text-sm"
-                  >
-                    Clear Filters & Search Again
-                  </button>
-                </div>
-              )}
-
-              {!searchLoading && searchResults.length > 0 && (
-                <>
-                  <div className="mb-4 flex items-center justify-between">
-                    <p className="text-sm md:text-base text-[#E5E7EB]">
-                      Found <span className="font-bold text-primary">{searchTotal}</span> PG{searchTotal !== 1 ? 's' : ''} matching your search
-                    </p>
-                  </div>
-                  <div className="space-y-4">
-                    {searchResults.map((pg) => (
-                      <div
-                        key={pg.pg_id}
-                        className="bg-[#0F1720] rounded-lg shadow-md border border-primary/20 p-5 md:p-6 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300"
-                      >
-                        {/* PG Images */}
-                        {pg.images && Array.isArray(pg.images) && pg.images.length > 0 && (
-                          <div className="mb-4">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                              {pg.images.slice(0, 4).map((img, idx) => (
-                                <div key={idx} className="relative aspect-video rounded-lg overflow-hidden border border-border">
-                                  <img
-                                    src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
-                                    alt={`${pg.pg_name} - Image ${idx + 1}`}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                      e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found';
-                                    }}
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0 mb-3">
-                          <div className="flex-1">
-                            <h3 className="text-lg sm:text-xl font-bold text-primary mb-1">{pg.pg_name || 'PG Name'}</h3>
-                            <p className="text-xs sm:text-sm text-[#D1D5DB] flex items-center gap-1">
-                              <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                              <span className="truncate">{pg.area && `${pg.area}, `}{pg.city || 'City not specified'}</span>
-                            </p>
-                          </div>
-                          {pg.address && (
-                            <button
-                              onClick={() => {
-                                const address = encodeURIComponent(`${pg.address}, ${pg.area || ''}, ${pg.city || ''}`);
-                                window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
-                              }}
-                              className="text-accent hover:text-accent/80 text-xs sm:text-sm font-medium flex items-center gap-1 self-start sm:self-auto"
-                            >
-                              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                              View on Map
-                            </button>
-                          )}
-                        </div>
-
-                        {pg.address && (
-                          <p className="text-[#E5E7EB] mb-3 text-sm">{pg.address}</p>
-                        )}
-
-                        {pg.facilities && Array.isArray(pg.facilities) && pg.facilities.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {pg.facilities.map((facility, idx) => (
-                              <span
-                                key={idx}
-                                className="px-2.5 py-1 bg-teal-accent/20 text-teal-accent text-xs font-medium rounded-full"
-                              >
-                                {facility}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        {pg.rooms && Array.isArray(pg.rooms) && pg.rooms.length > 0 ? (
-                          <div className="mt-4 mb-4">
-                            <h4 className="text-sm font-semibold mb-2 text-[#E5E7EB]">Available Rooms:</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              {pg.rooms.map((room) => (
-                                <div
-                                  key={room.room_id || Math.random()}
-                                  className="flex justify-between items-center p-2.5 bg-[#0B0F14] rounded border border-primary/20"
-                                >
-                                  <div>
-                                    <span className="font-medium text-sm text-[#E5E7EB]">{room.room_name || 'Room'}</span>
-                                    {room.gender_type && (
-                                      <span className="text-xs text-[#9CA3AF] ml-2">
-                                        ({room.gender_type})
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="font-bold text-primary">₹{room.rent_per_bed || 0}/bed</div>
-                                    <div className="text-xs text-[#9CA3AF]">
-                                      {room.available_beds || 0} bed{(room.available_beds || 0) !== 1 ? 's' : ''} available
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="mt-4 mb-4 p-3 bg-[#0B0F14] border border-primary/20 rounded text-sm text-[#D1D5DB]">
-                            No rooms available at the moment. Please contact the PG owner for availability.
-                          </div>
-                        )}
-
-                        <button
-                          onClick={() => navigate(`/marketplace/pg/${pg.pg_id}`)}
-                          className="w-full bg-[#14B8A6] text-white py-2.5 rounded-md hover:bg-[#2DD4BF] font-semibold transition-all shadow-md hover:shadow-lg text-sm"
-                        >
-                          View Details & Send Inquiry
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Pagination */}
-                  {searchTotal > searchLimit && (
-                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-                      <button
-                        onClick={() => handleMarketplaceSearch(searchPage - 1)}
-                        disabled={searchPage === 1}
-                        className="px-4 py-2 border border-primary/20 bg-[#0F1720] text-[#E5E7EB] rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#0B0F14] transition-colors font-medium text-sm"
-                      >
-                        ← Previous
-                      </button>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-[#E5E7EB]">
-                          Page <span className="font-semibold">{searchPage}</span> of <span className="font-semibold">{Math.ceil(searchTotal / searchLimit)}</span>
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => handleMarketplaceSearch(searchPage + 1)}
-                        disabled={searchPage >= Math.ceil(searchTotal / searchLimit)}
-                        className="px-4 py-2 border border-primary/20 bg-[#0F1720] text-[#E5E7EB] rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#0B0F14] transition-colors font-medium text-sm"
-                      >
-                        Next →
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
             </div>
           </div>
         </div>
@@ -2043,25 +1207,14 @@ const LandingPage = () => {
                     ))}
                   </ul>
                   <button
-                    onClick={() => handleSubscribe(plan.id)}
-                    disabled={paymentLoading}
+                    onClick={handleSubscribe}
                     className={`w-full py-3 sm:py-3.5 md:py-4 rounded-lg font-semibold transition-all text-sm sm:text-base flex items-center justify-center gap-2 active:scale-95 ${
                       idx === 1
-                        ? 'bg-[#14B8A6] text-white hover:bg-[#2DD4BF] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
-                        : 'bg-[#0B0F14] text-[#E5E7EB] hover:bg-[#0F1720] disabled:opacity-50 disabled:cursor-not-allowed'
+                        ? 'bg-[#14B8A6] text-white hover:bg-[#2DD4BF] shadow-lg'
+                        : 'bg-[#0B0F14] text-[#E5E7EB] hover:bg-[#0F1720]'
                     }`}
                   >
-                    {paymentLoading ? (
-                      <>
-                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>Opening Payment...</span>
-                      </>
-                    ) : (
-                      'Subscribe Now'
-                    )}
+                    Subscribe Now
                   </button>
                 </div>
               ))}
@@ -2070,7 +1223,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-
       {/* Footer */}
       <footer className="relative w-full border-t border-primary/10 py-10 sm:py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
@@ -2078,8 +1230,8 @@ const LandingPage = () => {
             <div className="sm:col-span-2 md:col-span-1">
               <h3 className="font-bold text-base md:text-lg mb-3 md:mb-4">PG Pilot – PG Management System</h3>
               <p className="text-[#D1D5DB] text-xs md:text-sm leading-relaxed mb-3 md:mb-0">
-                The complete platform for PG management and discovery. For owners: manage your property on autopilot. 
-                For tenants: find verified PGs with real-time availability. Connecting PG owners and tenants across India.
+                The complete platform for PG management. Manage your entire property on autopilot — tenants, payments, rooms, mess, and more. 
+                Built specifically for Indian PG owners.
               </p>
               <div className="flex gap-2 md:gap-3 mt-3 md:mt-4">
                 <a href="#" className="w-7 h-7 md:w-8 md:h-8 bg-primary/20 rounded flex items-center justify-center hover:bg-accent transition-colors">
@@ -2099,11 +1251,10 @@ const LandingPage = () => {
             <div>
               <h4 className="font-bold text-foreground mb-3 md:mb-4 text-sm md:text-base">Quick Links</h4>
               <ul className="space-y-2 text-xs md:text-sm text-[#D1D5DB]">
-                <li><Link to="/marketplace/search" className="hover:text-accent transition-colors">Find PG</Link></li>
+                <li><Link to="/for-tenants" className="hover:text-accent transition-colors">For Tenants</Link></li>
                 <li><a href="#features" className="hover:text-accent transition-colors">Features</a></li>
-                <li><a href="#pricing" className="hover:text-accent transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors">Free Trial</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors">Contact Us</a></li>
+                <li><a href="#pricing-plans" className="hover:text-accent transition-colors">Pricing</a></li>
+                <li><a href="#how-it-works" className="hover:text-accent transition-colors">How It Works</a></li>
               </ul>
             </div>
             <div className="sm:col-span-2 md:col-span-1">
@@ -2135,7 +1286,7 @@ const LandingPage = () => {
           </div>
           <div className="border-t border-primary/20 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
             <p className="text-xs md:text-sm text-[#D1D5DB] text-center md:text-left">
-              © 2024 PG Pilot – Connecting PG Owners & Tenants Across India
+              © 2024 PG Pilot – Complete PG Management Platform for Owners
             </p>
             <div className="flex gap-4 md:gap-6 text-xs md:text-sm text-[#D1D5DB]">
               <a href="#" className="hover:text-accent transition-colors">Contact us</a>
@@ -2267,11 +1418,8 @@ const LandingPage = () => {
             password: '',
             confirmPassword: '',
             role: 'pg_admin',
-            pg_name: '',
-            pg_location: '',
           });
           setSignupError('');
-          setPendingPlanId(null);
         }}
         title="Create Account"
         size="md"
@@ -2319,34 +1467,6 @@ const LandingPage = () => {
               value={signupData.email}
               onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
               className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-foreground text-sm font-bold mb-2">
-              PG Name *
-            </label>
-            <input
-              type="text"
-              value={signupData.pg_name}
-              onChange={(e) => setSignupData({ ...signupData, pg_name: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-              placeholder="Enter your PG name"
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-foreground text-sm font-bold mb-2">
-              PG Location/Address *
-            </label>
-            <textarea
-              value={signupData.pg_location}
-              onChange={(e) => setSignupData({ ...signupData, pg_location: e.target.value })}
-              className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
-              placeholder="Enter your PG location/address"
-              rows="3"
-              required
             />
           </div>
 
@@ -2434,8 +1554,6 @@ const LandingPage = () => {
                   password: '',
                   confirmPassword: '',
                   role: 'pg_admin',
-                  pg_name: '',
-                  pg_location: '',
                 });
                 setSignupError('');
               }}
@@ -2447,66 +1565,6 @@ const LandingPage = () => {
         </form>
       </Modal>
 
-      {/* PG Creation Modal */}
-      <Modal
-        isOpen={showPGModal}
-        onClose={() => {
-          setShowPGModal(false);
-          setPendingPlanId(null);
-          setPgFormData({ name: '', address: '', food_enabled: false, default_due_day: 5 });
-        }}
-        title="Create Your PG"
-      >
-        <form onSubmit={handleCreatePG}>
-          <p className="text-sm text-muted-foreground mb-4">
-            You need to create a PG before subscribing to a plan. Please fill in the details below.
-          </p>
-          <Input
-            label="PG Name"
-            value={pgFormData.name}
-            onChange={(e) => setPgFormData({ ...pgFormData, name: e.target.value })}
-            required
-          />
-          <Input
-            label="Address"
-            value={pgFormData.address}
-            onChange={(e) => setPgFormData({ ...pgFormData, address: e.target.value })}
-            type="textarea"
-          />
-          <div className="mb-4">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={pgFormData.food_enabled}
-                onChange={(e) => setPgFormData({ ...pgFormData, food_enabled: e.target.checked })}
-                className="mr-2"
-              />
-              <span className="text-foreground">Food Enabled</span>
-            </label>
-          </div>
-          <Input
-            label="Default Due Day"
-            type="number"
-            value={pgFormData.default_due_day}
-            onChange={(e) => setPgFormData({ ...pgFormData, default_due_day: parseInt(e.target.value) || 5 })}
-            required
-          />
-          <div className="flex gap-2 justify-end mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setShowPGModal(false);
-                setPendingPlanId(null);
-                setPgFormData({ name: '', address: '', food_enabled: false, default_due_day: 5 });
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">Create PG & Continue</Button>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 };

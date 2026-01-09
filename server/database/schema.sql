@@ -43,9 +43,12 @@ CREATE TABLE pgs (
     images JSON DEFAULT NULL,
     food_enabled BOOLEAN DEFAULT 0,
     default_due_day INT DEFAULT 5,
+    user_id BIGINT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_city_area (city, area),
-    INDEX idx_pg_uid (pg_uid)
+    INDEX idx_pg_uid (pg_uid),
+    INDEX idx_user_id (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- =====================================

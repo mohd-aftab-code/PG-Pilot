@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { getStoredPgId } from '../utils/auth';
+import { useSubscription } from '../context/SubscriptionContext';
 import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
 import Input from '../components/common/Input';
@@ -8,6 +9,7 @@ import Button from '../components/common/Button';
 import { formatDateDDMMYY, formatDateForInput } from '../components/common/dateUtils';
 
 const Tenants = () => {
+  const { isReadOnly } = useSubscription();
   const [tenants, setTenants] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [beds, setBeds] = useState([]);
@@ -136,6 +138,10 @@ const Tenants = () => {
   };
 
   const handleEdit = async (tenant) => {
+    if (isReadOnly) {
+      alert('Trial expired. Please upgrade to edit tenants.');
+      return;
+    }
     setEditingTenant(tenant);
     setFormData({
       ...formData,
@@ -174,6 +180,10 @@ const Tenants = () => {
   };
 
   const handleDelete = async (tenant) => {
+    if (isReadOnly) {
+      alert('Trial expired. Please upgrade to delete tenants.');
+      return;
+    }
     if (!window.confirm('Are you sure you want to delete this tenant?')) return;
     try {
       await api.delete(`/api/tenants/${tenant.id}`);

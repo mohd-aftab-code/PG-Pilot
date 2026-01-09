@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { getStoredUser, getStoredPgId } from '../utils/auth';
+import { useSubscription } from '../context/SubscriptionContext';
 import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
 import Input from '../components/common/Input';
@@ -170,6 +171,7 @@ const BedCard = ({ bed, onStatusChange }) => {
 };
 
 const RoomsBeds = () => {
+  const { isReadOnly } = useSubscription();
   const [rooms, setRooms] = useState([]);
   const [beds, setBeds] = useState({});
   const [expandedRooms, setExpandedRooms] = useState(new Set());
@@ -369,6 +371,8 @@ const RoomsBeds = () => {
         <Button 
           onClick={() => setIsRoomModalOpen(true)} 
           className="w-full sm:w-auto flex items-center gap-2"
+          disabled={isReadOnly}
+          title={isReadOnly ? 'Trial expired. Please upgrade to add rooms.' : ''}
         >
           <IconPlus />
           Add New Room
@@ -524,6 +528,10 @@ const RoomsBeds = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              if (isReadOnly) {
+                                alert('Trial expired. Please upgrade to edit rooms.');
+                                return;
+                              }
                               setEditingRoom(room);
                               setFormData({
                                 ...formData,
@@ -537,8 +545,13 @@ const RoomsBeds = () => {
                               });
                               setIsRoomModalOpen(true);
                             }}
-                            className="p-2 hover:bg-[#0B0F14] rounded transition-colors text-[#9CA3AF] hover:text-[#E5E7EB]"
-                            title="Edit room"
+                            disabled={isReadOnly}
+                            className={`p-2 rounded transition-colors ${
+                              isReadOnly 
+                                ? 'text-[#6B7280] cursor-not-allowed opacity-50' 
+                                : 'text-[#9CA3AF] hover:text-[#E5E7EB] hover:bg-[#0B0F14]'
+                            }`}
+                            title={isReadOnly ? 'Trial expired. Please upgrade to edit rooms.' : 'Edit room'}
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

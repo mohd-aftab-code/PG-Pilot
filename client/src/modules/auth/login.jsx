@@ -39,28 +39,32 @@ const Login = () => {
             if (user.pg_id) {
               try {
                 const subResponse = await api.get(`/api/subscriptions/pg/${user.pg_id}/active`);
-                if (subResponse.data.subscription) {
-                  navigate('/dashboard');
+                console.log('Login: Subscription check response:', {
+                  hasAccess: subResponse.data.hasAccess,
+                  trial: subResponse.data.trial,
+                  subscription: subResponse.data.subscription,
+                  pg_id: user.pg_id
+                });
+                
+                // Check hasAccess (includes both trial and subscription)
+                if (subResponse.data.hasAccess === true) {
+                  console.log('Login: Has access, redirecting to dashboard');
+                  // Has active subscription OR active trial - go to dashboard
+                  navigate('/dashboard', { replace: true });
                 } else {
-                  navigate('/', {
-                    state: {
-                      message: 'Please subscribe to a plan to access the dashboard. Subscription is required to use PG Pilot services.',
-                    },
-                  });
+                  console.log('Login: No access, redirecting to choose-plan. Response:', subResponse.data);
+                  // No subscription/trial - go to choose plan
+                  navigate('/choose-plan', { replace: true });
                 }
               } catch (error) {
-                navigate('/', {
-                  state: {
-                    message: 'Please subscribe to a plan to access the dashboard. Subscription is required to use PG Pilot services.',
-                  },
-                });
+                console.error('Login: Error checking subscription/trial:', error);
+                console.error('Login: Error details:', error.response?.data || error.message);
+                // Error checking - go to choose plan
+                navigate('/choose-plan', { replace: true });
               }
             } else {
-              navigate('/', {
-                state: {
-                  message: 'Please create a PG and subscribe to a plan to access the dashboard.',
-                },
-              });
+              // No PG - redirect to register PG
+              navigate('/register-pg', { replace: true });
             }
           }
         }, 100);
@@ -350,31 +354,26 @@ const Login = () => {
           if (user.role === 'superadmin') {
             navigate('/pgs'); // Superadmin goes to PG management
           } else {
-            // For PG Admin, check subscription before allowing access
+            // For PG Admin, check subscription/trial before allowing access
             if (user.pg_id) {
               try {
                 const subResponse = await api.get(`/api/subscriptions/pg/${user.pg_id}/active`);
-                if (subResponse.data.subscription) {
-                  // Has active subscription, allow dashboard access
-                  navigate('/dashboard');
+                // Check hasAccess (includes both trial and subscription)
+                if (subResponse.data.hasAccess === true) {
+                  // Has active subscription OR active trial, allow dashboard access
+                  navigate('/dashboard', { replace: true });
                 } else {
-                  // No subscription, redirect to landing page with message
-                  navigate('/', { 
-                    state: { 
-                      message: 'Please subscribe to a plan to access the dashboard. Subscription is required to use PG Pilot services.' 
-                    } 
-                  });
+                  // No subscription/trial, redirect to choose plan
+                  navigate('/choose-plan', { replace: true });
                 }
               } catch (error) {
-                // Error checking subscription, redirect to landing page
-                navigate('/', { 
-                  state: { 
-                    message: 'Please subscribe to a plan to access the dashboard. Subscription is required to use PG Pilot services.' 
-                  } 
-                });
+                console.error('Error checking subscription/trial:', error);
+                // Error checking subscription, redirect to choose plan
+                navigate('/choose-plan', { replace: true });
               }
             } else {
-              // No PG created yet, redirect to landing page
+              // No PG created yet, redirect to register PG
+              navigate('/register-pg', { replace: true });
               navigate('/', { 
                 state: { 
                   message: 'Please create a PG and subscribe to a plan to access the dashboard.' 
