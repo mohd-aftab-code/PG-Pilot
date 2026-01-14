@@ -1,31 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
+import { getFullUrl } from '../utils/api';
 import { getStoredPgId } from '../utils/auth';
 import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
-import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import { formatDateDDMMYY } from '../components/common/dateUtils';
 
 const Complaints = () => {
   const [complaints, setComplaints] = useState([]);
-  const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingComplaint, setEditingComplaint] = useState(null);
-  const [formData, setFormData] = useState({
-    tenant_id: '',
-    pg_id: getStoredPgId(),
-    title: '',
-    description: '',
-    status: 'open',
-  });
+  const [status, setStatus] = useState('open');
   const pgId = getStoredPgId();
 
   useEffect(() => {
     if (pgId) {
       fetchComplaints();
-      fetchTenants();
     }
   }, [pgId]);
 
@@ -41,41 +33,22 @@ const Complaints = () => {
     }
   };
 
-  const fetchTenants = async () => {
+  const handleStatusUpdate = async () => {
     try {
-      const response = await api.get(`/api/tenants/pg/${pgId}`);
-      setTenants(response.data.tenants || []);
-    } catch (error) {
-      console.error('Error fetching tenants:', error);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (editingComplaint) {
-        await api.put(`/api/complaints/${editingComplaint.id}`, formData);
-      } else {
-        await api.post('/api/complaints', formData);
-      }
+      await api.put(`/api/complaints/${editingComplaint.id}`, {
+        title: editingComplaint.title,
+        description: editingComplaint.description,
+        photo_url: editingComplaint.photo_url,
+        status: status
+      });
       setIsModalOpen(false);
       setEditingComplaint(null);
-      resetForm();
+      setStatus('open');
       fetchComplaints();
     } catch (error) {
-      console.error('Error saving complaint:', error);
-      alert(error.response?.data?.error || 'Error saving complaint');
+      console.error('Error updating complaint status:', error);
+      alert(error.response?.data?.error || 'Error updating complaint status');
     }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      tenant_id: '',
-      pg_id: pgId,
-      title: '',
-      description: '',
-      status: 'open',
-    });
   };
 
   const getStatusBadge = (status) => {
@@ -105,9 +78,8 @@ const Complaints = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB]">Complaints</h1>
-          <p className="text-sm text-[#9CA3AF] mt-1">Manage tenant complaints</p>
+          <p className="text-sm text-[#9CA3AF] mt-1">Manage tenant complaints - Update status to process</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">Add Complaint</Button>
       </div>
 
       {/* Table */}
@@ -118,13 +90,7 @@ const Complaints = () => {
           loading={loading}
           onEdit={(complaint) => {
             setEditingComplaint(complaint);
-            setFormData({
-              tenant_id: complaint.tenant_id,
-              pg_id: complaint.pg_id,
-              title: complaint.title,
-              description: complaint.description || '',
-              status: complaint.status,
-            });
+            setStatus(complaint.status);
             setIsModalOpen(true);
           }}
         />
@@ -135,61 +101,72 @@ const Complaints = () => {
         onClose={() => {
           setIsModalOpen(false);
           setEditingComplaint(null);
-          resetForm();
+          setStatus('open');
         }}
-        title={editingComplaint ? 'Edit Complaint' : 'Add Complaint'}
+        title="Update Complaint Status"
         size="lg"
       >
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Tenant *</label>
-            <select
-              value={formData.tenant_id}
-              onChange={(e) => setFormData({ ...formData, tenant_id: e.target.value })}
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
-              required
-            >
-              <option value="" className="bg-[#0B0F14] text-[#E5E7EB]">Select Tenant</option>
-              {tenants.map((tenant) => (
-                <option key={tenant.id} value={tenant.id} className="bg-[#0B0F14] text-[#E5E7EB]">{tenant.name}</option>
-              ))}
-            </select>
+        {editingComplaint && (
+          <div className="space-y-4">
+            {/* Display complaint details (read-only) */}
+            <div className="bg-[#0B0F14] border border-primary/20 rounded-lg p-4 space-y-3">
+              <div>
+                <label className="block text-[#9CA3AF] text-xs font-semibold mb-1">Tenant</label>
+                <p className="text-[#E5E7EB] text-sm">{editingComplaint.tenant_name}</p>
+              </div>
+              <div>
+                <label className="block text-[#9CA3AF] text-xs font-semibold mb-1">Title</label>
+                <p className="text-[#E5E7EB] text-sm">{editingComplaint.title}</p>
+              </div>
+              {editingComplaint.description && (
+                <div>
+                  <label className="block text-[#9CA3AF] text-xs font-semibold mb-1">Description</label>
+                  <p className="text-[#E5E7EB] text-sm whitespace-pre-wrap">{editingComplaint.description}</p>
+                </div>
+              )}
+              {editingComplaint.photo_url && (
+                <div>
+                  <label className="block text-[#9CA3AF] text-xs font-semibold mb-1">Photo</label>
+                  <img 
+                    src={getFullUrl(editingComplaint.photo_url)}
+                    alt="Complaint photo"
+                    className="max-w-full h-auto rounded-lg border border-primary/20"
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-[#9CA3AF] text-xs font-semibold mb-1">Date</label>
+                <p className="text-[#E5E7EB] text-sm">{formatDateDDMMYY(editingComplaint.created_at)}</p>
+              </div>
+            </div>
+
+            {/* Status update section */}
+            <div>
+              <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Update Status *</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
+                required
+              >
+                <option value="open" className="bg-[#0B0F14] text-[#E5E7EB]">Open</option>
+                <option value="in_progress" className="bg-[#0B0F14] text-[#E5E7EB]">In Progress</option>
+                <option value="resolved" className="bg-[#0B0F14] text-[#E5E7EB]">Resolved</option>
+              </select>
+            </div>
+
+            <div className="flex gap-2 justify-end pt-4 border-t border-primary/20">
+              <Button type="button" variant="outline" onClick={() => {
+                setIsModalOpen(false);
+                setEditingComplaint(null);
+                setStatus('open');
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleStatusUpdate}>Update Status</Button>
+            </div>
           </div>
-          <Input
-            label="Title"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            required
-          />
-          <div className="mb-4">
-            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Description</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm resize-none"
-              rows="4"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Status *</label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm"
-              required
-            >
-              <option value="open" className="bg-[#0B0F14] text-[#E5E7EB]">Open</option>
-              <option value="in_progress" className="bg-[#0B0F14] text-[#E5E7EB]">In Progress</option>
-              <option value="resolved" className="bg-[#0B0F14] text-[#E5E7EB]">Resolved</option>
-            </select>
-          </div>
-          <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">Save</Button>
-          </div>
-        </form>
+        )}
       </Modal>
     </div>
   );
