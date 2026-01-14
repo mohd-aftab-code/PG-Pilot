@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import { getStoredUser, setStoredUser } from '../utils/auth';
 import Button from '../components/common/Button';
@@ -7,8 +7,10 @@ import Input from '../components/common/Input';
 
 const RegisterPG = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [referralCodeFromUrl, setReferralCodeFromUrl] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -18,6 +20,7 @@ const RegisterPG = () => {
     food_enabled: false,
     default_due_day: 5,
     images: [],
+    referral_code: '', // Referral code input
     facilities: {
       FOOD: false,
       WIFI: false,
@@ -30,6 +33,15 @@ const RegisterPG = () => {
       STUDY_ROOM: false,
     },
   });
+
+  // Get referral code from URL
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      setReferralCodeFromUrl(refCode);
+      setFormData(prev => ({ ...prev, referral_code: refCode }));
+    }
+  }, [searchParams]);
 
   const facilityLabels = {
     FOOD: 'Food Available',
@@ -82,6 +94,11 @@ const RegisterPG = () => {
       formDataToSend.append('pincode', formData.pincode || '');
       formDataToSend.append('food_enabled', formData.food_enabled ? '1' : '0');
       formDataToSend.append('default_due_day', formData.default_due_day.toString());
+      
+      // Append referral code if provided
+      if (formData.referral_code) {
+        formDataToSend.append('referral_code', formData.referral_code);
+      }
       
       // Append facilities as array
       Object.keys(formData.facilities).forEach(facility => {
@@ -200,6 +217,27 @@ const RegisterPG = () => {
               onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
               placeholder="e.g., 201301"
             />
+
+            {referralCodeFromUrl && (
+              <div className="bg-[#22D3EE]/10 border border-[#22D3EE]/30 rounded-lg p-3">
+                <p className="text-sm text-[#22D3EE]">
+                  🎁 Referral code applied: <span className="font-mono font-bold">{referralCodeFromUrl}</span>
+                </p>
+                <p className="text-xs text-[#9CA3AF] mt-1">
+                  You'll get extra benefits when you subscribe!
+                </p>
+              </div>
+            )}
+
+            {!referralCodeFromUrl && (
+              <Input
+                label="Referral Code (Optional)"
+                type="text"
+                value={formData.referral_code}
+                onChange={(e) => setFormData({ ...formData, referral_code: e.target.value.toUpperCase() })}
+                placeholder="Enter referral code if you have one"
+              />
+            )}
 
             <div>
               <label className="block text-sm font-semibold mb-2 text-[#E5E7EB]">

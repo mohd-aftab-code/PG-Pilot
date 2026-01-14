@@ -151,7 +151,7 @@ const Payments = () => {
   ];
 
   return (
-    <div className="p-3 sm:p-4 md:p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div>

@@ -65,7 +65,8 @@ const createPG = async (req, res) => {
       pincode, 
       food_enabled, 
       default_due_day,
-      facilities
+      facilities,
+      referral_code: incomingReferralCode // Referral code used during registration
     } = req.body;
     const { role, id: userId, pg_id: userPgId } = req.user;
 
@@ -113,27 +114,32 @@ const createPG = async (req, res) => {
     // Generate and update pg_uid with proper format
     const pgUid = `PG_ID_${String(pgId).padStart(3, '0')}`;
     
+    // Generate unique referral code (REF + 6 digit number)
+    const referralCode = `REF${String(pgId).padStart(6, '0')}`;
+    
     // Auto-start 30-day FREE TRIAL when PG is registered
     const trialStartDate = new Date();
     const trialEndDate = new Date();
     trialEndDate.setDate(trialEndDate.getDate() + 30); // 30 days from today
     
-    // Update PG with pg_uid and trial dates
+    // Update PG with pg_uid, referral_code, and trial dates
     // Also ensure user_id is set (in case it wasn't set during INSERT)
     const [updatePgResult] = await database.query(
       `UPDATE pgs 
        SET pg_uid = ?, 
+           referral_code = ?,
            trial_start_date = ?, 
            trial_end_date = ?, 
            subscription_status = 'TRIAL',
            user_id = COALESCE(user_id, ?)
        WHERE id = ?`,
-      [pgUid, trialStartDate.toISOString().split('T')[0], trialEndDate.toISOString().split('T')[0], role === 'pg_admin' ? userId : null, pgId]
+      [pgUid, referralCode, trialStartDate.toISOString().split('T')[0], trialEndDate.toISOString().split('T')[0], role === 'pg_admin' ? userId : null, pgId]
     );
     
-    console.log(`PG Controller: Updated PG ${pgId} with pg_uid ${pgUid}, trial dates, and user_id ${role === 'pg_admin' ? userId : 'null'}`, {
+    console.log(`PG Controller: Updated PG ${pgId} with pg_uid ${pgUid}, referral_code ${referralCode}, trial dates, and user_id ${role === 'pg_admin' ? userId : 'null'}`, {
       affectedRows: updatePgResult.affectedRows,
-      user_id: role === 'pg_admin' ? userId : null
+      user_id: role === 'pg_admin' ? userId : null,
+      referral_code: referralCode
     });
 
     // If user is pg_admin, assign the PG to them
@@ -248,6 +254,41 @@ const createPG = async (req, res) => {
         } catch (facilityError) {
           console.error(`Error inserting facility ${facility}:`, facilityError);
         }
+      }
+    }
+
+    // Handle referral code if provided
+    if (incomingReferralCode) {
+      try {
+        // Find the PG that owns this referral code
+        const [referringPGs] = await database.query(
+          'SELECT id, name FROM pgs WHERE referral_code = ?',
+          [incomingReferralCode]
+        );
+        
+        if (referringPGs.length > 0 && referringPGs[0].id !== pgId) {
+          const referringPgId = referringPGs[0].id;
+          
+          // Check if referral already exists
+          const [existingReferral] = await database.query(
+            'SELECT id FROM referrals WHERE referred_by = ? AND referred_pg = ?',
+            [referringPgId, pgId]
+          );
+          
+          if (existingReferral.length === 0) {
+            // Auto-create referral record (status: pending) - 1 month (30 days) reward
+            await database.query(
+              'INSERT INTO referrals (referred_by, referred_pg, referral_code, reward_days, status) VALUES (?, ?, ?, ?, ?)',
+              [referringPgId, pgId, incomingReferralCode, 30, 'pending']
+            );
+            console.log(`PG Controller: Auto-created referral - PG ${referringPgId} referred PG ${pgId} using code ${incomingReferralCode}`);
+          }
+        } else {
+          console.log(`PG Controller: Invalid or self-referral code: ${incomingReferralCode}`);
+        }
+      } catch (referralError) {
+        console.error('PG Controller: Error processing referral code:', referralError);
+        // Don't fail PG creation if referral processing fails
       }
     }
 

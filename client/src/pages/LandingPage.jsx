@@ -1300,6 +1300,7 @@ const LandingPage = () => {
       {/* Login Modal */}
       <Modal
         isOpen={showLoginModal}
+        position="center"
         onClose={() => {
           setShowLoginModal(false);
           setLoginData({ phone: '', password: '' });
@@ -1409,6 +1410,7 @@ const LandingPage = () => {
       {/* Signup Modal */}
       <Modal
         isOpen={showSignupModal}
+        position="center"
         onClose={() => {
           setShowSignupModal(false);
           setSignupData({

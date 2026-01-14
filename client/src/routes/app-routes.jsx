@@ -13,6 +13,7 @@ import Plans from '../pages/Plans';
 import RoomsBeds from '../pages/RoomsBeds';
 import Tenants from '../pages/Tenants';
 import Payments from '../pages/Payments';
+import CoreManagement from '../pages/CoreManagement';
 import Complaints from '../pages/Complaints';
 import MessPlans from '../pages/MessPlans';
 import MessBills from '../pages/MessBills';
@@ -49,6 +50,7 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<ProtectedRoute requirePG={true} requirePlan={true}><Dashboard /></ProtectedRoute>} />
       <Route path="/pgs" element={<ProtectedRoute requireRole="superadmin"><PGManagement /></ProtectedRoute>} />
       <Route path="/plans" element={<ProtectedRoute requireRole="superadmin"><Plans /></ProtectedRoute>} />
+      <Route path="/core" element={<ProtectedRoute requirePG={true} requirePlan={true}><CoreManagement /></ProtectedRoute>} />
       <Route path="/rooms" element={<ProtectedRoute requirePG={true} requirePlan={true}><RoomsBeds /></ProtectedRoute>} />
       <Route path="/tenants" element={<ProtectedRoute requirePG={true} requirePlan={true}><Tenants /></ProtectedRoute>} />
       <Route path="/payments" element={<ProtectedRoute requirePG={true} requirePlan={true}><Payments /></ProtectedRoute>} />

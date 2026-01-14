@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { getStoredUser } from '../../utils/auth';
+import { useSubscription } from '../../context/SubscriptionContext';
 
 // Icon Components
 const IconDashboard = () => (
@@ -105,9 +106,115 @@ const IconChevronRight = () => (
   </svg>
 );
 
+// Subscription Status Card Component
+const SubscriptionStatusCard = ({ open, subscriptionStatus, trialInfo, hasActiveSubscription, isTrialActive, isTrialExpired }) => {
+  const getStatusInfo = () => {
+    if (hasActiveSubscription && subscriptionStatus) {
+      const expiryDate = new Date(subscriptionStatus.expiry_date);
+      const today = new Date();
+      const daysRemaining = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+      
+      return {
+        type: 'paid',
+        label: 'Paid Plan',
+        planName: subscriptionStatus.plan_name || 'Active Plan',
+        daysRemaining: daysRemaining > 0 ? daysRemaining : 0,
+        expiryDate: subscriptionStatus.expiry_date,
+        color: 'text-green-300',
+        bgColor: 'bg-green-500/10',
+        borderColor: 'border-green-500/30'
+      };
+    } else if (isTrialActive && trialInfo) {
+      const endDate = new Date(trialInfo.endDate);
+      const today = new Date();
+      const daysRemaining = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+      
+      return {
+        type: 'trial',
+        label: 'Free Trial',
+        planName: 'Trial Period',
+        daysRemaining: daysRemaining > 0 ? daysRemaining : 0,
+        expiryDate: trialInfo.endDate,
+        color: 'text-[#22D3EE]',
+        bgColor: 'bg-[#22D3EE]/10',
+        borderColor: 'border-[#22D3EE]/30'
+      };
+    } else if (isTrialExpired) {
+      return {
+        type: 'expired',
+        label: 'Trial Expired',
+        planName: 'No Active Plan',
+        daysRemaining: 0,
+        expiryDate: null,
+        color: 'text-red-300',
+        bgColor: 'bg-red-500/10',
+        borderColor: 'border-red-500/30'
+      };
+    } else {
+      return {
+        type: 'none',
+        label: 'No Plan',
+        planName: 'No Active Plan',
+        daysRemaining: 0,
+        expiryDate: null,
+        color: 'text-[#9CA3AF]',
+        bgColor: 'bg-[#0B0F14]',
+        borderColor: 'border-primary/10'
+      };
+    }
+  };
+
+  const statusInfo = getStatusInfo();
+
+  if (!open) {
+    // Collapsed view - just show icon
+    return (
+      <div className={`w-10 h-10 mx-auto rounded-lg flex items-center justify-center ${statusInfo.bgColor} ${statusInfo.borderColor} border`}>
+        <svg className={`w-5 h-5 ${statusInfo.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`p-3 rounded-lg border ${statusInfo.bgColor} ${statusInfo.borderColor}`}>
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex-1 min-w-0">
+          <p className={`text-xs font-semibold ${statusInfo.color} mb-1`}>{statusInfo.label}</p>
+          <p className="text-xs text-[#9CA3AF] truncate">{statusInfo.planName}</p>
+        </div>
+      </div>
+      
+      {statusInfo.type === 'paid' && statusInfo.daysRemaining > 0 && (
+        <div className="mt-2 pt-2 border-t border-primary/10">
+          <p className="text-xs text-[#9CA3AF]">
+            {statusInfo.daysRemaining} {statusInfo.daysRemaining === 1 ? 'day' : 'days'} remaining
+          </p>
+        </div>
+      )}
+      
+      {statusInfo.type === 'trial' && statusInfo.daysRemaining > 0 && (
+        <div className="mt-2 pt-2 border-t border-primary/10">
+          <p className="text-xs text-[#9CA3AF]">
+            {statusInfo.daysRemaining} {statusInfo.daysRemaining === 1 ? 'day' : 'days'} left
+          </p>
+        </div>
+      )}
+      
+      {statusInfo.type === 'expired' && (
+        <div className="mt-2 pt-2 border-t border-primary/10">
+          <p className="text-xs text-red-300">Upgrade to continue</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Sidebar = ({ open, onClose, isMobile }) => {
   const location = useLocation();
   const user = getStoredUser();
+  const { subscriptionStatus, trialInfo, hasActiveSubscription, isTrialActive, isTrialExpired } = useSubscription();
 
   // Base menu items for all users
   const baseMenuItems = [
@@ -123,9 +230,7 @@ const Sidebar = ({ open, onClose, isMobile }) => {
 
   // PG Admin items
   const pgAdminItems = [
-    { path: '/rooms', label: 'Rooms & Beds', icon: IconHome, roles: ['pg_admin'] },
-    { path: '/tenants', label: 'Tenants', icon: IconUsers, roles: ['pg_admin'] },
-    { path: '/payments', label: 'Payments', icon: IconDollar, roles: ['pg_admin'] },
+    { path: '/core', label: 'Core Management', icon: IconHome, roles: ['pg_admin'] },
     { path: '/complaints', label: 'Complaints', icon: IconAlert, roles: ['pg_admin'] },
     { path: '/inquiries', label: 'Inquiries', icon: IconInquiry, roles: ['pg_admin'] },
     { path: '/mess-plans', label: 'Mess Plans', icon: IconCoffee, roles: ['pg_admin'] },
@@ -177,10 +282,12 @@ const Sidebar = ({ open, onClose, isMobile }) => {
           </div>
         </div>
         
-        <nav className="p-3 h-[calc(100vh-4rem)] overflow-y-auto">
-          <ul className="space-y-1">
+        <nav className="p-3 flex flex-col h-[calc(100vh-4rem)]">
+          <ul className="space-y-1 flex-1 overflow-y-auto sidebar-scrollbar">
             {allMenuItems.map((item) => {
-              const isActive = location.pathname === item.path;
+              // Check if current path matches or starts with item path (for tabs)
+              const isActive = location.pathname === item.path || 
+                (item.path === '/core' && ['/rooms', '/tenants', '/payments'].includes(location.pathname));
               const IconComponent = item.icon;
               return (
                 <li key={item.path}>
@@ -205,6 +312,13 @@ const Sidebar = ({ open, onClose, isMobile }) => {
               );
             })}
           </ul>
+          
+          {/* Subscription Status Card - Bottom of Sidebar */}
+          {user?.role === 'pg_admin' && (
+            <div className="mt-auto pt-3 border-t border-primary/10">
+              <SubscriptionStatusCard open={open} subscriptionStatus={subscriptionStatus} trialInfo={trialInfo} hasActiveSubscription={hasActiveSubscription} isTrialActive={isTrialActive} isTrialExpired={isTrialExpired} />
+            </div>
+          )}
         </nav>
       </aside>
     </>

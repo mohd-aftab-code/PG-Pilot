@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../utils/api';
+import api, { getFullUrl } from '../utils/api';
 import { getStoredUser, getStoredPgId } from '../utils/auth';
 import { useSubscription } from '../context/SubscriptionContext';
 import DataTable from '../components/common/DataTable';
@@ -361,11 +361,11 @@ const RoomsBeds = () => {
   ];
 
   return (
-    <div className="p-4 md:p-6">
+    <div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-[#E5E7EB] mb-1">Rooms & Beds</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB] mb-1">Rooms & Beds</h1>
           <p className="text-[#9CA3AF] text-sm">Manage your rooms and bed availability</p>
         </div>
         <Button 
@@ -651,6 +651,8 @@ const RoomsBeds = () => {
           });
         }}
         title={editingRoom ? 'Edit Room' : 'Add New Room'}
+        position="right"
+        size="lg"
       >
         <form onSubmit={handleRoomSubmit}>
           <Input
@@ -747,7 +749,7 @@ const RoomsBeds = () => {
                   {(typeof editingRoom.room_images === 'string' ? JSON.parse(editingRoom.room_images) : editingRoom.room_images).map((img, index) => (
                     <div key={index} className="relative">
                       <img
-                        src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                        src={getFullUrl(img)}
                         alt={`Existing ${index + 1}`}
                         className="w-full h-20 object-cover rounded border border-primary/10"
                       />
@@ -781,12 +783,12 @@ const RoomsBeds = () => {
               : viewingImages.room_images).map((img, index) => (
               <div key={index} className="relative">
                 <img
-                  src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                  src={getFullUrl(img)}
                   alt={`Room image ${index + 1}`}
                   className="w-full h-48 object-cover rounded-lg border border-primary/10"
                 />
                 <a
-                  href={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                  href={getFullUrl(img)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="absolute bottom-2 right-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90 transition-colors"

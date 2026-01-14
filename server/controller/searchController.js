@@ -117,13 +117,13 @@ const searchPGs = async (req, res) => {
       });
     }
 
-    // Step 2: Get rooms with available beds for these PGs
+    // Step 2: Get rooms with available beds for these PGs (for optimization only, not filtering)
     let roomsQuery = `
       SELECT DISTINCT r.pg_id
       FROM rooms r
       INNER JOIN beds b ON r.id = b.room_id
       WHERE r.pg_id IN (${pgIds.map(() => '?').join(',')})
-        AND r.show_in_marketplace = 1
+        AND (r.show_in_marketplace = 1 OR r.show_in_marketplace IS NULL)
         AND b.status = 'vacant'
     `;
 
@@ -238,28 +238,28 @@ const searchPGs = async (req, res) => {
           continue;
         }
         
-        // PG has facilities data - check if it matches the filters
-        let include = true;
-        const reasons = [];
+        // PG has facilities data - check if it has at least ONE of the requested facilities (OR logic)
+        let hasAtLeastOne = false;
+        const matchedFacilities = [];
 
-        if (has_food === 'true' && !facilities.includes('FOOD')) {
-          include = false;
-          reasons.push('missing FOOD');
+        if (has_food === 'true' && facilities.includes('FOOD')) {
+          hasAtLeastOne = true;
+          matchedFacilities.push('FOOD');
         }
-        if (has_wifi === 'true' && !facilities.includes('WIFI')) {
-          include = false;
-          reasons.push('missing WIFI');
+        if (has_wifi === 'true' && facilities.includes('WIFI')) {
+          hasAtLeastOne = true;
+          matchedFacilities.push('WIFI');
         }
-        if (has_ac === 'true' && !facilities.includes('AC')) {
-          include = false;
-          reasons.push('missing AC');
+        if (has_ac === 'true' && facilities.includes('AC')) {
+          hasAtLeastOne = true;
+          matchedFacilities.push('AC');
         }
 
-        if (include) {
+        if (hasAtLeastOne) {
           filteredPgIds.push(pgId);
-          console.log(`PG ${pgId}: INCLUDED - Facilities: [${facilities.join(', ')}]`);
+          console.log(`PG ${pgId}: INCLUDED - Facilities: [${facilities.join(', ')}], Matched: [${matchedFacilities.join(', ')}]`);
         } else {
-          console.log(`PG ${pgId}: FILTERED OUT - Facilities: [${facilities.join(', ')}], Reasons: ${reasons.join(', ')}`);
+          console.log(`PG ${pgId}: FILTERED OUT - Facilities: [${facilities.join(', ')}], No matching facilities`);
         }
       }
     }
@@ -289,7 +289,7 @@ const searchPGs = async (req, res) => {
       FROM rooms r
       LEFT JOIN beds b ON r.id = b.room_id
       WHERE r.pg_id IN (${filteredPgIds.map(() => '?').join(',')})
-        AND r.show_in_marketplace = 1
+        AND (r.show_in_marketplace = 1 OR r.show_in_marketplace IS NULL)
     `;
 
     const roomDetailsParams = [...filteredPgIds];
@@ -310,13 +310,39 @@ const searchPGs = async (req, res) => {
       roomDetailsParams.push(budgetMax);
     }
 
-    roomDetailsQuery += ' GROUP BY r.id HAVING available_beds > 0';
+    roomDetailsQuery += ' GROUP BY r.id';
 
     console.log('Room Details Query:', roomDetailsQuery);
     console.log('Room Details Params:', roomDetailsParams);
+    
+    // Debug: Check rooms without budget filter first
+    const [debugRooms] = await database.query(
+      `SELECT id, pg_id, room_name, rent_per_bed, show_in_marketplace, gender_type
+       FROM rooms 
+       WHERE pg_id IN (${filteredPgIds.map(() => '?').join(',')})
+       AND (show_in_marketplace = 1 OR show_in_marketplace IS NULL)`,
+      filteredPgIds
+    );
+    console.log('DEBUG: All rooms for PGs (no filters):', debugRooms.length);
+    console.log('DEBUG: Rooms data:', debugRooms.map(r => ({ 
+      id: r.id, 
+      pg_id: r.pg_id, 
+      room_name: r.room_name, 
+      rent_per_bed: r.rent_per_bed,
+      show_in_marketplace: r.show_in_marketplace,
+      gender_type: r.gender_type
+    })));
+    
     const [roomRows] = await database.query(roomDetailsQuery, roomDetailsParams);
     console.log('Room rows found:', roomRows.length);
-    console.log('Room rows:', roomRows.map(r => ({ pg_id: r.pg_id, room_id: r.room_id, available_beds: r.available_beds })));
+    console.log('Room rows:', roomRows.map(r => ({ 
+      pg_id: r.pg_id, 
+      room_id: r.room_id, 
+      room_name: r.room_name,
+      rent_per_bed: r.rent_per_bed,
+      available_beds: r.available_beds,
+      total_beds: r.total_beds
+    })));
 
     // Step 7: Group rooms by PG
     const roomsByPg = {};
@@ -329,11 +355,53 @@ const searchPGs = async (req, res) => {
         room_name: room.room_name,
         rent_per_bed: parseFloat(room.rent_per_bed),
         gender_type: room.gender_type,
-        available_beds: parseInt(room.available_beds),
+        available_beds: parseInt(room.available_beds) || 0,
+        total_beds: parseInt(room.total_beds) || 0,
         room_description: room.room_description || null,
         room_images: room.room_images ? (typeof room.room_images === 'string' ? JSON.parse(room.room_images) : room.room_images) : null
       });
     });
+
+    // If no rooms found with filters, try to get all rooms without budget/gender filters
+    // This ensures PG shows with rooms even if they don't match budget/gender filters
+    if (roomRows.length === 0 && filteredPgIds.length > 0) {
+      console.log('No rooms found with filters, fetching all rooms for these PGs (without budget/gender filters)...');
+      const [allRooms] = await database.query(
+        `SELECT
+          r.id AS room_id,
+          r.pg_id,
+          r.room_name,
+          r.rent_per_bed,
+          r.gender_type,
+          r.room_description,
+          r.room_images,
+          COUNT(b.id) AS total_beds,
+          SUM(CASE WHEN b.status = 'vacant' THEN 1 ELSE 0 END) AS available_beds
+        FROM rooms r
+        LEFT JOIN beds b ON r.id = b.room_id
+        WHERE r.pg_id IN (${filteredPgIds.map(() => '?').join(',')})
+          AND (r.show_in_marketplace = 1 OR r.show_in_marketplace IS NULL)
+        GROUP BY r.id`,
+        filteredPgIds
+      );
+      
+      console.log('All rooms found (no budget/gender filters):', allRooms.length);
+      allRooms.forEach(room => {
+        if (!roomsByPg[room.pg_id]) {
+          roomsByPg[room.pg_id] = [];
+        }
+        roomsByPg[room.pg_id].push({
+          room_id: room.room_id,
+          room_name: room.room_name,
+          rent_per_bed: parseFloat(room.rent_per_bed),
+          gender_type: room.gender_type,
+          available_beds: parseInt(room.available_beds) || 0,
+          total_beds: parseInt(room.total_beds) || 0,
+          room_description: room.room_description || null,
+          room_images: room.room_images ? (typeof room.room_images === 'string' ? JSON.parse(room.room_images) : room.room_images) : null
+        });
+      });
+    }
 
     // Step 8: Build final response
     const result = [];

@@ -4,6 +4,7 @@ const referralController = require('../controller/referralController');
 const authenticateToken = require('../middleware/authMiddleware');
 
 router.get('/', authenticateToken, referralController.getReferrals);
+router.get('/my-code', authenticateToken, referralController.getMyReferralCode);
 router.post('/', authenticateToken, referralController.createReferral);
 router.put('/:id/activate', authenticateToken, referralController.activateReferral);
 

@@ -34,5 +34,20 @@ api.interceptors.response.use(
   }
 );
 
+// Export API base URL for use in image URLs and other static assets
+export const getApiBaseUrl = () => API_BASE_URL;
+
+// Helper function to get full URL for images/assets
+export const getFullUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  // Remove trailing slash from base URL and leading slash from path if present
+  const baseUrl = API_BASE_URL.replace(/\/$/, '');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${baseUrl}${cleanPath}`;
+};
+
 export default api;
 

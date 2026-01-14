@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import api from '../utils/api';
+import api, { getFullUrl } from '../utils/api';
 import Modal from '../components/common/Modal';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
@@ -240,7 +240,7 @@ const PGDetail = () => {
                             {room.room_images.slice(0, 3).map((img, idx) => (
                               <img
                                 key={idx}
-                                src={img}
+                                src={getFullUrl(img)}
                                 alt={`${room.room_name} ${idx + 1}`}
                                 className="w-full h-20 sm:h-24 object-cover rounded border border-primary/10"
                               />

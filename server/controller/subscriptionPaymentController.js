@@ -156,6 +156,43 @@ const verifyPayment = async (req, res) => {
         [finalPgId]
       );
       console.log(`Subscription activated for PG ${finalPgId}: Changed status from TRIAL to ACTIVE`);
+      
+      // Auto-activate pending referrals for this PG
+      try {
+        const [pendingReferrals] = await database.query(
+          'SELECT * FROM referrals WHERE referred_pg = ? AND status = "pending"',
+          [finalPgId]
+        );
+        
+        for (const referral of pendingReferrals) {
+          // Activate referral
+          await database.query(
+            'UPDATE referrals SET status = "activated" WHERE id = ?',
+            [referral.id]
+          );
+          
+          // Extend subscription for referred_pg (already done, but also extend referring PG's subscription)
+          const [referringSubscriptions] = await database.query(
+            'SELECT * FROM pg_subscriptions WHERE pg_id = ? ORDER BY expiry_date DESC LIMIT 1',
+            [referral.referred_by]
+          );
+          
+          if (referringSubscriptions.length > 0) {
+            const referringSubscription = referringSubscriptions[0];
+            const newExpiryDate = new Date(referringSubscription.expiry_date);
+            newExpiryDate.setDate(newExpiryDate.getDate() + referral.reward_days);
+            
+            await database.query(
+              'UPDATE pg_subscriptions SET expiry_date = ? WHERE id = ?',
+              [newExpiryDate.toISOString().split('T')[0], referringSubscription.id]
+            );
+            console.log(`Referral activated: Extended subscription for PG ${referral.referred_by} by ${referral.reward_days} days`);
+          }
+        }
+      } catch (referralError) {
+        console.error('Error auto-activating referrals:', referralError);
+        // Don't fail payment if referral activation fails
+      }
     } catch (subscriptionError) {
       // Handle foreign key constraint error specifically
       if (subscriptionError.code === 'ER_NO_REFERENCED_ROW_2' || subscriptionError.errno === 1452) {

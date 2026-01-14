@@ -3,27 +3,91 @@ const database = require('../config/database');
 // Get all referrals
 const getReferrals = async (req, res) => {
   try {
-    const { role, pg_id } = req.user;
+    const { role, pg_id: userPgId, id: userId } = req.user;
+
+    // Always check database for latest pg_id (token might be stale)
+    let actualPgId = userPgId;
+    if (role === 'pg_admin' && !actualPgId) {
+      const [users] = await database.query('SELECT pg_id FROM users WHERE id = ?', [userId]);
+      actualPgId = users.length > 0 ? users[0].pg_id : null;
+    }
 
     let query = `
       SELECT r.*, 
-             p1.name as referred_by_name, p1.pg_uid as referred_by_uid,
-             p2.name as referred_pg_name, p2.pg_uid as referred_pg_uid
+             p1.name as referred_by_name, p1.pg_uid as referred_by_uid, p1.referral_code as referred_by_code,
+             p2.name as referred_pg_name, p2.pg_uid as referred_pg_uid, p2.referral_code as referred_pg_code
       FROM referrals r
       LEFT JOIN pgs p1 ON r.referred_by = p1.id
       LEFT JOIN pgs p2 ON r.referred_pg = p2.id
     `;
 
-    if (role === 'pg_admin') {
+    if (role === 'pg_admin' && actualPgId) {
       query += ' WHERE r.referred_by = ? OR r.referred_pg = ?';
-      const [referrals] = await database.query(query, [pg_id, pg_id]);
+      const [referrals] = await database.query(query + ' ORDER BY r.created_at DESC', [actualPgId, actualPgId]);
       return res.json({ referrals });
     }
 
-    const [referrals] = await database.query(query + ' ORDER BY r.id DESC');
+    const [referrals] = await database.query(query + ' ORDER BY r.created_at DESC');
     res.json({ referrals });
   } catch (error) {
     console.error('Get referrals error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Get referral code and stats for current PG
+const getMyReferralCode = async (req, res) => {
+  try {
+    const { role, pg_id: userPgId, id: userId } = req.user;
+
+    // Always check database for latest pg_id
+    let actualPgId = userPgId;
+    if (role === 'pg_admin' && !actualPgId) {
+      const [users] = await database.query('SELECT pg_id FROM users WHERE id = ?', [userId]);
+      actualPgId = users.length > 0 ? users[0].pg_id : null;
+    }
+
+    if (!actualPgId) {
+      return res.status(404).json({ error: 'No PG found. Please register a PG first.' });
+    }
+
+    // Get PG with referral code
+    const [pgs] = await database.query(
+      'SELECT id, name, pg_uid, referral_code FROM pgs WHERE id = ?',
+      [actualPgId]
+    );
+
+    if (pgs.length === 0) {
+      return res.status(404).json({ error: 'PG not found' });
+    }
+
+    const pg = pgs[0];
+
+    // Get referral stats
+    const [referralStats] = await database.query(
+      `SELECT 
+        COUNT(*) as total_referrals,
+        SUM(CASE WHEN status = 'activated' THEN 1 ELSE 0 END) as activated_referrals,
+        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_referrals
+       FROM referrals 
+       WHERE referred_by = ?`,
+      [actualPgId]
+    );
+
+    const stats = referralStats[0] || { total_referrals: 0, activated_referrals: 0, pending_referrals: 0 };
+
+    res.json({
+      referral_code: pg.referral_code,
+      pg_name: pg.name,
+      pg_uid: pg.pg_uid,
+      stats: {
+        total: parseInt(stats.total_referrals) || 0,
+        activated: parseInt(stats.activated_referrals) || 0,
+        pending: parseInt(stats.pending_referrals) || 0
+      }
+    });
+  } catch (error) {
+    console.error('Get referral code error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -53,8 +117,8 @@ const createReferral = async (req, res) => {
     }
 
     const [result] = await database.query(
-      'INSERT INTO referrals (referred_by, referred_pg, reward_days) VALUES (?, ?, ?)',
-      [referred_by, referred_pg, reward_days || 7]
+      'INSERT INTO referrals (referred_by, referred_pg, referral_code, reward_days) VALUES (?, ?, ?, ?)',
+      [referred_by, referred_pg, null, reward_days || 30] // referral_code will be set by auto-creation in pgController, default 30 days (1 month)
     );
 
     const [referrals] = await database.query(
@@ -129,6 +193,7 @@ const activateReferral = async (req, res) => {
 
 module.exports = {
   getReferrals,
+  getMyReferralCode,
   createReferral,
   activateReferral,
 };

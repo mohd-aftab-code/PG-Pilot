@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../utils/api';
+import api, { getFullUrl } from '../utils/api';
 import { getStoredUser } from '../utils/auth';
 import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
@@ -296,7 +296,7 @@ const PGManagement = () => {
                   {(typeof editingPG.images === 'string' ? JSON.parse(editingPG.images) : editingPG.images).map((img, index) => (
                     <div key={index} className="relative">
                       <img
-                        src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                        src={getFullUrl(img)}
                         alt={`Existing ${index + 1}`}
                         className="w-full h-20 object-cover rounded border border-primary/10"
                       />

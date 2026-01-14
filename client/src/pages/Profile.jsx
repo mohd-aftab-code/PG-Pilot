@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import api, { getFullUrl } from '../utils/api';
 import { getStoredUser, setStoredUser } from '../utils/auth';
 import { Skeleton, SkeletonCard } from '../components/common/Skeleton';
 
@@ -329,7 +329,7 @@ const Profile = () => {
                           {user.pg_details.images.map((img, idx) => (
                             <div key={idx} className="relative aspect-video rounded-lg overflow-hidden border border-primary/10">
                               <img
-                                src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                                src={getFullUrl(img)}
                                 alt={`PG Image ${idx + 1}`}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {

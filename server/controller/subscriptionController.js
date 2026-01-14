@@ -4,10 +4,26 @@ const database = require('../config/database');
 const getSubscriptions = async (req, res) => {
   try {
     const { pg_id } = req.params;
-    const { role, pg_id: userPgId } = req.user;
+    const { role, pg_id: userPgIdFromToken, id: userId } = req.user;
 
-    if (role === 'pg_admin' && userPgId != pg_id) {
-      return res.status(403).json({ error: 'Access denied' });
+    // Always check database for latest pg_id (token might be stale)
+    if (role === 'pg_admin') {
+      const [users] = await database.query('SELECT pg_id FROM users WHERE id = ?', [userId]);
+      const userPgIdFromDB = users.length > 0 ? users[0].pg_id : null;
+      const actualPgId = userPgIdFromDB || userPgIdFromToken;
+
+      if (actualPgId && actualPgId != pg_id) {
+        console.log(`SubscriptionController: Access denied - User ${userId} owns PG ${actualPgId}, not ${pg_id}`);
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      // If no pg_id in DB or token, but user is trying to access a PG, deny
+      if (!actualPgId && pg_id) {
+        console.log(`SubscriptionController: Access denied - User ${userId} has no PG assigned`);
+        return res.status(403).json({ error: 'Access denied. Please register a PG first.' });
+      }
+
+      console.log(`SubscriptionController: Access granted - User ${userId} owns PG ${pg_id}`);
     }
 
     const [subscriptions] = await database.query(
@@ -15,10 +31,11 @@ const getSubscriptions = async (req, res) => {
        FROM pg_subscriptions ps 
        JOIN plans p ON ps.plan_id = p.id 
        WHERE ps.pg_id = ? 
-       ORDER BY ps.start_date DESC`,
+       ORDER BY ps.start_date DESC, ps.created_at DESC`,
       [pg_id]
     );
 
+    console.log(`SubscriptionController: Found ${subscriptions.length} subscriptions for PG ${pg_id}`);
     res.json({ subscriptions });
   } catch (error) {
     console.error('Get subscriptions error:', error);

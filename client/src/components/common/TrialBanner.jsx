@@ -36,7 +36,8 @@ const TrialBanner = () => {
           </div>
           <Button
             onClick={() => navigate('/choose-plan')}
-            className="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md font-medium text-sm"
+            variant="outline"
+            className="!bg-white !text-blue-600 hover:!bg-blue-50 !border-white/20 !px-4 !py-2 !rounded-md !font-medium !text-sm"
           >
             Upgrade Now
           </Button>
@@ -61,7 +62,8 @@ const TrialBanner = () => {
           </div>
           <Button
             onClick={() => navigate('/choose-plan')}
-            className="bg-white text-orange-600 hover:bg-orange-50 px-4 py-2 rounded-md font-medium text-sm"
+            variant="outline"
+            className="!bg-white !text-orange-600 hover:!bg-orange-50 !border-white/20 !px-4 !py-2 !rounded-md !font-medium !text-sm"
           >
             Upgrade Now
           </Button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../utils/api';
+import api, { getFullUrl } from '../utils/api';
 import { getStoredPgId } from '../utils/auth';
 import { useSubscription } from '../context/SubscriptionContext';
 import DataTable from '../components/common/DataTable';
@@ -240,7 +240,7 @@ const Tenants = () => {
       accessor: 'aadhaar_url', 
       render: (val, row) => {
         if (!val) return <span className="text-[#9CA3AF]">-</span>;
-        const docUrl = val.startsWith('http') ? val : `http://localhost:5000${val}`;
+        const docUrl = getFullUrl(val);
         return (
           <a
             href={docUrl}
@@ -257,7 +257,7 @@ const Tenants = () => {
   ];
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
+    <div>
       {/* Header Section */}
       <div className="mb-6 md:mb-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
@@ -432,7 +432,7 @@ const Tenants = () => {
               <div className="mt-2 p-3 bg-[#0B0F14] rounded-lg border border-primary/10">
                 <p className="text-xs text-[#9CA3AF] mb-2">Current Document:</p>
                 <a
-                  href={editingTenant.aadhaar_url.startsWith('http') ? editingTenant.aadhaar_url : `http://localhost:5000${editingTenant.aadhaar_url}`}
+                  href={getFullUrl(editingTenant.aadhaar_url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-[#22D3EE] bg-[#22D3EE]/10 hover:bg-[#22D3EE]/20 rounded-lg transition-colors"
