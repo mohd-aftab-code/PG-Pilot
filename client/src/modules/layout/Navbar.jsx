@@ -20,10 +20,11 @@ const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebar
 
   return (
     <nav 
-      className="fixed top-0 left-0 right-0 bg-[#0F1720]/95 backdrop-blur-md border-b border-primary/10 shadow-lg z-40 h-16 flex items-center px-4 md:px-6"
+      className="fixed top-0 bg-[#0F1720]/95 backdrop-blur-md border-b border-primary/10 shadow-lg z-30 h-16 flex items-center px-4 md:px-6"
       style={{ 
         left: isMobile ? 0 : `${sidebarWidth}px`,
-        width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`
+        width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`,
+        minWidth: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`
       }}
     >
       <div className="flex items-center justify-between w-full max-w-full">
@@ -33,17 +34,6 @@ const Navbar = ({ sidebarWidth, sidebarOpen, setSidebarOpen, isMobile, onSidebar
               onClick={onSidebarOpen}
               className="p-2 hover:bg-[#0B0F14] rounded-lg transition-colors text-[#E5E7EB] flex-shrink-0"
               aria-label="Toggle menu"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          )}
-          {!isMobile && (
-            <button
-              onClick={setSidebarOpen}
-              className="p-2 hover:bg-[#0B0F14] rounded-lg transition-colors text-[#E5E7EB] flex-shrink-0"
-              aria-label="Toggle sidebar"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />

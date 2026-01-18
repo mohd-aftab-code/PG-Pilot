@@ -75,6 +75,7 @@ const LayoutWrapper = ({ children }) => {
           open={sidebarOpen} 
           onClose={handleSidebarClose}
           isMobile={isMobile}
+          setSidebarOpen={handleSidebarToggle}
         />
       )}
       <main

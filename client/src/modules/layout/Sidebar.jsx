@@ -211,7 +211,7 @@ const SubscriptionStatusCard = ({ open, subscriptionStatus, trialInfo, hasActive
   );
 };
 
-const Sidebar = ({ open, onClose, isMobile }) => {
+const Sidebar = ({ open, onClose, isMobile, setSidebarOpen }) => {
   const location = useLocation();
   const user = getStoredUser();
   const { subscriptionStatus, trialInfo, hasActiveSubscription, isTrialActive, isTrialExpired } = useSubscription();
@@ -263,16 +263,16 @@ const Sidebar = ({ open, onClose, isMobile }) => {
         />
       )}
       <aside
-        className={`fixed top-0 left-0 h-screen bg-[#0F1720] text-[#E5E7EB] shadow-lg z-30 transition-all duration-300 border-r border-primary/10 ${
+        className={`fixed top-0 left-0 h-screen bg-[#0F1720] text-[#E5E7EB] shadow-lg z-40 transition-all duration-300 border-r border-primary/10 ${
           open ? 'w-64' : 'w-20'
         } ${isMobile ? (open ? 'translate-x-0' : '-translate-x-full') : ''}`}
-        style={{ width: open ? '256px' : '80px', paddingTop: '4rem' }}
+        style={{ width: open ? '256px' : '80px' }}
       >
         {/* Logo Section */}
-        <div className="fixed top-0 left-0 h-16 bg-[#0F1720] border-b border-primary/10 flex items-center justify-start z-40 transition-all duration-300"
+        <div className="absolute top-0 left-0 h-16 bg-[#0F1720] border-b border-r border-primary/10 flex items-center justify-between z-20 transition-all duration-300"
           style={{ width: open ? '256px' : '80px' }}
         >
-          <div className="flex items-center gap-3 px-3 w-full">
+          <div className="flex items-center gap-3 px-3 flex-1">
             <div className="w-10 h-10 bg-[#22D3EE]/20 rounded-lg flex items-center justify-center flex-shrink-0 border border-primary/20">
               <span className="text-[#22D3EE] font-bold text-sm">PG</span>
             </div>
@@ -280,9 +280,20 @@ const Sidebar = ({ open, onClose, isMobile }) => {
               <h1 className="text-lg font-bold text-[#E5E7EB] whitespace-nowrap">Pilot</h1>
             )}
           </div>
+          {!isMobile && (
+            <button
+              onClick={setSidebarOpen}
+              className="p-2 hover:bg-[#0B0F14] rounded-lg transition-colors text-[#E5E7EB] flex-shrink-0 mr-2"
+              aria-label="Toggle sidebar"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          )}
         </div>
         
-        <nav className="p-3 flex flex-col h-[calc(100vh-4rem)]">
+        <nav className="p-3 flex flex-col mt-16" style={{ height: 'calc(100vh - 4rem)' }}>
           <ul className="space-y-1 flex-1 overflow-y-auto sidebar-scrollbar">
             {allMenuItems.map((item) => {
               // Check if current path matches or starts with item path (for tabs)
