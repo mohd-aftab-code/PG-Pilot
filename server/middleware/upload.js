@@ -7,8 +7,9 @@ const uploadsDir = path.join(__dirname, '../uploads');
 const pgImagesDir = path.join(uploadsDir, 'pg-images');
 const roomImagesDir = path.join(uploadsDir, 'room-images');
 const tenantDocsDir = path.join(uploadsDir, 'tenant-docs');
+const complaintPhotosDir = path.join(uploadsDir, 'complaint-photos');
 
-[uploadsDir, pgImagesDir, roomImagesDir, tenantDocsDir].forEach(dir => {
+[uploadsDir, pgImagesDir, roomImagesDir, tenantDocsDir, complaintPhotosDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -90,6 +91,18 @@ const uploadRoomImages = multer({
   fileFilter: imageFilter
 });
 
+// Storage configuration for Complaint photos
+const complaintPhotoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, complaintPhotosDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, `complaint-${uniqueSuffix}${ext}`);
+  }
+});
+
 // Upload middleware for Tenant documents
 const uploadTenantDoc = multer({
   storage: tenantDocsStorage,
@@ -97,9 +110,17 @@ const uploadTenantDoc = multer({
   fileFilter: documentFilter
 });
 
+// Upload middleware for Complaint photos
+const uploadComplaintPhoto = multer({
+  storage: complaintPhotoStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: imageFilter
+});
+
 module.exports = {
   uploadPGImages,
   uploadRoomImages,
-  uploadTenantDoc
+  uploadTenantDoc,
+  uploadComplaintPhoto
 };
 

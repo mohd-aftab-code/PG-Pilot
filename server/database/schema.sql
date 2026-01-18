@@ -182,6 +182,7 @@ CREATE TABLE complaints (
     description TEXT,
     photo_url VARCHAR(255),
     status ENUM('open','in_progress','resolved') DEFAULT 'open',
+    admin_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_pg_status (pg_id, status),
     INDEX idx_tenant (tenant_id),
@@ -224,16 +225,13 @@ CREATE TABLE tenant_mess (
 -- =====================================
 CREATE TABLE mess_bills (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    tenant_id BIGINT NOT NULL,
     pg_id BIGINT NOT NULL,
     month_for DATE NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
-    status ENUM('pending','paid') DEFAULT 'pending',
+    description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_tenant_month (tenant_id, month_for),
-    INDEX idx_pg_status (pg_id, status),
+    INDEX idx_pg_month (pg_id, month_for),
     INDEX idx_month (month_for),
-    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
     FOREIGN KEY (pg_id) REFERENCES pgs(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -243,9 +241,10 @@ CREATE TABLE mess_bills (
 CREATE TABLE bills (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     pg_id BIGINT NOT NULL,
-    bill_type ENUM('electricity','water') NOT NULL,
+    bill_type VARCHAR(100) NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     bill_month DATE NOT NULL,
+    description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_pg_month (pg_id, bill_month),
     INDEX idx_type (bill_type),

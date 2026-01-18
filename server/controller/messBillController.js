@@ -11,9 +11,8 @@ const getMessBills = async (req, res) => {
     }
 
     const [bills] = await database.query(
-      `SELECT mb.*, t.name as tenant_name, t.phone as tenant_phone 
+      `SELECT mb.* 
        FROM mess_bills mb 
-       JOIN tenants t ON mb.tenant_id = t.id 
        WHERE mb.pg_id = ? 
        ORDER BY mb.month_for DESC`,
       [pg_id]
@@ -56,27 +55,24 @@ const getMessBillsByTenant = async (req, res) => {
 // Create mess bill
 const createMessBill = async (req, res) => {
   try {
-    const { tenant_id, pg_id, month_for, amount } = req.body;
+    const { pg_id, month_for, amount, description } = req.body;
     const { role, pg_id: userPgId } = req.user;
 
     if (role === 'pg_admin' && userPgId != pg_id) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    if (!tenant_id || !pg_id || !month_for || !amount) {
+    if (!pg_id || !month_for || !amount) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     const [result] = await database.query(
-      'INSERT INTO mess_bills (tenant_id, pg_id, month_for, amount) VALUES (?, ?, ?, ?)',
-      [tenant_id, pg_id, month_for, amount]
+      'INSERT INTO mess_bills (pg_id, month_for, amount, description) VALUES (?, ?, ?, ?)',
+      [pg_id, month_for, amount, description || null]
     );
 
     const [bills] = await database.query(
-      `SELECT mb.*, t.name as tenant_name 
-       FROM mess_bills mb 
-       JOIN tenants t ON mb.tenant_id = t.id 
-       WHERE mb.id = ?`,
+      'SELECT * FROM mess_bills WHERE id = ?',
       [result.insertId]
     );
 
@@ -91,7 +87,7 @@ const createMessBill = async (req, res) => {
 const updateMessBill = async (req, res) => {
   try {
     const { id } = req.params;
-    const { month_for, amount, status } = req.body;
+    const { month_for, amount, description } = req.body;
     const { role, pg_id } = req.user;
 
     const [bills] = await database.query('SELECT * FROM mess_bills WHERE id = ?', [id]);
@@ -103,20 +99,13 @@ const updateMessBill = async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    if (status && !['pending', 'paid'].includes(status)) {
-      return res.status(400).json({ error: 'Invalid status' });
-    }
-
     await database.query(
-      'UPDATE mess_bills SET month_for = ?, amount = ?, status = ? WHERE id = ?',
-      [month_for, amount, status, id]
+      'UPDATE mess_bills SET month_for = ?, amount = ?, description = ? WHERE id = ?',
+      [month_for || bills[0].month_for, amount || bills[0].amount, description !== undefined ? description : bills[0].description, id]
     );
 
     const [updatedBills] = await database.query(
-      `SELECT mb.*, t.name as tenant_name 
-       FROM mess_bills mb 
-       JOIN tenants t ON mb.tenant_id = t.id 
-       WHERE mb.id = ?`,
+      'SELECT * FROM mess_bills WHERE id = ?',
       [id]
     );
 

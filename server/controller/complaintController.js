@@ -85,7 +85,7 @@ const getComplaintById = async (req, res) => {
 // Create complaint
 const createComplaint = async (req, res) => {
   try {
-    const { tenant_id, pg_id, title, description, photo_url } = req.body;
+    const { tenant_id, pg_id, title, description } = req.body;
     const { role, pg_id: userPgId } = req.user;
 
     if (role === 'pg_admin' && userPgId != pg_id) {
@@ -96,9 +96,12 @@ const createComplaint = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Get photo URL from uploaded file
+    const photo_url = req.file ? `/uploads/complaint-photos/${req.file.filename}` : null;
+
     const [result] = await database.query(
       'INSERT INTO complaints (tenant_id, pg_id, title, description, photo_url) VALUES (?, ?, ?, ?, ?)',
-      [tenant_id, pg_id, title, description || null, photo_url || null]
+      [tenant_id, pg_id, title, description || null, photo_url]
     );
 
     const [complaints] = await database.query(
@@ -120,7 +123,7 @@ const createComplaint = async (req, res) => {
 const updateComplaint = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, photo_url, status } = req.body;
+    const { title, description, status, admin_notes } = req.body;
     const { role, pg_id } = req.user;
 
     const [complaints] = await database.query('SELECT * FROM complaints WHERE id = ?', [id]);
@@ -136,9 +139,12 @@ const updateComplaint = async (req, res) => {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
+    // Get photo URL from uploaded file, or keep existing if no new file uploaded
+    const photo_url = req.file ? `/uploads/complaint-photos/${req.file.filename}` : (req.body.photo_url || complaints[0].photo_url);
+
     await database.query(
-      'UPDATE complaints SET title = ?, description = ?, photo_url = ?, status = ? WHERE id = ?',
-      [title, description, photo_url, status, id]
+      'UPDATE complaints SET title = ?, description = ?, photo_url = ?, status = ?, admin_notes = ? WHERE id = ?',
+      [title || complaints[0].title, description !== undefined ? description : complaints[0].description, photo_url, status || complaints[0].status, admin_notes !== undefined ? admin_notes : complaints[0].admin_notes, id]
     );
 
     const [updatedComplaints] = await database.query(

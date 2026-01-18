@@ -3,7 +3,6 @@ import api from '../utils/api';
 import { getStoredPgId } from '../utils/auth';
 import DataTable from '../components/common/DataTable';
 import Modal from '../components/common/Modal';
-import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import { formatDateDDMMYY } from '../components/common/dateUtils';
 
@@ -11,8 +10,7 @@ const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingInvoice, setEditingInvoice] = useState(null);
-  const [formData, setFormData] = useState({ pg_id: getStoredPgId(), amount: '', invoice_date: '', due_date: '', status: 'unpaid' });
+  const [viewingInvoice, setViewingInvoice] = useState(null);
   const pgId = getStoredPgId();
 
   useEffect(() => {
@@ -31,18 +29,6 @@ const Invoices = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post('/api/invoices', formData);
-      setIsModalOpen(false);
-      setEditingInvoice(null);
-      setFormData({ pg_id: pgId, amount: '', invoice_date: '', due_date: '', status: 'unpaid' });
-      fetchInvoices();
-    } catch (error) {
-      alert(error.response?.data?.error || 'Error saving invoice');
-    }
-  };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
@@ -88,9 +74,8 @@ const Invoices = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#E5E7EB]">Invoices</h1>
-          <p className="text-sm text-[#9CA3AF] mt-1">Manage invoices</p>
+          <p className="text-sm text-[#9CA3AF] mt-1">View auto-generated invoices from payments</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">Add Invoice</Button>
       </div>
       {/* Table */}
       <div className="bg-[#0F1720] border border-primary/10 rounded-lg overflow-hidden">
@@ -99,77 +84,80 @@ const Invoices = () => {
           data={invoices} 
           loading={loading} 
           onView={(inv) => {
-            setEditingInvoice(inv);
+            setViewingInvoice(inv);
             setIsModalOpen(true);
           }}
         />
       </div>
       <Modal 
         isOpen={isModalOpen} 
-        onClose={() => { setIsModalOpen(false); setEditingInvoice(null); }} 
-        title={editingInvoice ? 'Invoice Details' : 'Add Invoice'}
+        onClose={() => { 
+          setIsModalOpen(false); 
+          setViewingInvoice(null); 
+        }} 
+        title="Invoice Details"
         size="lg"
+        position="right"
       >
-        {editingInvoice ? (
-          // View mode for all invoices
+        {viewingInvoice && (
           <div className="space-y-4">
             <div className="bg-[#0F1720] border border-primary/10 rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-center pb-3 border-b border-primary/10">
-                <h3 className="text-lg font-semibold text-[#E5E7EB]">Invoice #{String(editingInvoice.id).padStart(6, '0')}</h3>
-                {getStatusBadge(editingInvoice.status)}
+                <h3 className="text-lg font-semibold text-[#E5E7EB]">Invoice #{String(viewingInvoice.id).padStart(6, '0')}</h3>
+                {getStatusBadge(viewingInvoice.status)}
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-[#9CA3AF] mb-1">Amount</p>
-                  <p className="text-lg font-semibold text-[#E5E7EB]">₹{parseFloat(editingInvoice.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="text-lg font-semibold text-[#E5E7EB]">₹{parseFloat(viewingInvoice.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
                 <div>
                   <p className="text-xs text-[#9CA3AF] mb-1">Invoice Date</p>
-                  <p className="text-sm text-[#E5E7EB]">{formatDateDDMMYY(editingInvoice.invoice_date)}</p>
+                  <p className="text-sm text-[#E5E7EB]">{formatDateDDMMYY(viewingInvoice.invoice_date)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-[#9CA3AF] mb-1">Due Date</p>
-                  <p className="text-sm text-[#E5E7EB]">{formatDateDDMMYY(editingInvoice.due_date)}</p>
+                  <p className="text-sm text-[#E5E7EB]">{formatDateDDMMYY(viewingInvoice.due_date)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-[#9CA3AF] mb-1">Created At</p>
-                  <p className="text-sm text-[#E5E7EB]">{formatDateDDMMYY(editingInvoice.created_at)}</p>
+                  <p className="text-sm text-[#E5E7EB]">{formatDateDDMMYY(viewingInvoice.created_at)}</p>
                 </div>
               </div>
 
-              {editingInvoice.status === 'paid' && (editingInvoice.razorpay_payment_id || editingInvoice.razorpay_order_id || editingInvoice.transaction_id) && (
+              {viewingInvoice.status === 'paid' && (viewingInvoice.razorpay_payment_id || viewingInvoice.razorpay_order_id || viewingInvoice.transaction_id) && (
                 <div className="pt-3 border-t border-primary/10">
                   <h4 className="text-sm font-semibold text-[#22D3EE] mb-3">Payment Information</h4>
                   <div className="space-y-2">
-                    {editingInvoice.razorpay_order_id && (
+                    {viewingInvoice.razorpay_order_id && (
                       <div className="flex justify-between">
                         <span className="text-xs text-[#9CA3AF]">Razorpay Order ID:</span>
-                        <span className="text-xs text-[#E5E7EB] font-mono">{editingInvoice.razorpay_order_id}</span>
+                        <span className="text-xs text-[#E5E7EB] font-mono">{viewingInvoice.razorpay_order_id}</span>
                       </div>
                     )}
-                    {editingInvoice.razorpay_payment_id && (
+                    {viewingInvoice.razorpay_payment_id && (
                       <div className="flex justify-between">
                         <span className="text-xs text-[#9CA3AF]">Razorpay Payment ID:</span>
-                        <span className="text-xs text-[#E5E7EB] font-mono">{editingInvoice.razorpay_payment_id}</span>
+                        <span className="text-xs text-[#E5E7EB] font-mono">{viewingInvoice.razorpay_payment_id}</span>
                       </div>
                     )}
-                    {editingInvoice.transaction_id && (
+                    {viewingInvoice.transaction_id && (
                       <div className="flex justify-between">
                         <span className="text-xs text-[#9CA3AF]">Transaction ID:</span>
-                        <span className="text-xs text-[#E5E7EB] font-mono">{editingInvoice.transaction_id}</span>
+                        <span className="text-xs text-[#E5E7EB] font-mono">{viewingInvoice.transaction_id}</span>
                       </div>
                     )}
-                    {editingInvoice.order_id && (
+                    {viewingInvoice.order_id && (
                       <div className="flex justify-between">
                         <span className="text-xs text-[#9CA3AF]">Order ID:</span>
-                        <span className="text-xs text-[#E5E7EB] font-mono">{editingInvoice.order_id}</span>
+                        <span className="text-xs text-[#E5E7EB] font-mono">{viewingInvoice.order_id}</span>
                       </div>
                     )}
-                    {editingInvoice.payment_id && (
+                    {viewingInvoice.payment_id && (
                       <div className="flex justify-between">
                         <span className="text-xs text-[#9CA3AF]">Payment ID:</span>
-                        <span className="text-xs text-[#E5E7EB] font-mono">{editingInvoice.payment_id}</span>
+                        <span className="text-xs text-[#E5E7EB] font-mono">{viewingInvoice.payment_id}</span>
                       </div>
                     )}
                   </div>
@@ -177,27 +165,14 @@ const Invoices = () => {
               )}
             </div>
             <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Close</Button>
+              <Button type="button" variant="outline" onClick={() => {
+                setIsModalOpen(false);
+                setViewingInvoice(null);
+              }}>
+                Close
+              </Button>
             </div>
           </div>
-        ) : (
-          // Add mode only
-          <form onSubmit={handleSubmit}>
-            <Input label="Amount" type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required />
-            <Input label="Invoice Date" type="date" value={formData.invoice_date} onChange={(e) => setFormData({ ...formData, invoice_date: e.target.value })} />
-            <Input label="Due Date" type="date" value={formData.due_date} onChange={(e) => setFormData({ ...formData, due_date: e.target.value })} />
-            <div className="mb-4">
-              <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Status *</label>
-              <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm" required>
-                <option value="unpaid" className="bg-[#0B0F14] text-[#E5E7EB]">Unpaid</option>
-                <option value="paid" className="bg-[#0B0F14] text-[#E5E7EB]">Paid</option>
-              </select>
-            </div>
-            <div className="flex gap-2 justify-end mt-4">
-              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="submit">Save</Button>
-            </div>
-          </form>
         )}
       </Modal>
     </div>
@@ -205,4 +180,5 @@ const Invoices = () => {
 };
 
 export default Invoices;
+
 

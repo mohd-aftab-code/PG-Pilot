@@ -56,7 +56,7 @@ const getBillById = async (req, res) => {
 // Create bill
 const createBill = async (req, res) => {
   try {
-    const { pg_id, bill_type, amount, bill_month, allocations } = req.body;
+    const { pg_id, bill_type, amount, bill_month, description, allocations } = req.body;
     const { role, pg_id: userPgId } = req.user;
 
     if (role === 'pg_admin' && userPgId != pg_id) {
@@ -67,9 +67,6 @@ const createBill = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    if (!['electricity', 'water'].includes(bill_type)) {
-      return res.status(400).json({ error: 'Invalid bill type' });
-    }
 
     const connection = await database.getConnection();
     await connection.beginTransaction();
@@ -77,8 +74,8 @@ const createBill = async (req, res) => {
     try {
       // Create bill
       const [result] = await connection.query(
-        'INSERT INTO bills (pg_id, bill_type, amount, bill_month) VALUES (?, ?, ?, ?)',
-        [pg_id, bill_type, amount, bill_month]
+        'INSERT INTO bills (pg_id, bill_type, amount, bill_month, description) VALUES (?, ?, ?, ?, ?)',
+        [pg_id, bill_type, amount, bill_month, description || null]
       );
 
       const billId = result.insertId;
@@ -112,7 +109,7 @@ const createBill = async (req, res) => {
 const updateBill = async (req, res) => {
   try {
     const { id } = req.params;
-    const { bill_type, amount, bill_month, allocations } = req.body;
+    const { bill_type, amount, bill_month, description, allocations } = req.body;
     const { role, pg_id } = req.user;
 
     const [bills] = await database.query('SELECT * FROM bills WHERE id = ?', [id]);
@@ -130,8 +127,8 @@ const updateBill = async (req, res) => {
     try {
       // Update bill
       await connection.query(
-        'UPDATE bills SET bill_type = ?, amount = ?, bill_month = ? WHERE id = ?',
-        [bill_type, amount, bill_month, id]
+        'UPDATE bills SET bill_type = ?, amount = ?, bill_month = ?, description = ? WHERE id = ?',
+        [bill_type, amount, bill_month, description !== undefined ? description : bills[0].description, id]
       );
 
       // Delete old allocations

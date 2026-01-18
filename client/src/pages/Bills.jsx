@@ -13,7 +13,7 @@ const Bills = () => {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBill, setEditingBill] = useState(null);
-  const [formData, setFormData] = useState({ pg_id: getStoredPgId(), bill_type: 'electricity', amount: '', bill_month: '', allocations: [] });
+  const [formData, setFormData] = useState({ pg_id: getStoredPgId(), bill_type: '', amount: '', bill_month: '', description: '', allocations: [] });
 
   useEffect(() => {
     if (formData.pg_id) {
@@ -53,7 +53,7 @@ const Bills = () => {
       }
       setIsModalOpen(false);
       setEditingBill(null);
-      setFormData({ pg_id: formData.pg_id, bill_type: 'electricity', amount: '', bill_month: '', allocations: [] });
+      setFormData({ pg_id: formData.pg_id, bill_type: '', amount: '', bill_month: '', description: '', allocations: [] });
       fetchBills();
     } catch (error) {
       alert(error.response?.data?.error || 'Error saving bill');
@@ -79,19 +79,23 @@ const Bills = () => {
       </div>
       {/* Table */}
       <div className="bg-[#0F1720] border border-primary/10 rounded-lg overflow-hidden">
-        <DataTable columns={columns} data={bills} loading={loading} onEdit={(bill) => { setEditingBill(bill); setFormData({ pg_id: bill.pg_id, bill_type: bill.bill_type, amount: bill.amount, bill_month: formatDateForInput(bill.bill_month), allocations: [] }); setIsModalOpen(true); }} />
+        <DataTable columns={columns} data={bills} loading={loading} onEdit={(bill) => { setEditingBill(bill); setFormData({ pg_id: bill.pg_id, bill_type: bill.bill_type, amount: bill.amount, bill_month: formatDateForInput(bill.bill_month), description: bill.description || '', allocations: [] }); setIsModalOpen(true); }} />
       </div>
       <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingBill(null); }} title={editingBill ? 'Edit Bill' : 'Add Bill'} size="lg">
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Bill Type *</label>
-            <select value={formData.bill_type} onChange={(e) => setFormData({ ...formData, bill_type: e.target.value })} className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm" required>
-              <option value="electricity" className="bg-[#0B0F14] text-[#E5E7EB]">Electricity</option>
-              <option value="water" className="bg-[#0B0F14] text-[#E5E7EB]">Water</option>
-            </select>
-          </div>
+          <Input label="Bill Type" type="text" value={formData.bill_type} onChange={(e) => setFormData({ ...formData, bill_type: e.target.value })} required />
           <Input label="Amount" type="number" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} required />
           <Input label="Bill Month" type="date" value={formData.bill_month} onChange={(e) => setFormData({ ...formData, bill_month: e.target.value })} required />
+          <div>
+            <label className="block text-[#E5E7EB] text-sm font-semibold mb-2">Description</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Enter bill description or notes..."
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-primary/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22D3EE] focus:border-[#22D3EE] bg-[#0B0F14] text-[#E5E7EB] transition-all text-sm resize-none"
+              rows="3"
+            />
+          </div>
           <div className="flex gap-2 justify-end mt-4">
             <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
             <Button type="submit">Save</Button>
